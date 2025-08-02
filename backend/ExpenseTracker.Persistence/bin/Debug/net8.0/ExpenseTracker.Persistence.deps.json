@@ -1,0 +1,50 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "ExpenseTracker.Persistence/1.0.0": {
+        "dependencies": {
+          "ExpenseTracker.Application": "1.0.0",
+          "ExpenseTracker.Domain": "1.0.0"
+        },
+        "runtime": {
+          "ExpenseTracker.Persistence.dll": {}
+        }
+      },
+      "ExpenseTracker.Application/1.0.0": {
+        "dependencies": {
+          "ExpenseTracker.Domain": "1.0.0"
+        },
+        "runtime": {
+          "ExpenseTracker.Application.dll": {}
+        }
+      },
+      "ExpenseTracker.Domain/1.0.0": {
+        "runtime": {
+          "ExpenseTracker.Domain.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ExpenseTracker.Persistence/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ExpenseTracker.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ExpenseTracker.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

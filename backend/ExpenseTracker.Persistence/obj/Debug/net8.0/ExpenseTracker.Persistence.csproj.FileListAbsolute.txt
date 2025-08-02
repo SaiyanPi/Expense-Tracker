@@ -1,0 +1,17 @@
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\bin\Debug\net8.0\ExpenseTracker.Persistence.deps.json
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\bin\Debug\net8.0\ExpenseTracker.Persistence.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\bin\Debug\net8.0\ExpenseTracker.Persistence.pdb
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\bin\Debug\net8.0\ExpenseTracker.Application.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\bin\Debug\net8.0\ExpenseTracker.Domain.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\bin\Debug\net8.0\ExpenseTracker.Application.pdb
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\bin\Debug\net8.0\ExpenseTracker.Domain.pdb
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseTracker.Persistence.csproj.AssemblyReference.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseTracker.Persistence.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseTracker.Persistence.AssemblyInfoInputs.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseTracker.Persistence.AssemblyInfo.cs
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseTracker.Persistence.csproj.CoreCompileInputs.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseT.D4D6C268.Up2Date
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseTracker.Persistence.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\refint\ExpenseTracker.Persistence.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ExpenseTracker.Persistence.pdb
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Persistence\obj\Debug\net8.0\ref\ExpenseTracker.Persistence.dll
