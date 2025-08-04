@@ -4,10 +4,13 @@ public class Category
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = default!;
-
-    // Multi-user support
     public string? UserId { get; set; }     // foreign key
-
-    // Navigation
     public ICollection<Expense> Expenses { get; set; } = new List<Expense>();       // collectional navigation 
+
+
+
+
+    // public ApplicationUser User { get; set; }  // ❌ breaks Clean Architecture
+    // (domain layer must not depend on persistence layer)
+
 }

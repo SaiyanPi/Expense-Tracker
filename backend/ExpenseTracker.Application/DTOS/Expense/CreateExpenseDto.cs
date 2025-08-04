@@ -7,5 +7,6 @@ public class CreateExpenseDto
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
     public Guid CategoryId { get; set; }    // foreign key
+    public string? UserId { get; set; }     // foreign key
    
 }

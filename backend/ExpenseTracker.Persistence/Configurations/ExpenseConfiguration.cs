@@ -14,11 +14,24 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Property(e => e.Description)
+            .HasMaxLength(500);
+
         builder.Property(e => e.Amount)
             .HasColumnType("decimal(18,2)");
 
+        builder.Property(e => e.Date)
+            .IsRequired();
+
+        builder.Property(e => e.CategoryId)
+            .IsRequired();
+
+        builder.Property(e => e.UserId)
+           .HasMaxLength(450);
+           
         builder.HasOne(e => e.Category)
             .WithMany(c => c.Expenses)
-            .HasForeignKey(e => e.CategoryId);
+            .HasForeignKey(e => e.CategoryId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
