@@ -21,6 +21,7 @@ public class UserPersistenceMappingProfile : Profile
 }
 
 
-//📝 UserMappingProfile is located here in Persistence layer because Application layer does not have
-// a reference to a persistence layer where ApplicationUser resides. It is fine to place the
-// UserMappingProfile here
+//📝 UserPersistenceMappingProfile maps the ApplicationUser(Identity-specific) and Domain User
+// since we've split the user into persistence application user and domain user to maintain the
+// clean architecture.
+

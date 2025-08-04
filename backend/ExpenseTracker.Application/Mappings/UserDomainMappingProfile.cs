@@ -20,5 +20,9 @@ public class UserDomainMappingProfile : Profile
         // Entity -> Read DTO
         CreateMap<User, UserDto>();
     }
-    
+
 }
+
+// 📝 UserDomainMappingProfile maps domain user and DTO.
+// This keeps the Application layer clean and decoupled from persistence details likeApplicationUser from
+// Identity
