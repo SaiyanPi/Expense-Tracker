@@ -20,7 +20,7 @@ public class ECategoryConfiguration : IEntityTypeConfiguration<ApplicationUser>
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // forced to configure the ApplicationUser and Category/Expense relationship here even though
+        //📝 forced to configure the ApplicationUser and Category/Expense relationship here even though
         // Category and Expense are the dependent entity because we can't reference ApplicationUser
         // from Domain layer(breaks CLEAN architecture.)
     }

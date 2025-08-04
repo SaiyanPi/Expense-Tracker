@@ -17,8 +17,8 @@ public class ECategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.Property(e => e.UserId)
            .HasMaxLength(450);
 
-        // following col is commented because i've already defined the category-expense relationship in the
-        // expense configuration file since expense is the dependent entity
+        //📝 following col is commented because i've already defined the category-expense relationship in
+        // the expense configuration file since expense is the dependent entity
         // builder.HasMany(c => c.Expenses)
         //     .WithOne(e => e.Category)
         //     .HasForeignKey(e => e.CategoryId);

@@ -4,15 +4,18 @@ using ExpenseTrackler.Application.DTOs.Expense;
 
 namespace ExpenseTrackler.Application.Mappings;
 
-public class MappingProfile : Profile
+public class ExpenseMappingProfile : Profile
 {
-    public MappingProfile()
+    public ExpenseMappingProfile()
     {
         // Create -> Entity
         CreateMap<CreateExpenseDto, Expense>();
 
         // Update -> Entity
         CreateMap<UpdateExpenseDto, Expense>();
+
+        // required to populate an edit form with existing Expense data
+        CreateMap<Expense, UpdateExpenseDto>();
 
         // Entity -> Read DTO
         CreateMap<Expense, ExpenseDto>()

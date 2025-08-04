@@ -2,7 +2,6 @@ namespace ExpenseTrackler.Application.DTOs.Expense;
 
 public class UpdateExpenseDto
 {
-    public Guid Id { get; set; }
     public string Title { get; set; } = default!;
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
