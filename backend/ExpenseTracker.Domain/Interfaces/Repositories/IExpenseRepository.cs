@@ -1,6 +1,6 @@
 using ExpenseTracker.Domain.Entities;
 
-namespace ExpenseTracker.Application.Interfaces.Repositories;
+namespace ExpenseTracker.Domain.Interfaces.Repositories;
 
 public interface IExpenseRepository
 {
@@ -10,7 +10,7 @@ public interface IExpenseRepository
     Task UpdateAsync(Expense expense);
     Task DeleteAsync(Expense expense);
 }
-
+// 📝
 // 1. Repositories represent the data access layer:
 // Repositories work directly with your domain entities(not with DTOs and raw data like Guid IDs) but this
 // don’t mean that repositories can’t accept Guid values at all.
