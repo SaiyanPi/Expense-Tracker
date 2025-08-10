@@ -5,9 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Persistence;
 
-public class ExpenseDbContext : IdentityDbContext<ApplicationUser>
+public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
 {
-    public ExpenseDbContext(DbContextOptions<ExpenseDbContext> options) : base(options) {}
+    public ExpenseTrackerDbContext(DbContextOptions<ExpenseTrackerDbContext> options)
+    : base(options) {}
 
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<Category> Categories { get; set; }
@@ -16,6 +17,6 @@ public class ExpenseDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ExpenseDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ExpenseTrackerDbContext).Assembly);
     }
 }

@@ -4,11 +4,11 @@ namespace ExpenseTracker.Domain.Interfaces.Repositories;
 
 public interface IExpenseRepository
 {
-    Task<IEnumerable<Expense>> GetAllAsync();
-    Task<Expense?> GetByIdAsync(Guid id);
-    Task AddAsync(Expense expense);
-    Task UpdateAsync(Expense expense);
-    Task DeleteAsync(Expense expense);
+    Task<IReadOnlyList<Expense>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Expense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task AddAsync(Expense expense, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default);
 }
 // 📝
 // 1. Repositories represent the data access layer:

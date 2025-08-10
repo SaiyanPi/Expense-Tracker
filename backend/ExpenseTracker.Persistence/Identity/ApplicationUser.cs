@@ -11,7 +11,7 @@ public class ApplicationUser : IdentityUser
 
     
     // conversion/Mapping method to convert the ApplicationUser(IdentityUser) object into a Domain.Entities.User object
-    public Domain.Entities.User ToDomainUser() => new Domain.Entities.User
+    public User ToDomainUser() => new()
     {
         Id = this.Id, // though Id is not defined here in ApplicationUser it is inherited from IdentityUser
         FullName = this.FullName

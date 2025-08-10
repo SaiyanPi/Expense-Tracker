@@ -266,6 +266,9 @@
               },
               "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.Domain\\ExpenseTracker.Domain.csproj": {
                 "projectPath": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.Domain\\ExpenseTracker.Domain.csproj"
+              },
+              "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.Persistence\\ExpenseTracker.Persistence.csproj": {
+                "projectPath": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.Persistence\\ExpenseTracker.Persistence.csproj"
               }
             }
           }
