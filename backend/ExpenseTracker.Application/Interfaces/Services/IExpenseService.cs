@@ -7,7 +7,7 @@ public interface IExpenseService
     Task<IReadOnlyList<ExpenseDto>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<ExpenseDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Guid> CreateAsync(CreateExpenseDto dto, CancellationToken cancellationToken = default);
-    Task UpdateAsync(UpdateExpenseDto dto, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Guid id, UpdateExpenseDto dto, CancellationToken cancellationToken = default);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
