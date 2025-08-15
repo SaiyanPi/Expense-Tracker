@@ -2,7 +2,7 @@ using AutoMapper;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Persistence.Identity;
 
-namespace ExpenseTrackler.Persistence.Mappings;
+namespace ExpenseTracker.Persistence.Mappings;
 
 public class UserPersistenceMappingProfile : Profile
 {
