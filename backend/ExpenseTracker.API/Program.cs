@@ -1,11 +1,20 @@
-using ExpenseTracker.Persistence;
-using Microsoft.EntityFrameworkCore;
+using ExpenseTracker.Persistence.DI;
+using ExpenseTracker.Application.DI;
+using ExpenseTracker.Infrastructure.DI;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Register Application services
+builder.Services.AddApplicationServices();
+// Register Persistence services
+builder.Services.AddPersistenceServices(builder.Configuration);
+// Register Infrastructure services (optional)
+builder.Services.AddInfrastructureServices();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add controllers / minimal APIs
+builder.Services.AddControllers();
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
