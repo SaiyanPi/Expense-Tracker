@@ -16,7 +16,7 @@ public class ExpenseMappingProfile : Profile
         // Update -> Entity
         CreateMap<UpdateExpenseDto, Expense>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())       // never update Id
-            .ForMember(dest => dest.UserId, opt => opt.Ignore())   // UserId itself can't be updat
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())   // UserId itself can't be updated
             .ForMember(dest => dest.Category, opt => opt.Ignore());
 
         // required to populate an edit form with existing Expense data

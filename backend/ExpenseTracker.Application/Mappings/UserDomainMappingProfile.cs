@@ -9,7 +9,8 @@ public class UserDomainMappingProfile : Profile
     public UserDomainMappingProfile()
     {
         // Create -> Entity
-        CreateMap<RegisterUserDto, User>();
+        CreateMap<RegisterUserDto, User>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore());
 
         // Update -> Entity
         CreateMap<UpdateUserDto, User>();

@@ -9,13 +9,18 @@ public class CategoryMappingProfile : Profile
     public CategoryMappingProfile()
     {
         // Create -> Entity
-        CreateMap<CreateCategoryDto, Category>();
+        CreateMap<CreateCategoryDto, Category>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Expenses, opt => opt.Ignore());
 
         // Update -> Entity
-        CreateMap<UpdateCategoryDto, Category>();
+        CreateMap<UpdateCategoryDto, Category>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore()) 
+            .ForMember(dest => dest.Expenses, opt => opt.Ignore());
 
         // required to populate an edit form with existing user data
-        CreateMap<UpdateCategoryDto, Category>();
+        CreateMap<Category, UpdateCategoryDto>();
 
         // Entity -> Read DTO
         CreateMap<Category, CategoryDto>();
