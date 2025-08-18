@@ -74,7 +74,10 @@
       "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
       "ExpenseTracker.Domain/1.0.0": {
         "runtime": {
-          "ExpenseTracker.Domain.dll": {}
+          "ExpenseTracker.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
