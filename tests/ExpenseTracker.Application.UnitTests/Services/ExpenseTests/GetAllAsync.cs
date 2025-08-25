@@ -46,7 +46,7 @@ namespace ExpenseTests
                     Amount = 12.5m,
                     Date = DateTime.Today,
                     CategoryId = Guid.NewGuid(),
-                     UserId = "002",
+                    UserId = "002",
                     Category = new Category { Id = Guid.NewGuid(), Name = "Food" }
                 },
                 new Expense

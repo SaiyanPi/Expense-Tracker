@@ -12,6 +12,8 @@ C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\
 C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\Castle.Core.dll
 C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\FluentAssertions.dll
+C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\FluentValidation.dll
+C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\Microsoft.VisualStudio.CodeCoverage.Shim.dll
 C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 C:\Users\zlams\source\ExpenseTracker\tests\ExpenseTracker.Application.UnitTests\Services\ExpenseTests\bin\Debug\net8.0\Microsoft.Extensions.Options.dll

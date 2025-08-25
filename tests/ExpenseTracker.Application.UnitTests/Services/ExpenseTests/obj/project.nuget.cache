@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LbXC52LV5rI=",
+  "dgSpecHash": "ZRgFy1+vXQc=",
   "success": true,
   "projectFilePath": "C:\\Users\\zlams\\source\\ExpenseTracker\\tests\\ExpenseTracker.Application.UnitTests\\Services\\ExpenseTests\\ExpenseTests.csproj",
   "expectedPackageFiles": [
@@ -9,6 +9,8 @@
     "C:\\Users\\zlams\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
     "C:\\Users\\zlams\\.nuget\\packages\\coverlet.collector\\6.0.4\\coverlet.collector.6.0.4.nupkg.sha512",
     "C:\\Users\\zlams\\.nuget\\packages\\fluentassertions\\8.6.0\\fluentassertions.8.6.0.nupkg.sha512",
+    "C:\\Users\\zlams\\.nuget\\packages\\fluentvalidation\\12.0.0\\fluentvalidation.12.0.0.nupkg.sha512",
+    "C:\\Users\\zlams\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\12.0.0\\fluentvalidation.dependencyinjectionextensions.12.0.0.nupkg.sha512",
     "C:\\Users\\zlams\\.nuget\\packages\\microsoft.codecoverage\\17.14.1\\microsoft.codecoverage.17.14.1.nupkg.sha512",
     "C:\\Users\\zlams\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\zlams\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\6.0.0\\microsoft.extensions.dependencyinjection.abstractions.6.0.0.nupkg.sha512",
