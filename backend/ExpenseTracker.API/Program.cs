@@ -14,6 +14,8 @@ builder.Services.AddInfrastructureServices();
 // Add controllers / minimal APIs
 builder.Services.AddControllers();
 
+builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -29,6 +31,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();   //comes BEFORE Authorization
+
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();
 

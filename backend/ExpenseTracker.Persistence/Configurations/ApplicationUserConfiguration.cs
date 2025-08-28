@@ -13,12 +13,12 @@ public class ECategoryConfiguration : IEntityTypeConfiguration<ApplicationUser>
         builder.HasMany(u => u.Categories)
             .WithOne()  // no reverse nav in Category
             .HasForeignKey(c => c.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.HasMany(u => u.Expenses)
             .WithOne()
             .HasForeignKey(e => e.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         //📝 forced to configure the ApplicationUser and Category/Expense relationship here even though
         // Category and Expense are the dependent entity because we can't reference ApplicationUser

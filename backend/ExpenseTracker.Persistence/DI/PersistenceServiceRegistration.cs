@@ -1,4 +1,6 @@
+using ExpenseTracker.Persistence.Identity;
 using ExpenseTracker.Persistence.Mappings;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +13,18 @@ public static class PersistenceServiceRegistration
     {
         services.AddDbContext<ExpenseTrackerDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddIdentityCore<ApplicationUser>(options =>
+        {
+            // Configure Identity options here
+            options.Password.RequireDigit = true;
+            options.Password.RequireUppercase = false;
+        })
+            .AddRoles<IdentityRole>() // enable roles
+            .AddEntityFrameworkStores<ExpenseTrackerDbContext>()
+            .AddSignInManager() // needed for login with password
+            .AddDefaultTokenProviders();
+
 
         services.AddAutoMapper(
             typeof(UserPersistenceMappingProfile).Assembly

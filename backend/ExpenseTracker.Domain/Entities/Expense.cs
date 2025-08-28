@@ -10,4 +10,8 @@ public class Expense
     public Guid CategoryId { get; set; }    // foreign key
     public string? UserId { get; set; }     // foreign key
     public Category Category { get; set; } = default!;      // reference navigation to Category
+
+    
+    //  public ApplicationUser User { get; set; }   // ❌ breaks Clean Architecture
+    // (domain layer must not depend on persistence layer)
 }

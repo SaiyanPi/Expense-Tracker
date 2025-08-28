@@ -1,4 +1,5 @@
 using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Persistence.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,10 +29,15 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
 
         builder.Property(e => e.UserId)
            .HasMaxLength(450);
-           
+
         builder.HasOne(e => e.Category)
             .WithMany(c => c.Expenses)
             .HasForeignKey(e => e.CategoryId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
+        
+        builder.HasOne<ApplicationUser>()   // no navigation property
+            .WithMany()                     // no collection navigation
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
