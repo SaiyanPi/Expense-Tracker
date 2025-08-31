@@ -1,26 +1,64 @@
 using ExpenseTracker.Persistence.DI;
 using ExpenseTracker.Application.DI;
 using ExpenseTracker.Infrastructure.DI;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using ExpenseTracker.Persistence;
+using ExpenseTracker.Persistence.Identity;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register Application services
+// Register services, repositories, etc.
 builder.Services.AddApplicationServices();
-// Register Persistence services
 builder.Services.AddPersistenceServices(builder.Configuration);
-// Register Infrastructure services (optional)
 builder.Services.AddInfrastructureServices();
 
 // Add controllers / minimal APIs
 builder.Services.AddControllers();
-
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
-
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure JWT authentication 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    var jwtSettings = builder.Configuration.GetSection("JwtConfig");
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret is missing from configuration."))
+        )
+    };
+});
+
+
+
 var app = builder.Build();
+
+// Run the seeder
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context = services.GetRequiredService<ExpenseTrackerDbContext>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await ExpenseTrackerDbContextSeed.SeedAsync(context, userManager, roleManager);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -31,7 +69,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();   //comes BEFORE Authorization
+app.UseAuthentication();   // comes BEFORE Authorization
 
 app.UseAuthorization();
 

@@ -13,7 +13,11 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IExpenseService, ExpenseService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IUserService, UserService>();
+
+        // registering JWT token service
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
         
+        // registering AutoMapper profiles
         services.AddAutoMapper(
             typeof(ExpenseMappingProfile).Assembly,
             typeof(CategoryMappingProfile).Assembly,

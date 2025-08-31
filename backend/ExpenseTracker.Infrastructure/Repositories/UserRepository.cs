@@ -20,7 +20,7 @@ public class UserRepository : IUserRepository
 
     public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var appUsers =  await _userManager.Users.ToListAsync();
+        var appUsers = await _userManager.Users.ToListAsync();
         return _mapper.Map<IReadOnlyList<User>>(appUsers);
     }
 
@@ -70,6 +70,39 @@ public class UserRepository : IUserRepository
         {
             throw new InvalidOperationException($"Failed to delete user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
+    }
+
+    // --- Authentication ---
+    public async Task<bool> CheckPasswordAsync(string email, string password)
+    {
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser == null) return false;
+
+        return await _userManager.CheckPasswordAsync(appUser, password);
+    }
+
+    public async Task<IList<string>> GetRolesAsync(string email)
+    {
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser == null) return new List<string>();
+
+        return await _userManager.GetRolesAsync(appUser);
+    }
+    
+    // --- Refresh Tokens ---
+    public async Task SetRefreshTokenAsync(string email, string refreshToken, DateTime expiryTime)
+    {
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser == null) return;
+        appUser.RefreshToken = refreshToken;
+        appUser.RefreshTokenExpiryTime = expiryTime;
+        await _userManager.UpdateAsync(appUser);
+    }
+
+    public async Task<(string? refreshToken, DateTime? expiryTime)> GetRefreshTokenAsync(string userId)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        return (appUser?.RefreshToken, appUser?.RefreshTokenExpiryTime);
     }
 
 }
