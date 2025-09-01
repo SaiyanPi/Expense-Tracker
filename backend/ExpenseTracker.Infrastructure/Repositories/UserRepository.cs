@@ -36,10 +36,10 @@ public class UserRepository : IUserRepository
         return appUser is null ? null : _mapper.Map<User>(appUser);
     }
 
-    public async Task RegisterAsync(User user, CancellationToken cancellationToken = default)
+    public async Task RegisterAsync(User user, string password, CancellationToken cancellationToken = default)
     {
         var appUser = _mapper.Map<ApplicationUser>(user);
-        var result = await _userManager.CreateAsync(appUser);
+        var result = await _userManager.CreateAsync(appUser, password);
 
         if (!result.Succeeded)
         {
@@ -99,9 +99,9 @@ public class UserRepository : IUserRepository
         await _userManager.UpdateAsync(appUser);
     }
 
-    public async Task<(string? refreshToken, DateTime? expiryTime)> GetRefreshTokenAsync(string userId)
+    public async Task<(string? refreshToken, DateTime? expiryTime)> GetRefreshTokenAsync(string email)
     {
-        var appUser = await _userManager.FindByIdAsync(userId);
+        var appUser = await _userManager.FindByEmailAsync(email);
         return (appUser?.RefreshToken, appUser?.RefreshTokenExpiryTime);
     }
 

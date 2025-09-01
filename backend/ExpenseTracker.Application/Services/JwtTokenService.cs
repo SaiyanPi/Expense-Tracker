@@ -21,7 +21,7 @@ public class JwtTokenService : IJwtTokenService
     public (string Token, DateTime ExpiresAt) GenerateToken(User user, IList<string> roles)
     {
         var expiresAt = DateTime.UtcNow.AddHours(1);
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtConfig:Secret"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
@@ -37,8 +37,8 @@ public class JwtTokenService : IJwtTokenService
         }
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: _configuration["JwtConfig:Issuer"],
+            audience: _configuration["JwtConfig:Audience"],
             claims: claims,
             expires: expiresAt,
             signingCredentials: creds
@@ -65,7 +65,7 @@ public class JwtTokenService : IJwtTokenService
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!)
+                Encoding.UTF8.GetBytes(_configuration["JwtConfig:Secret"]!)
             ),
             ValidateLifetime = false // allow expired tokens
         };

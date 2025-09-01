@@ -43,7 +43,7 @@ public class UserService : IUserService
     public async Task<string> RegisterAsync(RegisterUserDto dto, CancellationToken cancellationToken = default)
     {
         var user = _mapper.Map<User>(dto);
-        await _userRepository.RegisterAsync(user, cancellationToken);
+        await _userRepository.RegisterAsync(user, dto.Password, cancellationToken);
         return user.Id;
     }
 
@@ -86,9 +86,14 @@ public class UserService : IUserService
         }
 
         var roles = await _userRepository.GetRolesAsync(dto.Email);
+
+        // Generate new access token
         var (token, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
+
+        // Generate new refresh token
         var (refreshToken, refreshExpires) = _jwtTokenService.GenerateRefreshToken();
 
+        // Save refresh token in DB
         await _userRepository.SetRefreshTokenAsync(dto.Email, refreshToken, refreshExpires);
 
         return new AuthResultDto
@@ -100,28 +105,41 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<string> RefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+    public async Task<AuthResultDto> RefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
     {
+        // parse the token
         var principal = _jwtTokenService.GetPrincipalFromExpiredToken(token);
         if (principal == null) throw new InvalidOperationException("Invalid token.");
 
+        // extracting email claim from the token
         var email = principal.FindFirst(ClaimTypes.Email)?.Value;
         if (email == null) throw new InvalidOperationException("Invalid token.");
 
+        // fetch the user with email from db
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
         if (user == null) throw new KeyNotFoundException("User not found.");
 
+        // fetch the stored refresh token and its expiry time from the db
         var storedRefresh = await _userRepository.GetRefreshTokenAsync(email);
         if (storedRefresh.refreshToken != refreshToken || storedRefresh.expiryTime < DateTime.UtcNow)
             throw new InvalidOperationException("Invalid refresh token.");
 
+        // Generate new tokens
         var roles = await _userRepository.GetRolesAsync(email);
         var (newToken, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
         var (newRefresh, newRefreshExpires) = _jwtTokenService.GenerateRefreshToken();
 
+        // Save new refresh token
         await _userRepository.SetRefreshTokenAsync(email, newRefresh, newRefreshExpires);
 
-        return newToken;
+        // Return both tokens to client
+        return new AuthResultDto
+        {
+            Success = true,
+            Token = newToken,
+            ExpiresAt = expiresAt,
+            RefreshToken = newRefresh
+        };
     }
 
     public async Task LogoutAsync(string email, CancellationToken cancellationToken = default)

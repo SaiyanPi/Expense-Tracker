@@ -15,7 +15,10 @@ public class UserPersistenceMappingProfile : Profile
 
         // reverse map: Creating/updating user from domain model (Domain User → ApplicationUser)
         CreateMap<User, ApplicationUser>()
-            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email));
     }
 
 }
