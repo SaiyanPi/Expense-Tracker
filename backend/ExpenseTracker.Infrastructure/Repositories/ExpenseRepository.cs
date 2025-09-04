@@ -15,7 +15,9 @@ public class ExpenseRepository : IExpenseRepository
 
     public async Task<IReadOnlyList<Expense>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var expenses = await _dbContext.Expenses.ToListAsync();
+        var expenses = await _dbContext.Expenses
+            .Include(e => e.Category) // to display the Category name
+            .ToListAsync();
         return expenses;
     }
 

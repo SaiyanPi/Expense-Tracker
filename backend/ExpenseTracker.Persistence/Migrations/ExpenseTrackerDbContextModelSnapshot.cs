@@ -53,9 +53,6 @@ namespace ExpenseTracker.Persistence.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
@@ -77,8 +74,6 @@ namespace ExpenseTracker.Persistence.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("CategoryId");
 
@@ -306,11 +301,6 @@ namespace ExpenseTracker.Persistence.Migrations
 
             modelBuilder.Entity("ExpenseTracker.Domain.Entities.Expense", b =>
                 {
-                    b.HasOne("ExpenseTracker.Persistence.Identity.ApplicationUser", null)
-                        .WithMany("Expenses")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("ExpenseTracker.Domain.Entities.Category", "Category")
                         .WithMany("Expenses")
                         .HasForeignKey("CategoryId")
@@ -318,7 +308,7 @@ namespace ExpenseTracker.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("ExpenseTracker.Persistence.Identity.ApplicationUser", null)
-                        .WithMany()
+                        .WithMany("Expenses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction);
 

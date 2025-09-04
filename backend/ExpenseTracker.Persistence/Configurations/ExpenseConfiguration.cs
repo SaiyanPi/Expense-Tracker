@@ -36,7 +36,7 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .OnDelete(DeleteBehavior.NoAction);
         
         builder.HasOne<ApplicationUser>()   // no navigation property
-            .WithMany()                     // no collection navigation
+            .WithMany(u => u.Expenses)                
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.NoAction);
     }
