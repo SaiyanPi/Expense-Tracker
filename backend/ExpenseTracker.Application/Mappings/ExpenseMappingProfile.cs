@@ -11,7 +11,8 @@ public class ExpenseMappingProfile : Profile
         // Create -> Entity
         CreateMap<CreateExpenseDto, Expense>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())       // generated in code/db
-            .ForMember(dest => dest.Category, opt => opt.Ignore()); // nav property (EF will handle)
+            .ForMember(dest => dest.Category, opt => opt.Ignore())
+            .ForMember(dest => dest.Date, opt => opt.MapFrom(_ => DateTime.UtcNow));
 
         // Update -> Entity
         CreateMap<UpdateExpenseDto, Expense>()

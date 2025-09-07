@@ -32,6 +32,13 @@ public class ExpenseService : IExpenseService
 
     public async Task<Guid> CreateAsync(CreateExpenseDto dto, CancellationToken cancellationToken = default)
     {
+        // business rule: title must be unique
+        var exists = await _expenseRepository.ExistsByTitleAsync(dto.Title, cancellationToken);
+        if (exists)
+        {
+            throw new ValidationException("title", $"An expense with the title '{dto.Title}' already exists.");
+        }
+
         var expense = _mapper.Map<Expense>(dto);
         await _expenseRepository.AddAsync(expense, cancellationToken);
         return expense.Id;

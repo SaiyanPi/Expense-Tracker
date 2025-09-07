@@ -9,6 +9,9 @@ public interface IExpenseRepository
     Task AddAsync(Expense expense, CancellationToken cancellationToken = default);
     Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default);
     Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default);
+
+    // Additional method to check for existing title for validation in service in Application layer
+    Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default);
 }
 // 📝
 // 1. Repositories represent the data access layer:

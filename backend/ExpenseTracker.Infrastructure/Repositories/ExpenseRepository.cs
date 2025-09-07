@@ -45,6 +45,12 @@ public class ExpenseRepository : IExpenseRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    // Additional method to check for existing title for validation in service in Application layer
+    public async Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Expenses.AnyAsync(e => e.Title == title, cancellationToken);
+    }
+
 }
 
 // This is the implementation of repositopry interface in domain layer
