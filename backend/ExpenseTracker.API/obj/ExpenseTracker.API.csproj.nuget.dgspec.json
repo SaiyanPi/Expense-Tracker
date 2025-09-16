@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.api\\ExpenseTracker.API.csproj": {}
+    "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.API\\ExpenseTracker.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.api\\ExpenseTracker.API.csproj": {
+    "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.API\\ExpenseTracker.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.api\\ExpenseTracker.API.csproj",
+        "projectUniqueName": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.API\\ExpenseTracker.API.csproj",
         "projectName": "ExpenseTracker.API",
-        "projectPath": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.api\\ExpenseTracker.API.csproj",
+        "projectPath": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.API\\ExpenseTracker.API.csproj",
         "packagesPath": "C:\\Users\\zlams\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.api\\obj\\",
+        "outputPath": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

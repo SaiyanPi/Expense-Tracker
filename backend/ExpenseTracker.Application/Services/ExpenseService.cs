@@ -1,5 +1,5 @@
-
 using AutoMapper;
+using ExpenseTracker.Application.Exceptions;
 using ExpenseTracker.Application.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -36,7 +36,7 @@ public class ExpenseService : IExpenseService
         var exists = await _expenseRepository.ExistsByTitleAsync(dto.Title, cancellationToken);
         if (exists)
         {
-            throw new ValidationException("title", $"An expense with the title '{dto.Title}' already exists.");
+            throw new ValidationException($"Expense with title '{dto.Title}' already exists.");
         }
 
         var expense = _mapper.Map<Expense>(dto);

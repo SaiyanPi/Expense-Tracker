@@ -7,6 +7,7 @@ using System.Text;
 using ExpenseTracker.Persistence;
 using ExpenseTracker.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
+using ExpenseTracker.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Register custom exception middleware FIRST in pipeline
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
