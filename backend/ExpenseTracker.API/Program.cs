@@ -8,6 +8,9 @@ using ExpenseTracker.Persistence;
 using ExpenseTracker.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using ExpenseTracker.API.Middleware;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,15 @@ builder.Services.AddInfrastructureServices();
 
 // Add controllers / minimal APIs
 builder.Services.AddControllers();
+
+// Modern FluentValidation registration
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+// Register all validators from Application assembly
+// builder.Services.AddValidatorsFromAssemblyContaining<CreateExpenseDtoValidator>();
+builder.Services.AddValidatorsFromAssembly(typeof(ExpenseTracker.Application.AssemblyReference).Assembly);
+
+
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -68,7 +80,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Register custom exception middleware FIRST in pipeline
+// Register exception middleware FIRST in pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();

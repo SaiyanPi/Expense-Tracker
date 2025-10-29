@@ -1,5 +1,7 @@
 using System.Net;
 using System.Text.Json;
+using Azure;
+using ExpenseTracker.API.Models;
 using ExpenseTracker.Application.Exceptions;
 
 namespace ExpenseTracker.API.Middleware;
@@ -19,7 +21,7 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
-            await _next(context); // call next middleware
+            await _next(context); 
         }
         catch (Exception ex)
         {
@@ -27,6 +29,7 @@ public class ExceptionHandlingMiddleware
         }
     }
 
+    // for logging purposes
     private void LogException(HttpContext context, Exception ex)
     {
         _logger.LogError(ex,
@@ -36,40 +39,53 @@ public class ExceptionHandlingMiddleware
             context.TraceIdentifier);
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
-        string message = ex.Message;
+        // Log all exceptions (optional: could skip known handled ones)
+        LogException(context, ex);
 
-        switch (ex)
+        var response = new ErrorResponse
         {
-            case NotFoundException:
-                statusCode = HttpStatusCode.NotFound;
-                break;
-            case ValidationException:
-                statusCode = HttpStatusCode.BadRequest;
-                break;
-            case UnauthorizedException:
-                statusCode = HttpStatusCode.Unauthorized;
-                break;
-            case ForbiddenException:
-                statusCode = HttpStatusCode.Forbidden;
-                break;
-            case ConflictException:
-                statusCode = HttpStatusCode.Conflict;
-                break;
+            Error = ex.GetType().Name,
+            Message = ex.Message,
+            TraceId = context.TraceIdentifier
+        };
+
+        // switch expression for concise status mapping
+        var statusCode = ex switch
+        {
+            FluentValidation.ValidationException => HttpStatusCode.BadRequest,
+            ValidationException => HttpStatusCode.BadRequest,
+            NotFoundException => HttpStatusCode.NotFound,
+            UnauthorizedException => HttpStatusCode.Unauthorized,
+            ForbiddenException => HttpStatusCode.Forbidden,
+            ConflictException => HttpStatusCode.Conflict,
+            _ => HttpStatusCode.InternalServerError
+        };
+
+        // Customize FluentValidation error details
+        if (ex is FluentValidation.ValidationException fvEx)
+        {
+            response.Message = "One or more validation errors occurred.";
+            response.Details = fvEx.Errors.Select(e => new
+            {
+                e.PropertyName,
+                e.ErrorMessage
+            });
         }
+        
+        response.StatusCode = (int)statusCode;
 
-        var result = JsonSerializer.Serialize(new
-        {
-            statusCode = (int)statusCode,
-            error = ex.GetType().Name,
-            message,
-            traceId = context.TraceIdentifier
-        });
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
-        return context.Response.WriteAsync(result);
+
+        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        });
+
+        await context.Response.WriteAsync(json);
     }
     
 }

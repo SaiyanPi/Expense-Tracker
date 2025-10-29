@@ -183,3 +183,4 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.genruntimeconfig.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ref\ExpenseTracker.API.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\FluentValidation.AspNetCore.dll

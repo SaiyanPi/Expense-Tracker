@@ -1,6 +1,8 @@
+using System.Reflection;
 using ExpenseTracker.Application.Interfaces.Services;
 using ExpenseTracker.Application.Services;
 using ExpenseTrackler.Application.Mappings;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ExpenseTracker.Application.DI;
@@ -16,13 +18,16 @@ public static class ApplicationServiceRegistration
 
         // registering JWT token service
         services.AddScoped<IJwtTokenService, JwtTokenService>();
-        
+
         // registering AutoMapper profiles
         services.AddAutoMapper(
             typeof(ExpenseMappingProfile).Assembly,
             typeof(CategoryMappingProfile).Assembly,
             typeof(UserDomainMappingProfile).Assembly
         );
+        
+        // Register FluentValidation validators automatically
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         return services;
     }

@@ -26,6 +26,7 @@ public class ExpenseService : IExpenseService
 
     public async Task<ExpenseDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        
         var expense = await _expenseRepository.GetByIdAsync(id, cancellationToken);
         return _mapper.Map<ExpenseDto?>(expense);
     }
