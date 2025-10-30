@@ -10,7 +10,7 @@ public class UpdateExpenseDtoValidator : AbstractValidator<UpdateExpenseDto>
     {
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Title is required")
-            .MinimumLength(50).WithMessage("Title must be at least 50 characters long");
+            .MinimumLength(3).WithMessage("Title must be at least 3 characters long");
 
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description is required")

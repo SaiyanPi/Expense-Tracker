@@ -50,6 +50,8 @@ public class ExceptionHandlingMiddleware
             Message = ex.Message,
             TraceId = context.TraceIdentifier
         };
+       
+
 
         // switch expression for concise status mapping
         var statusCode = ex switch
