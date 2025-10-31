@@ -9,4 +9,8 @@ public interface ICategoryRepository
     Task AddAsync(Category category, CancellationToken cancellationToken = default);
     Task UpdateAsync(Category category, CancellationToken cancellationToken = default);
     Task DeleteAsync(Category category, CancellationToken cancellationToken = default);
+
+    // Additional method to check for existing name for validation in service in Application layer
+    //Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByNameAndUserIdAsync(string name, string userId, CancellationToken cancellationToken = default);
 }

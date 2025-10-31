@@ -7,9 +7,9 @@ namespace ExpenseTracker.Persistence;
 public class ExpenseTrackerDbContextSeed
 {
     public static async Task SeedAsync(
-             ExpenseTrackerDbContext context,
-             UserManager<ApplicationUser> userManager,
-             RoleManager<IdentityRole> roleManager)
+        ExpenseTrackerDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager)
     {
         // Apply migrations automatically (optional but useful for dev)
         await context.Database.MigrateAsync();
@@ -21,9 +21,10 @@ public class ExpenseTrackerDbContextSeed
             await roleManager.CreateAsync(new IdentityRole("User"));
         }
 
-        // 2. Seed Default Admin User
+        // 2. Seed 
         if (!userManager.Users.Any())
         {
+            // i. Admin User
             var adminUser = new ApplicationUser
             {
                 FullName = "Admin User",
@@ -32,39 +33,65 @@ public class ExpenseTrackerDbContextSeed
                 EmailConfirmed = true
             };
 
-            var result = await userManager.CreateAsync(adminUser, "Admin@123");
+            var adminUserResult = await userManager.CreateAsync(adminUser, "Admin@123");
 
-            if (result.Succeeded)
+            if (adminUserResult.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
             }
+
+            // ii. Regular User
+            var regularUser = new ApplicationUser
+            {
+                FullName = "Regular User",
+                UserName = "user@expensetracker.com",
+                Email = "user@expensetracker.com",
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(regularUser, "User@123");
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(regularUser, "User");
+            }
+
         }
 
         // 3. Seed Categories
         if (!context.Categories.Any())
         {
-            var categories = new List<Category>
+            // Assume users exist
+            var adminUser = await userManager.FindByEmailAsync("admin@expensetracker.com");
+            var regularUser = await userManager.FindByEmailAsync("user@expensetracker.com");
+            
+            if (adminUser != null && regularUser != null)
+            {
+                var categories = new List<Category>
                 {
-                    new Category { Name = "Food" },
-                    new Category { Name = "Transport" },
-                    new Category { Name = "Shopping" },
-                    new Category { Name = "Bills" },
-                    new Category { Name = "Other" }
+                    new Category { Name = "Food", UserId = adminUser?.Id },
+                    new Category { Name = "Transport", UserId = regularUser?.Id },
+                    new Category { Name = "Shopping", UserId = adminUser?.Id },
+                    new Category { Name = "Bills", UserId = regularUser?.Id },
+                    new Category { Name = "Other", UserId = regularUser?.Id }
                 };
 
-            await context.Categories.AddRangeAsync(categories);
-            await context.SaveChangesAsync();
+                await context.Categories.AddRangeAsync(categories);
+                await context.SaveChangesAsync();
+                    
+            }
+        
         }
 
         // 4. Seed Expenses
         if (!context.Expenses.Any())
         {
             // Assume categories are seeded first
-            var foodCategory = context.Categories.FirstOrDefault(c => c.Name == "Food");
-            var transportCategory = context.Categories.FirstOrDefault(c => c.Name == "Transport");
+            var foodCategory = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Food");
+            var transportCategory = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Transport");
 
             // Assume admin user exists
-            var adminUser = userManager.FindByEmailAsync("admin@expensetracker.com").Result;
+            var adminUser = await userManager.FindByEmailAsync("admin@expensetracker.com");
 
             if (foodCategory != null && transportCategory != null && adminUser != null)
             {

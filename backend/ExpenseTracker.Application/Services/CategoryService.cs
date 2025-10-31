@@ -1,5 +1,6 @@
 
 using AutoMapper;
+using ExpenseTracker.Application.Exceptions;
 using ExpenseTracker.Application.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -26,11 +27,19 @@ public class CategoryService : ICategoryService
     public async Task<CategoryDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
+        if (category is null)
+            throw new NotFoundException(nameof(Category), id);
+
         return _mapper.Map<CategoryDto?>(category);
     }
 
     public async Task<Guid> CreateAsync(CreateCategoryDto dto, CancellationToken cancellationToken = default)
     {
+        // business rule: category name must be unique per user
+        var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(dto.Name, dto.UserId, cancellationToken);
+        if (exists)
+            throw new ConflictException($"Category with name '{dto.Name}' already exists for user '{dto.UserId}'.");
+
         var category = _mapper.Map<Category>(dto);
         await _categoryRepository.AddAsync(category, cancellationToken);
         return category.Id;
@@ -38,23 +47,42 @@ public class CategoryService : ICategoryService
 
     public async Task UpdateAsync(Guid id, UpdateCategoryDto dto, CancellationToken cancellationToken = default)
     {
+        // check if category exists
         var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
         if (category is null)
-        {
-            throw new KeyNotFoundException($"Category with id {id} not found");
-        }
+            throw new NotFoundException(nameof(Category), id);
+
+        // business rule: category name must be unique per user
+        var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(dto.Name, dto.UserId, cancellationToken);
+        if (exists && !string.Equals(category.Name, dto.Name, StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException($"Category with name '{dto.Name}' already exists for user '{dto.UserId}'.");
+        
+        // business rule: user must own the category
+        if (category.UserId != dto.UserId)
+            throw new UnauthorizedException("You are not authorized to update this category.");
 
         _mapper.Map(dto, category);
-        await _categoryRepository.UpdateAsync(category, cancellationToken);
+
+        // save changes
+        try
+        {
+            await _categoryRepository.UpdateAsync(category, cancellationToken);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            throw new UnauthorizedException("You are not authorized to update this category.");
+        }
+        catch (Exception ex)
+        {
+            throw new ValidationException($"Failed to update category: {ex.Message}");
+        }
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var category = await _categoryRepository.GetByIdAsync(id, cancellationToken);
         if (category is null)
-        {
-            throw new KeyNotFoundException($"Category with id {id} not found");
-        }
+            throw new NotFoundException(nameof(Category), id);
 
         await _categoryRepository.DeleteAsync(category, cancellationToken);
     }

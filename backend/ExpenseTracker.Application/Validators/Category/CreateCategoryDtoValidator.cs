@@ -8,7 +8,7 @@ public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required")
-            .MaximumLength(50).WithMessage("Name cannot exceed 50 characters");
+            .MinimumLength(3).WithMessage("Name must be at least 3 characters long");
 
         RuleFor(x => x.UserId)
             .NotEmpty().WithMessage("UserId is required");

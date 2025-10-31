@@ -39,9 +39,7 @@ public class ExpenseService : IExpenseService
         // business rule: title must be unique
         var exists = await _expenseRepository.ExistsByTitleAsync(dto.Title, cancellationToken);
         if (exists)
-        {
             throw new ConflictException($"Expense with title '{dto.Title}' already exists.");
-        }
 
         var expense = _mapper.Map<Expense>(dto);
         await _expenseRepository.AddAsync(expense, cancellationToken);
@@ -58,9 +56,7 @@ public class ExpenseService : IExpenseService
         // business rule: title must be unique
         var exists = await _expenseRepository.ExistsByTitleAsync(dto.Title, cancellationToken);
         if (exists && !string.Equals(expense.Title, dto.Title, StringComparison.OrdinalIgnoreCase))
-        {
             throw new ValidationException($"Expense with title '{dto.Title}' already exists.");
-        }
 
         _mapper.Map(dto, expense);
         
@@ -69,7 +65,7 @@ public class ExpenseService : IExpenseService
         {
             await _expenseRepository.UpdateAsync(expense, cancellationToken);
         }
-         catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException)
         {
             throw new UnauthorizedException("You are not authorized to update this expense.");
         }
