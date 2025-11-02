@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ExpenseTracker.Persistence.Configurations;
 
-public class ECategoryConfiguration : IEntityTypeConfiguration<Category>
+public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
     public void Configure(EntityTypeBuilder<Category> builder)
     {
@@ -14,8 +14,9 @@ public class ECategoryConfiguration : IEntityTypeConfiguration<Category>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.Property(e => e.UserId)
-           .HasMaxLength(450);
+        builder.Property(c => c.UserId)
+            .IsRequired(false)
+            .HasMaxLength(450);
 
         //📝 following col is commented because i've already defined the category-expense relationship in
         // the expense configuration file since expense is the dependent entity

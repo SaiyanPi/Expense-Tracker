@@ -36,40 +36,31 @@ public class UserRepository : IUserRepository
         return appUser is null ? null : _mapper.Map<User>(appUser);
     }
 
-    public async Task RegisterAsync(User user, string password, CancellationToken cancellationToken = default)
+    public async Task<bool> RegisterAsync(User user, string password, CancellationToken cancellationToken = default)
     {
         var appUser = _mapper.Map<ApplicationUser>(user);
         var result = await _userManager.CreateAsync(appUser, password);
-
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-        }
+        return result.Succeeded;
     }
 
-    public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default)
     {
         var appUser = await _userManager.FindByIdAsync(user.Id);
-        if (appUser is null) return;
+        if (appUser is null) return false;
 
         _mapper.Map(user, appUser);
         var result = await _userManager.UpdateAsync(appUser);
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to update user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-        }
+        return result.Succeeded;
     }
 
-    public async Task DeleteAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(User user, CancellationToken cancellationToken = default)
     {
         var appUser = await _userManager.FindByIdAsync(user.Id);
-        if (appUser is null) return;
+        if (appUser is null) return false;
 
         var result = await _userManager.DeleteAsync(appUser);
-        if (!result.Succeeded)
-        {
-            throw new InvalidOperationException($"Failed to delete user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-        }
+        return result.Succeeded;
+    
     }
 
     // --- Authentication ---

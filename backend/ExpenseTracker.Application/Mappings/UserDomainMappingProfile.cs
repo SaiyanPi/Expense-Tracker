@@ -25,5 +25,5 @@ public class UserDomainMappingProfile : Profile
 }
 
 // 📝 UserDomainMappingProfile maps domain user and DTO.
-// This keeps the Application layer clean and decoupled from persistence details likeApplicationUser from
+// This keeps the Application layer clean and decoupled from persistence details like ApplicationUser from
 // Identity

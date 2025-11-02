@@ -33,6 +33,13 @@ public class AuthController : ControllerBase
         return Ok(result); // AuthResultDto with token + refresh
     }
 
+    [HttpPut("update/{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
+    {
+        await _userService.UpdateAsync(id, dto, cancellationToken);
+        return NoContent();
+    }
+
     // POST: api/auth/refresh
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto, CancellationToken cancellationToken)

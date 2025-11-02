@@ -2,7 +2,9 @@ using ExpenseTracker.Persistence.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class ECategoryConfiguration : IEntityTypeConfiguration<ApplicationUser>
+namespace ExpenseTracker.Persistence.Configurations;
+
+public class ApplicationUserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 {
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
@@ -13,12 +15,12 @@ public class ECategoryConfiguration : IEntityTypeConfiguration<ApplicationUser>
         builder.HasMany(u => u.Categories)
             .WithOne()  // no reverse nav in Category
             .HasForeignKey(c => c.UserId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(u => u.Expenses)
             .WithOne()
             .HasForeignKey(e => e.UserId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.SetNull);
 
         //📝 forced to configure the ApplicationUser and Category/Expense relationship here even though
         // Category and Expense are the dependent entity because we can't reference ApplicationUser

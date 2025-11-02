@@ -25,7 +25,7 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .IsRequired();
 
         builder.Property(e => e.CategoryId)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(e => e.UserId)
            .HasMaxLength(450);
@@ -33,11 +33,11 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.HasOne(e => e.Category)
             .WithMany(c => c.Expenses)
             .HasForeignKey(e => e.CategoryId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.SetNull);
         
         builder.HasOne<ApplicationUser>()   // no navigation property
             .WithMany(u => u.Expenses)                
             .HasForeignKey(e => e.UserId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using AutoMapper;
 using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.Exceptions;
 using ExpenseTracker.Application.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -42,8 +43,15 @@ public class UserService : IUserService
 
     public async Task<string> RegisterAsync(RegisterUserDto dto, CancellationToken cancellationToken = default)
     {
+        if (await _userRepository.GetByEmailAsync(dto.Email, cancellationToken) != null)
+            throw new ConflictException($"User with email {dto.Email} already exists.");
+
         var user = _mapper.Map<User>(dto);
-        await _userRepository.RegisterAsync(user, dto.Password, cancellationToken);
+        var registered = await _userRepository.RegisterAsync(user, dto.Password, cancellationToken);
+
+        if (!registered)
+            throw new IdentityOperationException("User registration failed: {errors}");
+       
         return user.Id;
     }
 
@@ -51,39 +59,41 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetByIdAsync(id, cancellationToken);
         if (user is null)
-        {
-            throw new KeyNotFoundException($"User with id {id} not found");
-        }
+            throw new NotFoundException(nameof(User), id);
 
         _mapper.Map(dto, user);
-        await _userRepository.UpdateAsync(user, cancellationToken);
+        var updated = await _userRepository.UpdateAsync(user, cancellationToken);
+        if (!updated)
+            throw new IdentityOperationException("User update failed: {errors}");
     }
 
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(id, cancellationToken);
         if (user is null)
+            throw new NotFoundException(nameof(User), id);
+  
+        // var deleted = await _userRepository.DeleteAsync(user, cancellationToken);
+        // if (!deleted)
+        try
         {
-            throw new KeyNotFoundException($"User with id {id} not found");
+            await _userRepository.DeleteAsync(user, cancellationToken);
         }
-
-        await _userRepository.DeleteAsync(user, cancellationToken);
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.InnerException?.Message);
+            throw;
+        }
     }
 
 
     // --- Authentication ---
 
     public async Task<AuthResultDto> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default)
-    {
+    {       
         var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
         if (user == null || !await _userRepository.CheckPasswordAsync(dto.Email, dto.Password))
-        {
-            return new AuthResultDto
-            {
-                Success = false,
-                Errors = new[] { "Invalid email or password" }
-            };
-        }
+        throw new InvalidCredentialsException();
 
         var roles = await _userRepository.GetRolesAsync(dto.Email);
 
