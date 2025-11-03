@@ -10,10 +10,12 @@ namespace ExpenseTracker.Application.Services;
 public class CategoryService : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
-    public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
+    public CategoryService(ICategoryRepository categoryRepository, IUserRepository userRepository, IMapper mapper)
     {
         _categoryRepository = categoryRepository;
+        _userRepository = userRepository;
         _mapper = mapper;
     }
 
@@ -35,6 +37,14 @@ public class CategoryService : ICategoryService
 
     public async Task<Guid> CreateAsync(CreateCategoryDto dto, CancellationToken cancellationToken = default)
     {
+        // check if the userId exist
+        if(dto.UserId is not null)
+        {
+            var userExists = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+            if (userExists is null)
+                throw new NotFoundException(nameof(User), dto.UserId);
+        }
+
         // business rule: category name must be unique per user
         var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(dto.Name, dto.UserId, cancellationToken);
         if (exists)

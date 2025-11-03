@@ -11,6 +11,7 @@ public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
             .MinimumLength(3).WithMessage("Name must be at least 3 characters long");
 
         RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("UserId is required");
+            .Must(id => string.IsNullOrEmpty(id) || Guid.TryParse(id, out _))
+            .WithMessage("UserId must be either null, empty, or a valid GUID");
     }
 }
