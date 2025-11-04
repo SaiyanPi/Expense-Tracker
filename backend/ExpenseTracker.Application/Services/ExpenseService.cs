@@ -11,10 +11,12 @@ namespace ExpenseTracker.Application.Services;
 public class ExpenseService : IExpenseService
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
-    public ExpenseService(IExpenseRepository expenseRepository, IMapper mapper)
+    public ExpenseService(IExpenseRepository expenseRepository, IUserRepository userRepository, IMapper mapper)
     {
         _expenseRepository = expenseRepository;
+        _userRepository = userRepository;
         _mapper = mapper;
     }
 
@@ -36,6 +38,14 @@ public class ExpenseService : IExpenseService
 
     public async Task<Guid> CreateAsync(CreateExpenseDto dto, CancellationToken cancellationToken = default)
     {
+        // check if the userId exist
+        if (dto.UserId is not null)
+        {
+            var userExists = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+            if (userExists is null)
+                throw new NotFoundException(nameof(User), dto.UserId);
+        }
+        
         // business rule: title must be unique
         var exists = await _expenseRepository.ExistsByTitleAsync(dto.Title, cancellationToken);
         if (exists)
