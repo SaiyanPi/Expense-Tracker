@@ -1,4 +1,4 @@
-namespace ExpenseTrackler.Application.DTOs.Expense;
+namespace ExpenseTracker.Application.DTOs.Expense;
 
 public class ExpenseDto
 {

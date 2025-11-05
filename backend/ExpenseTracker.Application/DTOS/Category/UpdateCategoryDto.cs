@@ -1,8 +1,8 @@
-namespace ExpenseTrackler.Application.DTOs.Category;
+namespace ExpenseTracker.Application.DTOs.Category;
 
 public class UpdateCategoryDto
 {
     public string Name { get; set; } = default!;
-    public string UserId { get; set; } = default!;     // foreign key
+    public string? UserId { get; set; } = default!;     // foreign key
 
 }

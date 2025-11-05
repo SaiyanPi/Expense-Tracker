@@ -1,4 +1,4 @@
-namespace ExpenseTrackler.Application.DTOs.User;
+namespace ExpenseTracker.Application.DTOs.User;
 
 public class UpdateUserDto
 {

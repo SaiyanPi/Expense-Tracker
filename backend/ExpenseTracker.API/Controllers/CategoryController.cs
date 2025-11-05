@@ -1,5 +1,10 @@
-using ExpenseTracker.Application.Interfaces.Services;
-using ExpenseTrackler.Application.DTOs.Category;
+using ExpenseTracker.Application.DTOs.Category;
+using ExpenseTracker.Application.Features.Categories.Commands.CreateCategory;
+using ExpenseTracker.Application.Features.Categories.Commands.DeleteCategory;
+using ExpenseTracker.Application.Features.Categories.Commands.UpdateCategory;
+using ExpenseTracker.Application.Features.Categories.Queries.GetAllCategories;
+using ExpenseTracker.Application.Features.Categories.Queries.GetCategoryById;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CategoryTracker.API.Controllers;
@@ -8,18 +13,19 @@ namespace CategoryTracker.API.Controllers;
 [Route("api/[controller]")]
 public class CategoryController : ControllerBase
 {
-    private readonly ICategoryService _categoryService;
+    private readonly IMediator _mediator;
 
-    public CategoryController(ICategoryService categoryService)
+    public CategoryController(IMediator mediator)
     {
-        _categoryService = categoryService;
+        _mediator = mediator;
     }
 
     // GET: api/Category
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
     {
-        var categories = await _categoryService.GetAllAsync(cancellationToken);
+        var query = new GetAllCategoriesQuery();
+        var categories = await _mediator.Send(query, cancellationToken);
         return Ok(categories);
     }
 
@@ -27,11 +33,8 @@ public class CategoryController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        var category = await _categoryService.GetByIdAsync(id, cancellationToken);
-        if (category == null)
-        {
-            return NotFound();
-        }
+        var query = new GetCategoryByIdQuery(id);
+        var category = await _mediator.Send(query, cancellationToken);
         return Ok(category);
     }
 
@@ -42,10 +45,11 @@ public class CategoryController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var newCategoryId = await _categoryService.CreateAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = newCategoryId }, null);
+        var command = new CreateCategoryCommand(dto);
+        var newCategory = await _mediator.Send(command, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = newCategory.Id }, newCategory);
     }
-
+    
     // PUT: api/Category/{id}
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryDto dto, CancellationToken cancellationToken)
@@ -53,7 +57,14 @@ public class CategoryController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        await _categoryService.UpdateAsync(id, dto, cancellationToken);
+        var command = new UpdateCategoryCommand(id,
+            dto.Name,
+            dto.UserId
+        );
+        var updatedCategory = await _mediator.Send(command, cancellationToken);
+        if (!updatedCategory)
+            return NotFound();
+
         return NoContent();
     }
 
@@ -61,7 +72,11 @@ public class CategoryController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        await _categoryService.DeleteAsync(id, cancellationToken);
+        var command = new DeleteCategoryCommand(id);
+        var success = await _mediator.Send(command, cancellationToken);
+        if (!success)
+            return NotFound();
+
         return NoContent();
     }
 }

@@ -1,5 +1,10 @@
-using ExpenseTracker.Application.Interfaces.Services;
-using ExpenseTrackler.Application.DTOs.Expense;
+using ExpenseTracker.Application.DTOs.Expense;
+using ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
+using ExpenseTracker.Application.Features.Expenses.Commands.DeleteExpense;
+using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpenses;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetExpenseById;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -8,18 +13,19 @@ namespace ExpenseTracker.API.Controllers;
 [Route("api/[controller]")]
 public class ExpenseController : ControllerBase
 {
-    private readonly IExpenseService _expenseService;
+    private readonly IMediator _mediator;
 
-    public ExpenseController(IExpenseService expenseService)
+    public ExpenseController(IMediator mediator)
     {
-        _expenseService = expenseService;
+        _mediator = mediator;
     }
 
     // GET: api/expense
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
     {
-        var expenses = await _expenseService.GetAllAsync(cancellationToken);
+        var query = new GetAllExpensesQuery();
+        var expenses = await _mediator.Send(query, cancellationToken);
         return Ok(expenses);
     }
 
@@ -27,11 +33,8 @@ public class ExpenseController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        var expense = await _expenseService.GetByIdAsync(id, cancellationToken);
-        if (expense == null)
-        {
-            return NotFound();
-        }
+        var query = new GetExpenseByIdQuery(id);
+        var expense = await _mediator.Send(query, cancellationToken);
         return Ok(expense);
     }
 
@@ -42,8 +45,9 @@ public class ExpenseController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var newExpenseId = await _expenseService.CreateAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = newExpenseId }, null);
+        var command = new CreateExpenseCommand(dto);
+        var newExpense = await _mediator.Send(command, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = newExpense.Id }, newExpense);
     }
 
     // PUT: api/expense/{id}
@@ -53,7 +57,17 @@ public class ExpenseController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        await _expenseService.UpdateAsync(id, dto, cancellationToken);
+        var command = new UpdateExpenseCommand(id,
+            dto.Title,
+            dto.Description,
+            dto.Amount,
+            dto.Date,
+            dto.CategoryId
+        );
+        var updatedExpense = await _mediator.Send(command, cancellationToken);
+        if (!updatedExpense)
+            return NotFound();
+            
         return NoContent();
     }
 
@@ -61,7 +75,11 @@ public class ExpenseController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        await _expenseService.DeleteAsync(id, cancellationToken);
+        var command = new DeleteExpenseCommand(id);
+        var success = await _mediator.Send(command, cancellationToken);
+        if (!success)
+            return NotFound();
+
         return NoContent();
     }
 }

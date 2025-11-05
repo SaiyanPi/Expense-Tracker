@@ -1,4 +1,4 @@
-namespace ExpenseTrackler.Application.DTOs.Category;
+namespace ExpenseTracker.Application.DTOs.Category;
 
 public class CreateCategoryDto
 {

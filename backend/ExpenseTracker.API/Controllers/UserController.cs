@@ -49,17 +49,23 @@ public class UserController : ControllerBase
     }
 
     // POST: api/user
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<IActionResult> Create([FromBody] RegisterUserDto dto, CancellationToken cancellationToken = default)
     {
-        var result = await _userService.RegisterAsync(dto, cancellationToken);
-        return Ok(result);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var newUserId = await _userService.RegisterAsync(dto, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = newUserId }, null);
     }
 
     // PUT: api/user/{id}
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         await _userService.UpdateAsync(id, dto, cancellationToken);
         return NoContent();
     }

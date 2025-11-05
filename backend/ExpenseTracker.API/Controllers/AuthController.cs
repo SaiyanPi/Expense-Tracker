@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Constants;
 using ExpenseTracker.Application.DTOs.User;
 using ExpenseTracker.Application.Interfaces.Services;
 using ExpenseTrackler.Application.DTOs.User;
@@ -16,6 +17,21 @@ public class AuthController : ControllerBase
     {
         _userService = userService;
     }
+
+    // [HttpPost("register-user")]
+    // public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    // {
+    //     return RegisterWithRole(dto, AppRoles.User, cancellationToken);
+    // }
+
+    // [HttpPost("register-admin")]
+    // public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    // {
+    //     return RegisterWithRole(dto, AppRoles.Admin, cancellationToken);
+    // }
+
+    
+    
 
     // POST: api/auth/register
     [HttpPost("register")]
