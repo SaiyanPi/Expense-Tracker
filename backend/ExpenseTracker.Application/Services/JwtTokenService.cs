@@ -1,4 +1,4 @@
-using ExpenseTracker.Application.Interfaces.Services;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

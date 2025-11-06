@@ -13,13 +13,13 @@ public class UserDomainMappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore());
 
         // Update -> Entity
-        CreateMap<UpdateUserDto, User>();
+        CreateMap<UpdateUserDto, User>().ReverseMap();
 
         // required to populate an edit form with existing user data
-        CreateMap<User, UpdateUserDto>();
+        // CreateMap<User, UpdateUserDto>();
 
         // Entity -> Read DTO
-        CreateMap<User, UserDto>();
+        CreateMap<User, UserDto>().ReverseMap();
     }
 
 }

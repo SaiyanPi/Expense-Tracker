@@ -11,7 +11,8 @@ public class UserPersistenceMappingProfile : Profile
         // map: Reading user info (ApplicationUser → Domain User)
         CreateMap<ApplicationUser, User>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName));
+            .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email ?? string.Empty));
 
         // reverse map: Creating/updating user from domain model (Domain User → ApplicationUser)
         CreateMap<User, ApplicationUser>()

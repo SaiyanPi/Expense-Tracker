@@ -1,7 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
-using ExpenseTracker.Persistence;
 using ExpenseTracker.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
