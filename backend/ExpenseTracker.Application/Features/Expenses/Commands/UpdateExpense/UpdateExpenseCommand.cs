@@ -9,4 +9,4 @@ public record UpdateExpenseCommand(
     decimal Amount,
     DateTime Date,
     Guid? CategoryId
-) : IRequest<bool>;
+) : IRequest<Unit>;

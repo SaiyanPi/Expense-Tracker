@@ -2,4 +2,4 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Expenses.Commands.DeleteExpense;
 
-public record DeleteExpenseCommand(Guid Id) : IRequest<bool>;
+public record DeleteExpenseCommand(Guid Id) : IRequest<Unit>;

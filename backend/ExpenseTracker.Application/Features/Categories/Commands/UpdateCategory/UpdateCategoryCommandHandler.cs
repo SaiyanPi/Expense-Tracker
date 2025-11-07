@@ -6,7 +6,7 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Categories.Commands.UpdateCategory;
 
-public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, bool>
+public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand, Unit>
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IMapper _mapper;
@@ -17,7 +17,7 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
         _mapper = mapper;
     }
 
-    public async Task<bool> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
         var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (category == null)
@@ -26,6 +26,6 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
         _mapper.Map(request, category);
 
         await _categoryRepository.UpdateAsync(category, cancellationToken);
-        return true;
+        return Unit.Value;
     }
 }

@@ -41,19 +41,19 @@ public class UserService : IUserService
         return _mapper.Map<UserDto?>(user);
     }
 
-    public async Task<string> RegisterAsync(RegisterUserDto dto, CancellationToken cancellationToken = default)
-    {
-        if (await _userRepository.GetByEmailAsync(dto.Email, cancellationToken) != null)
-            throw new ConflictException($"User with email {dto.Email} already exists.");
+    // public async Task<string> RegisterAsync(RegisterUserDto dto, CancellationToken cancellationToken = default)
+    // {
+    //     if (await _userRepository.GetByEmailAsync(dto.Email, cancellationToken) != null)
+    //         throw new ConflictException($"User with email {dto.Email} already exists.");
 
-        var user = _mapper.Map<User>(dto);
-        var registered = await _userRepository.RegisterAsync(user, dto.Password, cancellationToken);
+    //     var user = _mapper.Map<User>(dto);
+    //     var registered = await _userRepository.RegisterAsync(user, dto.Password, cancellationToken);
 
-        if (!registered)
-            throw new IdentityOperationException("User registration failed: {errors}");
+    //     if (!registered)
+    //         throw new IdentityOperationException("User registration failed: {errors}");
        
-        return user.Id;
-    }
+    //     return user.Id;
+    // }
 
     public async Task UpdateAsync(string id, UpdateUserDto dto, CancellationToken cancellationToken = default)
     {
@@ -89,71 +89,71 @@ public class UserService : IUserService
 
     // --- Authentication ---
 
-    public async Task<AuthResultDto> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default)
-    {       
-        var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
-        if (user == null || !await _userRepository.CheckPasswordAsync(dto.Email, dto.Password))
-        throw new InvalidCredentialsException();
+    // public async Task<AuthResultDto> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default)
+    // {       
+    //     var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
+    //     if (user == null || !await _userRepository.CheckPasswordAsync(dto.Email, dto.Password))
+    //     throw new InvalidCredentialsException();
 
-        var roles = await _userRepository.GetRolesAsync(dto.Email);
+    //     var roles = await _userRepository.GetRolesAsync(dto.Email);
 
-        // Generate new access token
-        var (token, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
+    //     // Generate new access token
+    //     var (token, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
 
-        // Generate new refresh token
-        var (refreshToken, refreshExpires) = _jwtTokenService.GenerateRefreshToken();
+    //     // Generate new refresh token
+    //     var (refreshToken, refreshExpires) = _jwtTokenService.GenerateRefreshToken();
 
-        // Save refresh token in DB
-        await _userRepository.SetRefreshTokenAsync(dto.Email, refreshToken, refreshExpires);
+    //     // Save refresh token in DB
+    //     await _userRepository.SetRefreshTokenAsync(dto.Email, refreshToken, refreshExpires);
 
-        return new AuthResultDto
-        {
-            Success = true,
-            Token = token,
-            ExpiresAt = expiresAt,
-            RefreshToken = refreshToken
-        };
-    }
+    //     return new AuthResultDto
+    //     {
+    //         Success = true,
+    //         Token = token,
+    //         ExpiresAt = expiresAt,
+    //         RefreshToken = refreshToken
+    //     };
+    // }
 
-    public async Task<AuthResultDto> RefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
-    {
-        // parse the token
-        var principal = _jwtTokenService.GetPrincipalFromExpiredToken(token);
-        if (principal == null) throw new InvalidOperationException("Invalid token.");
+    // public async Task<AuthResultDto> RefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
+    // {
+    //     // parse the token
+    //     var principal = _jwtTokenService.GetPrincipalFromExpiredToken(token);
+    //     if (principal == null) throw new InvalidOperationException("Invalid token.");
 
-        // extracting email claim from the token
-        var email = principal.FindFirst(ClaimTypes.Email)?.Value;
-        if (email == null) throw new InvalidOperationException("Invalid token.");
+    //     // extracting email claim from the token
+    //     var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+    //     if (email == null) throw new InvalidOperationException("Invalid token.");
 
-        // fetch the user with email from db
-        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
-        if (user == null) throw new KeyNotFoundException("User not found.");
+    //     // fetch the user with email from db
+    //     var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+    //     if (user == null) throw new KeyNotFoundException("User not found.");
 
-        // fetch the stored refresh token and its expiry time from the db
-        var storedRefresh = await _userRepository.GetRefreshTokenAsync(email);
-        if (storedRefresh.refreshToken != refreshToken || storedRefresh.expiryTime < DateTime.UtcNow)
-            throw new InvalidOperationException("Invalid refresh token.");
+    //     // fetch the stored refresh token and its expiry time from the db
+    //     var storedRefresh = await _userRepository.GetRefreshTokenAsync(email);
+    //     if (storedRefresh.refreshToken != refreshToken || storedRefresh.expiryTime < DateTime.UtcNow)
+    //         throw new InvalidOperationException("Invalid refresh token.");
 
-        // Generate new tokens
-        var roles = await _userRepository.GetRolesAsync(email);
-        var (newToken, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
-        var (newRefresh, newRefreshExpires) = _jwtTokenService.GenerateRefreshToken();
+    //     // Generate new tokens
+    //     var roles = await _userRepository.GetRolesAsync(email);
+    //     var (newToken, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
+    //     var (newRefresh, newRefreshExpires) = _jwtTokenService.GenerateRefreshToken();
 
-        // Save new refresh token
-        await _userRepository.SetRefreshTokenAsync(email, newRefresh, newRefreshExpires);
+    //     // Save new refresh token
+    //     await _userRepository.SetRefreshTokenAsync(email, newRefresh, newRefreshExpires);
 
-        // Return both tokens to client
-        return new AuthResultDto
-        {
-            Success = true,
-            Token = newToken,
-            ExpiresAt = expiresAt,
-            RefreshToken = newRefresh
-        };
-    }
+    //     // Return both tokens to client
+    //     return new AuthResultDto
+    //     {
+    //         Success = true,
+    //         Token = newToken,
+    //         ExpiresAt = expiresAt,
+    //         RefreshToken = newRefresh
+    //     };
+    // }
 
-    public async Task LogoutAsync(string email, CancellationToken cancellationToken = default)
-    {
-        await _userRepository.SetRefreshTokenAsync(email, null!, DateTime.MinValue);
-    }
+    // public async Task LogoutAsync(string email, CancellationToken cancellationToken = default)
+    // {
+    //     await _userRepository.SetRefreshTokenAsync(email, null!, DateTime.MinValue);
+    // }
 }   

@@ -6,4 +6,4 @@ public record UpdateCategoryCommand(
     Guid Id,
     string Name,
     string? UserId
-) : IRequest<bool>;
+) : IRequest<Unit>;

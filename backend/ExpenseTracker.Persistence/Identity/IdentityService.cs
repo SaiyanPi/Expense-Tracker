@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
@@ -100,6 +101,42 @@ public class IdentityService : IIdentityService
 
     public async Task<AuthResultDto> RefreshTokenAsync(RefreshTokenDto dto, CancellationToken cancellationToken = default)
     {
-        return await _jwtTokenService.RefreshTokenAsync(dto.Token, dto.RefreshToken);
+        // parse the token
+        var principal = _jwtTokenService.GetPrincipalFromExpiredToken(dto.Token);
+        if (principal is null)
+            throw new Application.Common.Exceptions.InvalidOperationException("Invalid token.");
+
+        // extracting email claim from the token
+        var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+        if (email is null)
+            throw new Application.Common.Exceptions.InvalidOperationException("Invalid token.");
+
+        // fetch the user with email from db
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null)
+            throw new NotFoundException(nameof(User), email);
+        
+        // fetch the stored refresh token and its expiry time from the db
+        var storedRefresh = await _userRepository.GetRefreshTokenAsync(email);
+        if (storedRefresh.refreshToken != dto.RefreshToken || storedRefresh.expiryTime < DateTime.UtcNow)
+            throw new Application.Common.Exceptions.InvalidOperationException("Invalid refresh token.");
+
+        // Generate new tokens
+        var roles = await _userRepository.GetRolesAsync(email);
+        var (newToken, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
+        var (newRefresh, newRefreshExpires) = _jwtTokenService.GenerateRefreshToken();
+
+        // Save new refresh token
+        await _userRepository.SetRefreshTokenAsync(email, newRefresh, newRefreshExpires);
+
+        // Return both tokens to client
+        return new AuthResultDto
+        {
+            Success = true,
+            Token = newToken,
+            RefreshToken = newRefresh,
+            ExpiresAt = expiresAt
+        };
+
     }
 }

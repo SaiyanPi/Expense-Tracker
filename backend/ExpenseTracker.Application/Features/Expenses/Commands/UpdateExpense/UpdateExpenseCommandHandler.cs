@@ -6,7 +6,7 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
 
-public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand, bool>
+public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand, Unit>
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly IMapper _mapper;
@@ -17,7 +17,7 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
         _mapper = mapper;
     }
 
-    public async Task<bool> Handle(UpdateExpenseCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(UpdateExpenseCommand request, CancellationToken cancellationToken)
     {
         var expense = await _expenseRepository.GetByIdAsync(request.Id, cancellationToken);
         if (expense == null)
@@ -26,6 +26,6 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
         _mapper.Map(request, expense);
 
         await _expenseRepository.UpdateAsync(expense, cancellationToken);
-        return true;
+        return Unit.Value;
     }
 }

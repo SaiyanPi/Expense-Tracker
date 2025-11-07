@@ -5,7 +5,7 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Categories.Commands.DeleteCategory;
 
-public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, bool>
+public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Unit>
 {
     private readonly ICategoryRepository _categoryRepository;
 
@@ -14,13 +14,13 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
         _categoryRepository = categoryRepository;
     }
 
-    public async Task<bool> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
     {
         var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (category == null)
             throw new NotFoundException(nameof(Category), request.Id);
 
         await _categoryRepository.DeleteAsync(category, cancellationToken);
-        return true;
+        return Unit.Value;
     }
 }
