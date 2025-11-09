@@ -29,3 +29,6 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
         return Unit.Value;
     }
 }
+
+
+// we are using repository directly 

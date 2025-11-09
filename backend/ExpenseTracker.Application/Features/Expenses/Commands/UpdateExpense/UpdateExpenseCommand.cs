@@ -10,3 +10,21 @@ public record UpdateExpenseCommand(
     DateTime Date,
     Guid? CategoryId
 ) : IRequest<Unit>;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// We use primitive properties for updating Expense entity instead of using DTO.
+

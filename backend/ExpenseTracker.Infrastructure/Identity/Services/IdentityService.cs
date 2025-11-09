@@ -5,9 +5,10 @@ using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.DTOs.User;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
+using ExpenseTracker.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 
-namespace ExpenseTracker.Persistence.Identity;
+namespace ExpenseTracker.Infrastructure.Identity.Services;
 
 public class IdentityService : IIdentityService
 {

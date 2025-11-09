@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ExpenseTracker.Application.Services;
+namespace ExpenseTracker.Infrastructure.Identity.Services;
 
 public class JwtTokenService : IJwtTokenService
 {
