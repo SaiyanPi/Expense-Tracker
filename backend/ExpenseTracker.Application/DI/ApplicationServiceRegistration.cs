@@ -1,7 +1,7 @@
 using System.Reflection;
-using ExpenseTracker.Application.Interfaces.Services;
+using ExpenseTracker.Application.Common.Interfaces.Services;
+using ExpenseTracker.Application.Common.Mappings;
 using ExpenseTracker.Application.Services;
-using ExpenseTrackler.Application.Mappings;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,14 +16,16 @@ public static class ApplicationServiceRegistration
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IUserService, UserService>();
 
-        // registering JWT token service
-        services.AddScoped<IJwtTokenService, JwtTokenService>();
-
         // registering AutoMapper profiles
         services.AddAutoMapper(
             typeof(ExpenseMappingProfile).Assembly,
             typeof(CategoryMappingProfile).Assembly,
             typeof(UserDomainMappingProfile).Assembly
+        );
+
+        // registering MediatR handlers
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
         );
         
         // Register FluentValidation validators automatically

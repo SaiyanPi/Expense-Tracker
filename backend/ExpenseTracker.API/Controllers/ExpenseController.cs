@@ -64,10 +64,7 @@ public class ExpenseController : ControllerBase
             dto.Date,
             dto.CategoryId
         );
-        var updatedExpense = await _mediator.Send(command, cancellationToken);
-        if (!updatedExpense)
-            return NotFound();
-            
+        await _mediator.Send(command, cancellationToken);
         return NoContent();
     }
 
@@ -76,10 +73,7 @@ public class ExpenseController : ControllerBase
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteExpenseCommand(id);
-        var success = await _mediator.Send(command, cancellationToken);
-        if (!success)
-            return NotFound();
-
+        await _mediator.Send(command, cancellationToken);
         return NoContent();
     }
 }

@@ -1,4 +1,4 @@
-using ExpenseTrackler.Application.DTOs.Expense;
+using ExpenseTracker.Application.DTOs.Expense;
 
 namespace ExpenseTracker.Application.Common.Interfaces.Services;
 

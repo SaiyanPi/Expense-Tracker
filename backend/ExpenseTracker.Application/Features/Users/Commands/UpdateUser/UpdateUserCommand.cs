@@ -3,7 +3,7 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Users.Commands.UpdateUser;
 
-public record UpdateUserCommand(UpdateUserDto UpdateUserDto) : IRequest<Unit>;
+public record UpdateUserCommand(string Id, UpdateUserDto UpdateUserDto) : IRequest<Unit>;
 
 
 

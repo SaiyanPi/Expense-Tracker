@@ -61,10 +61,7 @@ public class CategoryController : ControllerBase
             dto.Name,
             dto.UserId
         );
-        var updatedCategory = await _mediator.Send(command, cancellationToken);
-        if (!updatedCategory)
-            return NotFound();
-
+        await _mediator.Send(command, cancellationToken);
         return NoContent();
     }
 
@@ -73,10 +70,7 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteCategoryCommand(id);
-        var success = await _mediator.Send(command, cancellationToken);
-        if (!success)
-            return NotFound();
-
+        await _mediator.Send(command, cancellationToken);
         return NoContent();
     }
 }

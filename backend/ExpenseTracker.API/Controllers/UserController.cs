@@ -1,6 +1,10 @@
-using ExpenseTracker.Application.Interfaces.Services;
-using ExpenseTrackler.Application.DTOs.Expense;
-using ExpenseTrackler.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.Features.Users.Commands.DeleteUser;
+using ExpenseTracker.Application.Features.Users.Commands.UpdateUser;
+using ExpenseTracker.Application.Features.Users.Queries.GetAllUsers;
+using ExpenseTracker.Application.Features.Users.Queries.GetByEmail;
+using ExpenseTracker.Application.Features.Users.Queries.GetById;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -9,18 +13,19 @@ namespace ExpenseTracker.API.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IMediator _mediator;
 
-    public UserController(IUserService userService)
+    public UserController(IMediator mediator)
     {
-        _userService = userService;
+        _mediator = mediator;
     }
 
     // GET: api/user
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
     {
-        var users = await _userService.GetAllAsync(cancellationToken);
+        var query = new GetAllUsersQuery();
+        var users = await _mediator.Send(query, cancellationToken);
         return Ok(users);
     }
 
@@ -28,11 +33,8 @@ public class UserController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken = default)
     {
-        var user = await _userService.GetByIdAsync(id, cancellationToken);
-        if (user == null)
-        {
-            return NotFound();
-        }
+        var query = new GetByIdQuery(id);
+        var user = await _mediator.Send(query, cancellationToken);
         return Ok(user);
     }
 
@@ -40,24 +42,21 @@ public class UserController : ControllerBase
     [HttpGet("email/{email}")]
     public async Task<IActionResult> GetByEmail(string email, CancellationToken cancellationToken = default)
     {
-        var user = await _userService.GetByEmailAsync(email, cancellationToken);
-        if (user == null)
-        {
-            return NotFound();
-        }
+        var query = new GetByEmailQuery(email);
+        var user = await _mediator.Send(query, cancellationToken);
         return Ok(user);
     }
 
     // POST: api/user
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] RegisterUserDto dto, CancellationToken cancellationToken = default)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+    // [HttpPost]
+    // public async Task<IActionResult> Create([FromBody] RegisterUserDto dto, CancellationToken cancellationToken = default)
+    // {
+    //     if (!ModelState.IsValid)
+    //         return BadRequest(ModelState);
 
-        var newUserId = await _userService.RegisterAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = newUserId }, null);
-    }
+    //     var newUserId = await _userService.RegisterAsync(dto, cancellationToken);
+    //     return CreatedAtAction(nameof(GetById), new { id = newUserId }, null);
+    // }
 
     // PUT: api/user/{id}
     [HttpPut("{id:guid}")]
@@ -66,7 +65,8 @@ public class UserController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        await _userService.UpdateAsync(id, dto, cancellationToken);
+        var command = new UpdateUserCommand(id, dto);
+        await _mediator.Send(command, cancellationToken);
         return NoContent();
     }
 
@@ -74,7 +74,8 @@ public class UserController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {
-        await _userService.DeleteAsync(id, cancellationToken);
+        var command = new DeleteUserCommand(id);
+        await _mediator.Send(command, cancellationToken);
         return NoContent();
     }
 }

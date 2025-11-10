@@ -1,4 +1,5 @@
 using AutoMapper;
+using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -19,7 +20,12 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
 
     public async Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = _mapper.Map<User>(request.UpdateUserDto);
+        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), request.Id);
+
+        _mapper.Map(request.UpdateUserDto, user);
+        
         await _userRepository.UpdateAsync(user, cancellationToken);
         return Unit.Value;
     }

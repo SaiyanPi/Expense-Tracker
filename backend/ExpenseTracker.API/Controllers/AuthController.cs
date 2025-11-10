@@ -1,7 +1,9 @@
-using ExpenseTracker.Application.Constants;
 using ExpenseTracker.Application.DTOs.User;
-using ExpenseTracker.Application.Interfaces.Services;
-using ExpenseTrackler.Application.DTOs.User;
+using ExpenseTracker.Application.Features.Identity.Commands.Login;
+using ExpenseTracker.Application.Features.Identity.Commands.Logout;
+using ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;
+using ExpenseTracker.Application.Features.Identity.Commands.Register;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -11,11 +13,11 @@ namespace ExpenseTracker.API.Controllers;
 // FOR AUTHENTICATION FLOW
 public class AuthController : ControllerBase
 {
-    private readonly IUserService _userService;
+    private readonly IMediator _mediator;
 
-    public AuthController(IUserService userService)
+    public AuthController(IMediator mediator)
     {
-        _userService = userService;
+        _mediator = mediator;
     }
 
     // [HttpPost("register-user")]
@@ -37,30 +39,35 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
     {
-        var result = await _userService.RegisterAsync(dto, cancellationToken);
-        return Ok(result); // Could return AuthResultDto right away after registration
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var command = new RegisterUserCommand(dto);
+        var result = await _mediator.Send(command, cancellationToken);
+        return CreatedAtAction(nameof(Register), new { id = result.Token }, result);
     }
 
     // POST: api/auth/login
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserDto dto, CancellationToken cancellationToken)
     {
-        var result = await _userService.LoginAsync(dto, cancellationToken);
-        return Ok(result); // AuthResultDto with token + refresh
-    }
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-    [HttpPut("update/{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
-    {
-        await _userService.UpdateAsync(id, dto, cancellationToken);
-        return NoContent();
+        var command = new LoginUserCommand(dto);
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result); // AuthResultDto with token + refresh
     }
 
     // POST: api/auth/refresh
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto, CancellationToken cancellationToken)
     {
-        var result = await _userService.RefreshTokenAsync(dto.Token, dto.RefreshToken, cancellationToken);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState); 
+        
+        var command = new RefreshTokenCommand(dto);
+        var result = await _mediator.Send(command, cancellationToken);
         return Ok(result); // Same AuthResultDto
     }
 
@@ -68,7 +75,11 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] LogoutUserDto dto, CancellationToken cancellationToken)
     {
-        await _userService.LogoutAsync(dto.Email, cancellationToken);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var command = new LogoutUserCommand(dto);
+        await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Logged out successfully" });
     }
 }

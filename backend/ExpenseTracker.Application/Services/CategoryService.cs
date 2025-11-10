@@ -1,10 +1,9 @@
-
 using AutoMapper;
-using ExpenseTracker.Application.Exceptions;
-using ExpenseTracker.Application.Interfaces.Services;
+using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
+using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
-using ExpenseTrackler.Application.DTOs.Category;
 namespace ExpenseTracker.Application.Services;
 
 public class CategoryService : ICategoryService
