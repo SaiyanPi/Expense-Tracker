@@ -1,4 +1,5 @@
 using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Persistence.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,9 +15,10 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.Property(c => c.UserId)
-            .IsRequired(false)
-            .HasMaxLength(450);
+        builder.HasOne<ApplicationUser>() // reference ApplicationUser type
+            .WithMany() // no navigation property in ApplicationUser
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         //📝 following col is commented because i've already defined the category-expense relationship in
         // the expense configuration file since expense is the dependent entity

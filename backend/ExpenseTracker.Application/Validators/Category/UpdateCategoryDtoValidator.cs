@@ -1,4 +1,4 @@
-using ExpenseTrackler.Application.DTOs.Category;
+using ExpenseTracker.Application.DTOs.Category;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.Category;

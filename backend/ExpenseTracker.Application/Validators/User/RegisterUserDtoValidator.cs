@@ -1,4 +1,4 @@
-using ExpenseTrackler.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.User;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.User;

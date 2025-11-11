@@ -57,10 +57,13 @@ public class CategoryController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var command = new UpdateCategoryCommand(id,
+        var command = new UpdateCategoryCommand(
             dto.Name,
             dto.UserId
-        );
+        )
+        {
+            Id = id
+        };
         await _mediator.Send(command, cancellationToken);
         return NoContent();
     }

@@ -1,5 +1,4 @@
-using System.Data;
-using ExpenseTrackler.Application.DTOs.Expense;
+using ExpenseTracker.Application.DTOs.Expense;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.Expense;

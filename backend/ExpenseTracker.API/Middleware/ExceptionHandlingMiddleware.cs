@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Azure;
 using ExpenseTracker.API.Models;
-using ExpenseTracker.Application.Exceptions;
+using ExpenseTracker.Application.Common.Exceptions;
 
 namespace ExpenseTracker.API.Middleware;
 
@@ -32,25 +32,30 @@ public class ExceptionHandlingMiddleware
     // for logging purposes
     private void LogException(HttpContext context, Exception ex)
     {
-        _logger.LogError(ex,
-            "Unhandled exception occurred while processing request {Method} {Path}. TraceId: {TraceId}",
+        var logLevel = ex switch
+        {
+            ValidationException => LogLevel.Warning,
+            NotFoundException => LogLevel.Information,
+            UnauthorizedException => LogLevel.Warning,
+            ForbiddenException => LogLevel.Warning,
+            ConflictException => LogLevel.Warning,
+            _ => LogLevel.Error
+        };
+
+        _logger.Log(logLevel, ex,
+            "Exception while processing {Method} {Path}. TraceId: {TraceId}",
             context.Request.Method,
             context.Request.Path,
             context.TraceIdentifier);
     }
 
+
     private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
+        if (ex is AggregateException aggEx)
+            ex = aggEx.Flatten().InnerExceptions.FirstOrDefault() ?? ex;
         // Log all exceptions (optional: could skip known handled ones)
         LogException(context, ex);
-
-        var response = new ErrorResponse
-        {
-            Error = ex.GetType().Name,
-            Message = ex.Message,
-            TraceId = context.TraceIdentifier
-        };
-       
 
 
         // switch expression for concise status mapping
@@ -65,6 +70,17 @@ public class ExceptionHandlingMiddleware
             _ => HttpStatusCode.InternalServerError
         };
 
+        var response = new ErrorResponse
+        {
+            StatusCode = (int)statusCode,
+            Error = ex.GetType().Name,
+            Message = statusCode == HttpStatusCode.InternalServerError
+                ? "An unexpected error occurred. Please try again later."
+                : ex.Message,
+            TraceId = context.TraceIdentifier
+        };
+       
+
         // Customize FluentValidation error details
         if (ex is FluentValidation.ValidationException fvEx)
         {
@@ -77,9 +93,8 @@ public class ExceptionHandlingMiddleware
         }
         
         response.StatusCode = (int)statusCode;
-
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)statusCode;
+        context.Response.Headers["Trace-Id"] = context.TraceIdentifier;
 
         var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {
