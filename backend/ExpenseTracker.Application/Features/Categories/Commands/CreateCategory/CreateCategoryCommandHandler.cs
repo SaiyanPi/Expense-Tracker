@@ -22,19 +22,19 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
     public async Task<CategoryDto> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         // check if the userId exist
-        if (request.CategoryDto.UserId is not null)
+        if (request.CreateCategoryDto.UserId is not null)
         {
-            var userExists = await _userRepository.GetByIdAsync(request.CategoryDto.UserId, cancellationToken);
+            var userExists = await _userRepository.GetByIdAsync(request.CreateCategoryDto.UserId, cancellationToken);
             if (userExists is null)
-                throw new NotFoundException(nameof(User), request.CategoryDto.UserId);
+                throw new NotFoundException(nameof(User), request.CreateCategoryDto.UserId);
+
+            // business rule: category name must be unique per user
+            var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(request.CreateCategoryDto.Name, request.CreateCategoryDto.UserId, cancellationToken);
+            if (exists)
+                throw new ConflictException($"Category with name '{request.CreateCategoryDto.Name}' already exists for user '{request.CreateCategoryDto.UserId}'.");
         }
         
-        // business rule: category name must be unique per user
-        var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(request.CategoryDto.Name, request.CategoryDto.UserId, cancellationToken);
-        if (exists)
-            throw new ConflictException($"Category with name '{request.CategoryDto.Name}' already exists for user '{request.CategoryDto.UserId}'.");
-        
-        var category = _mapper.Map<Category>(request.CategoryDto);
+        var category = _mapper.Map<Category>(request.CreateCategoryDto);
         await _categoryRepository.AddAsync(category, cancellationToken);
         return _mapper.Map<CategoryDto>(category);
     }

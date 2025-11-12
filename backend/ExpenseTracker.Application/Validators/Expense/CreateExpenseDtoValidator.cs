@@ -26,7 +26,14 @@ public class CreateExpenseDtoValidator : AbstractValidator<CreateExpenseDto>
         RuleFor(x => x.CategoryId)
             .NotEmpty().WithMessage("CategoryId is required");
 
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("UserId is required");
+        // Apply rule only when UserId is provided (not null or empty)
+        When(x => !string.IsNullOrWhiteSpace(x.UserId), () =>
+        {
+            RuleFor(x => x.UserId!)
+                .Must(BeAValidGuid)
+                .WithMessage("UserId must be a valid GUID when provided.");
+        });
     }
+    private bool BeAValidGuid(string userId)
+        => Guid.TryParse(userId, out _);
 }

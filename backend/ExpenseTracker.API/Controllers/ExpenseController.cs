@@ -57,13 +57,17 @@ public class ExpenseController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var command = new UpdateExpenseCommand(id,
+        var command = new UpdateExpenseCommand(
             dto.Title,
             dto.Description,
             dto.Amount,
             dto.Date,
             dto.CategoryId
-        );
+        )
+        {
+            Id = id
+        };
+        
         await _mediator.Send(command, cancellationToken);
         return NoContent();
     }

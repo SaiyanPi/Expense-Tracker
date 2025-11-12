@@ -24,7 +24,8 @@ public class UpdateExpenseDtoValidator : AbstractValidator<UpdateExpenseDto>
             .LessThanOrEqualTo(DateTime.Now).WithMessage("Date must be in the past or present");
 
         RuleFor(x => x.CategoryId)
-            .NotEmpty().WithMessage("CategoryId is required");
+            .Must(categoryId => categoryId == null || categoryId != Guid.Empty)
+            .WithMessage("CategoryId must be a valid non-empty GUID when provided.");
 
     }
 }

@@ -3,4 +3,4 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
 
-public record CreateExpenseCommand(CreateExpenseDto ExpenseDto) : IRequest<ExpenseDto>;
+public record CreateExpenseCommand(CreateExpenseDto CreateExpenseDto) : IRequest<ExpenseDto>;

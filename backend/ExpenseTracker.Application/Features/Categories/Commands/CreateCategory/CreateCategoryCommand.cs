@@ -3,4 +3,4 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Categories.Commands.CreateCategory;
 
-public record CreateCategoryCommand(CreateCategoryDto CategoryDto) : IRequest<CategoryDto>;
+public record CreateCategoryCommand(CreateCategoryDto CreateCategoryDto) : IRequest<CategoryDto>;

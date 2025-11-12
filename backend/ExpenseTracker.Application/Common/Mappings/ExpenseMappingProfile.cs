@@ -1,6 +1,7 @@
 using AutoMapper;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Application.DTOs.Expense;
+using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
 
 namespace ExpenseTracker.Application.Common.Mappings;
 
@@ -18,6 +19,13 @@ public class ExpenseMappingProfile : Profile
         CreateMap<UpdateExpenseDto, Expense>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())       // never update Id
             .ForMember(dest => dest.UserId, opt => opt.Ignore())   // UserId itself can't be updated
+            .ForMember(dest => dest.Category, opt => opt.Ignore());
+
+
+        // MediatR UpdateCommand -> Entity
+        CreateMap<UpdateExpenseCommand, Expense>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
             .ForMember(dest => dest.Category, opt => opt.Ignore());
 
         // required to populate an edit form with existing Expense data
