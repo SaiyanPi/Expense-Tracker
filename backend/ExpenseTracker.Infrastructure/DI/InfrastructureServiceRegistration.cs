@@ -14,6 +14,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IIdentityRepository, IdentityRepository>();
 
         // registering identity service
         services.AddScoped<IIdentityService, IdentityService>();

@@ -12,47 +12,48 @@ namespace ExpenseTracker.Infrastructure.Identity.Services;
 
 public class IdentityService : IIdentityService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IJwtTokenService _jwtTokenService;
+    //private readonly IJwtTokenService _jwtTokenService;
+    private readonly IIdentityRepository _identityRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IJwtTokenService _jwtTokenService;
     private readonly IMapper _mapper;
 
     public IdentityService(
-        UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IJwtTokenService jwtTokenService,
+        IIdentityRepository identityRepository,
         IUserRepository userRepository,
+        IJwtTokenService jwtTokenService,
         IMapper mapper)
     {
-        _userManager = userManager;
         _signInManager = signInManager;
-        _jwtTokenService = jwtTokenService;
+        _identityRepository = identityRepository;
         _userRepository = userRepository;
+        _jwtTokenService = jwtTokenService;
         _mapper = mapper;
     }
 
-    public async Task<AuthResultDto> RegisterUserAsync(RegisterUserDto dto, CancellationToken cancellationToken = default)
+    public async Task<AuthResultDto> RegisterUserAsync(RegisterUserDto dto, IEnumerable<string> roles, CancellationToken cancellationToken = default)
     {
+        // check if user with email already exists
+        if (await _userRepository.GetByEmailAsync(dto.Email, cancellationToken) != null)
+            throw new ConflictException($"User with email {dto.Email} already exists.");
+            
         var domainUser = _mapper.Map<User>(dto);
-        var created = await _userRepository.RegisterAsync(domainUser, dto.Password, cancellationToken);
-        if (!created)
-            throw new IdentityOperationException("User registration failed. {errors}");
+        var (Succeeded, UserId, Errors) = await _identityRepository.RegisterAsync(domainUser, dto.Password, roles, cancellationToken);
+        if (!Succeeded)
+            throw new IdentityOperationException("User registration failed.");
 
-        // get roles
-        var roles = await _userRepository.GetRolesAsync(dto.Email);
-        // generate new access token
-        var (token, expiresAt) = _jwtTokenService.GenerateToken(domainUser, roles);
-        // Generate new refresh token
-        var (refreshToken, refreshExpires) = _jwtTokenService.GenerateRefreshToken();
-        // Save refresh token in DB
-        await _userRepository.SetRefreshTokenAsync(dto.Email, refreshToken, refreshExpires);
+        var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken)
+            ?? throw new Exception("User not found after registration.");
+
+        var accessToken = await _identityRepository.GenerateJwtTokenAsync(user);
+        var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(user);
         return new AuthResultDto
         {
             Success = true,
-            Token = token,
-            RefreshToken = refreshToken,
-            ExpiresAt = expiresAt
+            Token = accessToken,
+            RefreshToken = refreshToken
         };
     }
 
@@ -67,37 +68,38 @@ public class IdentityService : IIdentityService
         // if (appUser is null)
         //     throw new UnauthorizedAccessException("Invalid credentials. {errors}");
 
-        var result = await _signInManager.CheckPasswordSignInAsync(_mapper.Map<ApplicationUser>(domainUser), dto.Password, false);
-        if (!result.Succeeded)
+        var valid = await _identityRepository.CheckPasswordAsync(dto.Email, dto.Password, cancellationToken);
+        if (!valid)
             throw new InvalidCredentialsException("Invalid credentials. {errors}");
 
-        var roles = await _userRepository.GetRolesAsync(dto.Email);
-        // generate new access token
-        var (token, expiresAt) = _jwtTokenService.GenerateToken(domainUser, roles);
-        // Generate new refresh token
-        var (refreshToken, refreshExpires) = _jwtTokenService.GenerateRefreshToken();
-        // Save refresh token in DB
-        await _userRepository.SetRefreshTokenAsync(dto.Email, refreshToken, refreshExpires);
+        var accessToken = await _identityRepository.GenerateJwtTokenAsync(domainUser);
+        var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(domainUser);
         return new AuthResultDto
         {
             Success = true,
-            Token = token,
-            RefreshToken = refreshToken,
-            ExpiresAt = expiresAt
+            Token = accessToken,
+            RefreshToken = refreshToken
         };
     }
 
     public async Task LogoutAsync(LogoutUserDto dto, CancellationToken cancellationToken = default)
     {
-        var domainUser = await _userRepository.GetByEmailAsync(dto.Email);
-        if (domainUser is null)
+        var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
+        if( user is null)
             throw new NotFoundException(nameof(User), dto.Email);
+        var userId = user.Id;
 
-        _mapper.Map<ApplicationUser>(domainUser).RefreshToken = null;
-        _mapper.Map<ApplicationUser>(domainUser).RefreshTokenExpiryTime = null;
-
-        await _userManager.UpdateAsync(_mapper.Map<ApplicationUser>(domainUser));
-        await _signInManager.SignOutAsync();
+        var storedRefresh = await _userRepository.GetRefreshTokenAsync(dto.Email);
+        if (storedRefresh.refreshToken == null)
+        {
+            throw new IdentityOperationException("Logout failed. No refresh token found.");
+        }
+        
+        var revoked = await _identityRepository.RevokeRefreshTokenAsync(userId, storedRefresh.refreshToken, cancellationToken);
+        if (!revoked)
+        {
+            throw new IdentityOperationException("Logout failed. Unable to revoke refresh token.");
+        }
     }
 
     public async Task<AuthResultDto> RefreshTokenAsync(RefreshTokenDto dto, CancellationToken cancellationToken = default)
@@ -117,27 +119,23 @@ public class IdentityService : IIdentityService
         if (user is null)
             throw new NotFoundException(nameof(User), email);
         
-        // fetch the stored refresh token and its expiry time from the db
-        var storedRefresh = await _userRepository.GetRefreshTokenAsync(email);
-        if (storedRefresh.refreshToken != dto.RefreshToken || storedRefresh.expiryTime < DateTime.UtcNow)
-            throw new Application.Common.Exceptions.InvalidOperationException("Invalid refresh token.");
+        var isValid = await _identityRepository.ValidateRefreshTokenAsync(user.Id, dto.RefreshToken, cancellationToken);
+        if (!isValid)
+            throw new IdentityOperationException("Invalid or expired refresh token."); 
+        
+         // Generate new tokens
+        var accessToken = await _identityRepository.GenerateJwtTokenAsync(user, cancellationToken);
+        var newRefreshToken = await _identityRepository.GenerateRefreshTokenAsync(user, cancellationToken);
 
-        // Generate new tokens
-        var roles = await _userRepository.GetRolesAsync(email);
-        var (newToken, expiresAt) = _jwtTokenService.GenerateToken(user, roles);
-        var (newRefresh, newRefreshExpires) = _jwtTokenService.GenerateRefreshToken();
+        var stored = await _identityRepository.StoreRefreshTokenAsync(user.Id, newRefreshToken, cancellationToken);
+        if (!stored)
+            throw new IdentityOperationException("Unable to store new refresh token.");
 
-        // Save new refresh token
-        await _userRepository.SetRefreshTokenAsync(email, newRefresh, newRefreshExpires);
-
-        // Return both tokens to client
         return new AuthResultDto
         {
             Success = true,
-            Token = newToken,
-            RefreshToken = newRefresh,
-            ExpiresAt = expiresAt
+            Token = accessToken,
+            RefreshToken = newRefreshToken
         };
-
     }
 }

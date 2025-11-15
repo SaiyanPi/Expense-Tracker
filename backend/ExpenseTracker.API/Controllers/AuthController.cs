@@ -1,3 +1,5 @@
+
+using ExpenseTracker.Application.Common.Constants;
 using ExpenseTracker.Application.DTOs.User;
 using ExpenseTracker.Application.Features.Identity.Commands.Login;
 using ExpenseTracker.Application.Features.Identity.Commands.Logout;
@@ -20,29 +22,29 @@ public class AuthController : ControllerBase
         _mediator = mediator;
     }
 
-    // [HttpPost("register-user")]
-    // public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
-    // {
-    //     return RegisterWithRole(dto, AppRoles.User, cancellationToken);
-    // }
+    [HttpPost("register-user")]
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    {
+        return await Register(dto, AppRoles.User, cancellationToken);
+    }
 
-    // [HttpPost("register-admin")]
-    // public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
-    // {
-    //     return RegisterWithRole(dto, AppRoles.Admin, cancellationToken);
-    // }
+    [HttpPost("register-admin")]
+    public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    {
+        return await Register(dto, AppRoles.Admin, cancellationToken);
+    }
 
     
     
 
     // POST: api/auth/register
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, string roles, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var command = new RegisterUserCommand(dto);
+        var command = new RegisterUserCommand(dto, role);
         var result = await _mediator.Send(command, cancellationToken);
         return CreatedAtAction(nameof(Register), new { id = result.Token }, result);
     }

@@ -39,7 +39,13 @@ public class UserRepository : IUserRepository
     {
         var appUser = _mapper.Map<ApplicationUser>(user);
         var result = await _userManager.CreateAsync(appUser, password);
-        return result.Succeeded;
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new Exception($"Identity registration failed: {errors}");
+        }
+
+        return true;
     }
 
     public async Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default)

@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Application.Constants;
+namespace ExpenseTracker.Application.Common.Constants;
 public static class AppRoles
 {
     public const string Admin = "Admin";
