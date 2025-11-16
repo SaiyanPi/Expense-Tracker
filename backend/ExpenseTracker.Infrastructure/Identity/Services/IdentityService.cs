@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
@@ -33,14 +34,14 @@ public class IdentityService : IIdentityService
         _mapper = mapper;
     }
 
-    public async Task<AuthResultDto> RegisterUserAsync(RegisterUserDto dto, IEnumerable<string> roles, CancellationToken cancellationToken = default)
+    public async Task<AuthResultDto> RegisterUserAsync(RegisterUserDto dto, string role, CancellationToken cancellationToken = default)
     {
         // check if user with email already exists
         if (await _userRepository.GetByEmailAsync(dto.Email, cancellationToken) != null)
             throw new ConflictException($"User with email {dto.Email} already exists.");
             
         var domainUser = _mapper.Map<User>(dto);
-        var (Succeeded, UserId, Errors) = await _identityRepository.RegisterAsync(domainUser, dto.Password, roles, cancellationToken);
+        var (Succeeded, UserId, Errors) = await _identityRepository.RegisterAsync(domainUser, dto.Password, role, cancellationToken);
         if (!Succeeded)
             throw new IdentityOperationException("User registration failed.");
 
@@ -102,40 +103,69 @@ public class IdentityService : IIdentityService
         }
     }
 
-    public async Task<AuthResultDto> RefreshTokenAsync(RefreshTokenDto dto, CancellationToken cancellationToken = default)
+    public async Task<AuthResultDto> RefreshTokenAsync( RefreshTokenDto dto,
+        CancellationToken cancellationToken = default)
     {
-        // parse the token
-        var principal = _jwtTokenService.GetPrincipalFromExpiredToken(dto.Token);
-        if (principal is null)
-            throw new Application.Common.Exceptions.InvalidOperationException("Invalid token.");
+        if (string.IsNullOrWhiteSpace(dto.Token))
+            throw new Application.Common.Exceptions.InvalidOperationException("Access token must be provided.");
 
-        // extracting email claim from the token
-        var email = principal.FindFirst(ClaimTypes.Email)?.Value;
-        if (email is null)
-            throw new Application.Common.Exceptions.InvalidOperationException("Invalid token.");
+        if (string.IsNullOrWhiteSpace(dto.RefreshToken))
+            throw new Application.Common.Exceptions.InvalidOperationException("Refresh token must be provided.");
 
-        // fetch the user with email from db
+        // ---- STEP 1: Decode access token safely ----
+        var handler = new JwtSecurityTokenHandler();
+        JwtSecurityToken jwtToken;
+
+        try
+        {
+            jwtToken = handler.ReadJwtToken(dto.Token);
+        }
+        catch (Exception)
+        {
+            throw new Application.Common.Exceptions.InvalidOperationException("Invalid access token format.");
+        }
+
+        // ---- STEP 2: Extract email claim ----
+        // Use standard JWT claim name
+        var email = jwtToken.Claims.FirstOrDefault(c =>
+            c.Type == JwtRegisteredClaimNames.Email ||
+            c.Type == "email" ||
+            c.Type == ClaimTypes.Email
+        )?.Value;
+
+        if (string.IsNullOrWhiteSpace(email))
+            throw new Application.Common.Exceptions.InvalidOperationException("Email claim not found in access token.");
+
+        //Console.WriteLine("EMAIL FROM TOKEN: " + email);
+
+        // ---- STEP 3: Retrieve user by email ----
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
-        if (user is null)
+        if (user == null)
             throw new NotFoundException(nameof(User), email);
-        
-        var isValid = await _identityRepository.ValidateRefreshTokenAsync(user.Id, dto.RefreshToken, cancellationToken);
+
+        // ---- STEP 4: Validate refresh token ----
+        var isValid = await _identityRepository.ValidateRefreshTokenAsync(
+            user.Id, dto.RefreshToken, cancellationToken);
+
         if (!isValid)
-            throw new IdentityOperationException("Invalid or expired refresh token."); 
-        
-         // Generate new tokens
-        var accessToken = await _identityRepository.GenerateJwtTokenAsync(user, cancellationToken);
+            throw new IdentityOperationException("Invalid or expired refresh token.");
+
+        // ---- STEP 5: Generate new tokens ----
+        var newAccessToken = await _identityRepository.GenerateJwtTokenAsync(user, cancellationToken);
         var newRefreshToken = await _identityRepository.GenerateRefreshTokenAsync(user, cancellationToken);
 
+        // ---- STEP 6: Store new refresh token ----
         var stored = await _identityRepository.StoreRefreshTokenAsync(user.Id, newRefreshToken, cancellationToken);
         if (!stored)
             throw new IdentityOperationException("Unable to store new refresh token.");
 
+        // ---- STEP 7: Return AuthResultDto ----
         return new AuthResultDto
         {
             Success = true,
-            Token = accessToken,
+            Token = newAccessToken,
             RefreshToken = newRefreshToken
         };
     }
+
 }

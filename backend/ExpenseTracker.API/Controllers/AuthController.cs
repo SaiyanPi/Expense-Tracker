@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/register
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, string roles, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, string role, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);

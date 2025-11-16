@@ -5,7 +5,7 @@ namespace ExpenseTracker.Domain.Interfaces.Repositories;
 public interface IIdentityRepository
 {
     Task<(bool Succeeded, IEnumerable<string>? Errors, User? User)> RegisterAsync( User user, string password, 
-        IEnumerable<string> roles, CancellationToken cancellationToken = default);
+        string role, CancellationToken cancellationToken = default);
     Task<bool> CheckPasswordAsync(string email, string password, CancellationToken cancellationToken = default);
 
     Task<string> GenerateJwtTokenAsync(User user, CancellationToken cancellationToken = default);

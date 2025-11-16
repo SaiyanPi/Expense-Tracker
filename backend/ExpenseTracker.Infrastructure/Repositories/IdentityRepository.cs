@@ -31,7 +31,7 @@ public class IdentityRepository : IIdentityRepository
     // User Registration
     // ------------------------------
     public async Task<(bool Succeeded, IEnumerable<string>? Errors, User? User)> RegisterAsync
-        (User user, string password, IEnumerable<string> roles, CancellationToken cancellationToken = default)
+        (User user, string password, string role, CancellationToken cancellationToken = default)
     {
         var appUser = _mapper.Map<ApplicationUser>(user);
 
@@ -39,10 +39,9 @@ public class IdentityRepository : IIdentityRepository
         if (!result.Succeeded)
             return (false, result.Errors.Select(e => e.Description), null);
 
-        foreach (var role in roles)
-        {
-            await _userManager.AddToRoleAsync(appUser, role ?? "User");
-        }
+        await _userManager.AddToRoleAsync(appUser, role ?? "User");
+      
+
         // Convert ApplicationUser → Domain User
         var domainUser = new User
         {
@@ -73,36 +72,33 @@ public class IdentityRepository : IIdentityRepository
     {
         var key = Encoding.UTF8.GetBytes(_config["JwtConfig:Secret"]!);
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.FullName)
-        };
-
-        //var appUser = _mapper.Map<ApplicationUser>(user);
+        // Fetch user from UserManager
         var appUser = await _userManager.FindByIdAsync(user.Id);
         if (appUser == null) 
             throw new Exception("User not found.");
-            
-        var userRoles = await _userManager.GetRolesAsync(appUser);
 
-        // Console.WriteLine("ROLES: " + string.Join(",", userRoles));
+        // Build claims 
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.FullName),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? "")
+        };
 
-        claims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
-        
+        // Add roles
+        var roles = await _userManager.GetRolesAsync(appUser);
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+
+        // Signing
         var signingKey = new SymmetricSecurityKey(key);
         var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-        var expiresAt = DateTime.UtcNow.AddHours(2);
-        
+
         var token = new JwtSecurityToken(
             issuer: _config["JwtConfig:Issuer"],
             audience: _config["JwtConfig:Audience"],
-            expires: expiresAt,
             claims: claims,
-            signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256)
+            expires: DateTime.UtcNow.AddHours(2),
+            signingCredentials: creds   // <-- Use the SAME credentials object
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
