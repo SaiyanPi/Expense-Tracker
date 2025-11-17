@@ -13,24 +13,18 @@ namespace ExpenseTracker.Infrastructure.Identity.Services;
 
 public class IdentityService : IIdentityService
 {
-    private readonly SignInManager<ApplicationUser> _signInManager;
     //private readonly IJwtTokenService _jwtTokenService;
     private readonly IIdentityRepository _identityRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IJwtTokenService _jwtTokenService;
     private readonly IMapper _mapper;
 
     public IdentityService(
-        SignInManager<ApplicationUser> signInManager,
         IIdentityRepository identityRepository,
         IUserRepository userRepository,
-        IJwtTokenService jwtTokenService,
         IMapper mapper)
     {
-        _signInManager = signInManager;
         _identityRepository = identityRepository;
         _userRepository = userRepository;
-        _jwtTokenService = jwtTokenService;
         _mapper = mapper;
     }
 
@@ -75,6 +69,10 @@ public class IdentityService : IIdentityService
 
         var accessToken = await _identityRepository.GenerateJwtTokenAsync(domainUser);
         var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(domainUser);
+
+        // store refresh token
+        await _identityRepository.StoreRefreshTokenAsync(domainUser.Id, refreshToken, cancellationToken);
+
         return new AuthResultDto
         {
             Success = true,
@@ -88,18 +86,19 @@ public class IdentityService : IIdentityService
         var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
         if( user is null)
             throw new NotFoundException(nameof(User), dto.Email);
+
         var userId = user.Id;
 
-        var storedRefresh = await _userRepository.GetRefreshTokenAsync(dto.Email);
-        if (storedRefresh.refreshToken == null)
+        var storedRefresh = await _identityRepository.GetRefreshTokenAsync(userId, cancellationToken);
+        if (storedRefresh == null)
         {
             throw new IdentityOperationException("Logout failed. No refresh token found.");
         }
         
-        var revoked = await _identityRepository.RevokeRefreshTokenAsync(userId, storedRefresh.refreshToken, cancellationToken);
+        var revoked = await _identityRepository.RevokeRefreshTokenAsync(userId, storedRefresh, cancellationToken);
         if (!revoked)
         {
-            throw new IdentityOperationException("Logout failed. Unable to revoke refresh token.");
+            throw new IdentityOperationException("No active session, User already logged out.");
         }
     }
 
@@ -136,7 +135,7 @@ public class IdentityService : IIdentityService
         if (string.IsNullOrWhiteSpace(email))
             throw new Application.Common.Exceptions.InvalidOperationException("Email claim not found in access token.");
 
-        //Console.WriteLine("EMAIL FROM TOKEN: " + email);
+        Console.WriteLine("EMAIL FROM TOKEN: " + email);
 
         // ---- STEP 3: Retrieve user by email ----
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
@@ -166,6 +165,25 @@ public class IdentityService : IIdentityService
             Token = newAccessToken,
             RefreshToken = newRefreshToken
         };
+    }
+
+
+    // Change Password
+    //-------------------
+    public async Task ChangePasswordAsync(ChangePasswordDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.Email);
+        
+        // check if the current password is correct
+        var isCurrentPasswordValid = await _identityRepository.CheckPasswordAsync(dto.Email, dto.CurrentPassword, cancellationToken);
+        if (!isCurrentPasswordValid)
+            throw new IdentityOperationException("Your Current password is incorrect.");
+
+        var changed = await _identityRepository.ChangePasswordAsync(user.Id, dto.CurrentPassword, dto.NewPassword, cancellationToken);
+        if (!changed)
+            throw new IdentityOperationException("Password change failed. Current password may be incorrect.");
     }
 
 }

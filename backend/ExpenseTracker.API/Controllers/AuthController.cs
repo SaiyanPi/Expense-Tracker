@@ -1,6 +1,7 @@
 
 using ExpenseTracker.Application.Common.Constants;
 using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.Features.Identity.Commands.ChangePassword;
 using ExpenseTracker.Application.Features.Identity.Commands.Login;
 using ExpenseTracker.Application.Features.Identity.Commands.Logout;
 using ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;
@@ -83,6 +84,18 @@ public class AuthController : ControllerBase
         var command = new LogoutUserCommand(dto);
         await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Logged out successfully" });
+    }
+
+    // POST: api/auth/change-password
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var command = new ChangePasswordCommand(dto);
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Password changed successfully" });
     }
 }
 

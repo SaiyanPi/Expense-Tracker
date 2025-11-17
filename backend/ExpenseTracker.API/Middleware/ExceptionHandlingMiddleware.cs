@@ -67,6 +67,10 @@ public class ExceptionHandlingMiddleware
             UnauthorizedException => HttpStatusCode.Unauthorized,
             ForbiddenException => HttpStatusCode.Forbidden,
             ConflictException => HttpStatusCode.Conflict,
+            IdentityOperationException => HttpStatusCode.BadRequest, 
+            DomainException => HttpStatusCode.BadRequest,
+            InvalidCredentialsException => HttpStatusCode.Unauthorized,  
+            Application.Common.Exceptions.InvalidOperationException => HttpStatusCode.BadRequest,
             _ => HttpStatusCode.InternalServerError
         };
 

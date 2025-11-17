@@ -13,4 +13,6 @@ public interface IIdentityRepository
     Task<bool> StoreRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken = default);
     Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken = default);
     Task<bool> RevokeRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken = default);
+    Task<string?> GetRefreshTokenAsync(string userId, CancellationToken cancellationToken = default);
+    Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
 }

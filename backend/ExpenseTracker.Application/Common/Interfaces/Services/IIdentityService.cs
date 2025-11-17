@@ -8,4 +8,5 @@ public interface IIdentityService
     Task<AuthResultDto> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default);
     Task LogoutAsync(LogoutUserDto dto,CancellationToken cancellationToken = default);
     Task<AuthResultDto> RefreshTokenAsync(RefreshTokenDto dto, CancellationToken cancellationToken = default);
+    Task ChangePasswordAsync(ChangePasswordDto dto, CancellationToken cancellationToken = default);
 }

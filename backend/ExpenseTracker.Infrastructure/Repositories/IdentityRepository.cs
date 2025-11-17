@@ -27,9 +27,10 @@ public class IdentityRepository : IIdentityRepository
         _config = config;
     }
 
-    // ------------------------------
+
+
     // User Registration
-    // ------------------------------
+    //---------------------------
     public async Task<(bool Succeeded, IEnumerable<string>? Errors, User? User)> RegisterAsync
         (User user, string password, string role, CancellationToken cancellationToken = default)
     {
@@ -54,9 +55,8 @@ public class IdentityRepository : IIdentityRepository
     }
 
 
-    // ------------------------------
     // Check Password
-    // ------------------------------
+    //---------------------------
     public async Task<bool> CheckPasswordAsync(string email, string password, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByEmailAsync(email);
@@ -65,9 +65,10 @@ public class IdentityRepository : IIdentityRepository
         return await _userManager.CheckPasswordAsync(user, password);
     }
 
-    // ------------------------------
+
+
     // JWT Generation
-    // ------------------------------
+    //---------------------------
     public async Task<string> GenerateJwtTokenAsync(User user, CancellationToken cancellationToken)
     {
         var key = Encoding.UTF8.GetBytes(_config["JwtConfig:Secret"]!);
@@ -104,18 +105,21 @@ public class IdentityRepository : IIdentityRepository
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    // ------------------------------
+ 
+
+
     // Refresh Token Generation
-    // ------------------------------
+    //---------------------------
     public Task<string> GenerateRefreshTokenAsync(User user, CancellationToken cancellationToken)
     {
         var refresh = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
         return Task.FromResult(refresh);
     }
 
-    // ------------------------------
+
+
     // Store Refresh Token (Identity Tokens table)
-    // ------------------------------
+    //--------------------------------------------
     public async Task<bool> StoreRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
@@ -126,9 +130,10 @@ public class IdentityRepository : IIdentityRepository
         return true;
     }
 
-    // ------------------------------
+
+
     // Validate Refresh Token
-    // ------------------------------
+    //---------------------------
     public async Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
@@ -139,9 +144,10 @@ public class IdentityRepository : IIdentityRepository
         return stored == refreshToken;
     }
 
-    // ------------------------------
+
+
     // Revoke Refresh Token (Logout)
-    // ------------------------------
+    //---------------------------------
     public async Task<bool> RevokeRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
@@ -150,6 +156,32 @@ public class IdentityRepository : IIdentityRepository
         await _userManager.RemoveAuthenticationTokenAsync(appUser, "ExpenseTracker", "RefreshToken");
 
         return true;
+    }
+
+
+
+    // Get Refresh Token (for Logout)
+    //---------------------------------
+    public async Task<string?> GetRefreshTokenAsync(string userId, CancellationToken cancellationToken)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return null;
+
+        var stored = await _userManager.GetAuthenticationTokenAsync(appUser, "ExpenseTracker", "RefreshToken");
+
+        return stored;
+    }
+
+
+    // Change Password
+    //---------------------------
+    public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken cancellationToken)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return false;
+
+        var result = await _userManager.ChangePasswordAsync(appUser, currentPassword, newPassword);
+        return result.Succeeded;
     }
 
     
