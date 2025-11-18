@@ -12,9 +12,9 @@ public static class ApplicationServiceRegistration
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         // register application services
-        services.AddScoped<IExpenseService, ExpenseService>();
-        services.AddScoped<ICategoryService, CategoryService>();
-        services.AddScoped<IUserService, UserService>();
+        // services.AddScoped<IExpenseService, ExpenseService>();
+        // services.AddScoped<ICategoryService, CategoryService>();
+        // services.AddScoped<IUserService, UserService>();
 
         // registering AutoMapper profiles
         services.AddAutoMapper(

@@ -17,37 +17,35 @@ public class UserRepository : IUserRepository
         _mapper = mapper;
     }
 
+    // Get All Users
+    // --------------
     public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var appUsers = await _userManager.Users.ToListAsync();
         return _mapper.Map<IReadOnlyList<User>>(appUsers);
     }
 
+
+    // Get User By Id
+    // ---------------
     public async Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
         var appUser = await _userManager.FindByIdAsync(id);
         return appUser is null ? null : _mapper.Map<User>(appUser);
     }
 
+
+    // Get User By Email
+    // -------------------
     public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         var appUser = await _userManager.FindByEmailAsync(email);
         return appUser is null ? null : _mapper.Map<User>(appUser);
     }
 
-    public async Task<bool> RegisterAsync(User user, string password, CancellationToken cancellationToken = default)
-    {
-        var appUser = _mapper.Map<ApplicationUser>(user);
-        var result = await _userManager.CreateAsync(appUser, password);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new Exception($"Identity registration failed: {errors}");
-        }
 
-        return true;
-    }
-
+    // Update User
+    // -------------
     public async Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default)
     {
         var appUser = await _userManager.FindByIdAsync(user.Id);
@@ -58,6 +56,9 @@ public class UserRepository : IUserRepository
         return result.Succeeded;
     }
 
+
+    // Delete User
+    // -------------
     public async Task<bool> DeleteAsync(User user, CancellationToken cancellationToken = default)
     {
         var appUser = await _userManager.FindByIdAsync(user.Id);
@@ -68,39 +69,4 @@ public class UserRepository : IUserRepository
     
     }
 
-    // --- Authentication ---
-    public async Task<bool> CheckPasswordAsync(string email, string password)
-    {
-        var appUser = await _userManager.FindByEmailAsync(email);
-        if (appUser == null) return false;
-
-        return await _userManager.CheckPasswordAsync(appUser, password);
-    }
-
-    public async Task<IList<string>> GetRolesAsync(string email)
-    {
-        var appUser = await _userManager.FindByEmailAsync(email);
-        if (appUser == null) return new List<string>();
-
-        return await _userManager.GetRolesAsync(appUser);
-    }
-    
-    // --- Refresh Tokens ---
-    public async Task SetRefreshTokenAsync(string email, string refreshToken, DateTime expiryTime)
-    {
-        var appUser = await _userManager.FindByEmailAsync(email);
-        if (appUser == null) return;
-        appUser.RefreshToken = refreshToken;
-        appUser.RefreshTokenExpiryTime = expiryTime;
-        await _userManager.UpdateAsync(appUser);
-    }
-
-    public async Task<(string? refreshToken, DateTime? expiryTime)> GetRefreshTokenAsync(string email)
-    {
-        var appUser = await _userManager.FindByEmailAsync(email);
-        return (appUser?.RefreshToken, appUser?.RefreshTokenExpiryTime);
-    }
-
 }
-
-// This is the implementation of repositopry interface in domain layer
