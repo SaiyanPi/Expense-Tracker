@@ -19,6 +19,15 @@ public class CategoryRepository : ICategoryRepository
         return categories;
     }
 
+    public async Task<IReadOnlyList<Category>> GetAllCategoriesByEmailAsync(string userId, CancellationToken cancellationToken = default)
+    {
+
+        var categories = await _dbContext.Categories
+            .Where(c => c.UserId == userId)
+            .ToListAsync(cancellationToken);
+        return categories;
+    }
+
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var category = await _dbContext.Categories.FindAsync(id);

@@ -3,6 +3,7 @@ using ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
 using ExpenseTracker.Application.Features.Expenses.Commands.DeleteExpense;
 using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpenses;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetExpenseById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,15 @@ public class ExpenseController : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
     {
         var query = new GetAllExpensesQuery();
+        var expenses = await _mediator.Send(query, cancellationToken);
+        return Ok(expenses);
+    }
+
+    // GET: api/expense/email?email={email}
+    [HttpGet("email")]
+    public async Task<IActionResult> GetAllByEmail(string email, CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllExpensesByEmailQuery(email);
         var expenses = await _mediator.Send(query, cancellationToken);
         return Ok(expenses);
     }

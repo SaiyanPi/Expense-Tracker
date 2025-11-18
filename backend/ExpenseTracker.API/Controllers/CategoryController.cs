@@ -3,6 +3,7 @@ using ExpenseTracker.Application.Features.Categories.Commands.CreateCategory;
 using ExpenseTracker.Application.Features.Categories.Commands.DeleteCategory;
 using ExpenseTracker.Application.Features.Categories.Commands.UpdateCategory;
 using ExpenseTracker.Application.Features.Categories.Queries.GetAllCategories;
+using ExpenseTracker.Application.Features.Categories.Queries.GetAllCategoriesByEmail;
 using ExpenseTracker.Application.Features.Categories.Queries.GetCategoryById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,15 @@ public class CategoryController : ControllerBase
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
     {
         var query = new GetAllCategoriesQuery();
+        var categories = await _mediator.Send(query, cancellationToken);
+        return Ok(categories);
+    }
+
+    // GET: api/Category/email?email={email}
+    [HttpGet("email")]
+    public async Task<IActionResult> GetAllByEmail(string email, CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllCategoriesByEmailQuery(email);
         var categories = await _mediator.Send(query, cancellationToken);
         return Ok(categories);
     }

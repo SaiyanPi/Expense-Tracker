@@ -21,6 +21,15 @@ public class ExpenseRepository : IExpenseRepository
         return expenses;
     }
 
+    public async Task<IReadOnlyList<Expense>> GetAllExpensesByEmailAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var expenses = await _dbContext.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.UserId == userId)
+            .ToListAsync(cancellationToken);
+        return expenses;
+    }
+
     public async Task<Expense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var expense = await _dbContext.Expenses.FindAsync(id);
