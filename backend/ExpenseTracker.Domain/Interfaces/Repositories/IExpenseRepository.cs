@@ -1,4 +1,5 @@
 using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Domain.Models;
 
 namespace ExpenseTracker.Domain.Interfaces.Repositories;
 
@@ -13,7 +14,34 @@ public interface IExpenseRepository
 
     // Additional method to check for existing title for validation in service in Application layer
     Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default);
+    Task<decimal> GetTotalExpensesAsync(CancellationToken cancellationToken = default);
+    Task<decimal> GetTotalExpensesByEmailAsync(string userId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CategorySummary>> GetCategorySummaryAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CategorySummary>> GetCategorySummaryByEmailAsync(string userId, CancellationToken cancellationToken = default);
+    Task<FilteredExpensesResult> FilterExpensesAsync(
+                                                        DateTime? startDate,
+                                                        DateTime? endDate,
+                                                        decimal? minAmount,
+                                                        decimal? maxAmount,
+                                                        Guid? categoryId,
+                                                        string? userId,
+                                                        CancellationToken cancellationToken = default
+                                                    );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 📝
 // 1. Repositories represent the data access layer:
 // Repositories work directly with your domain entities(not with DTOs and raw data like Guid IDs) but this

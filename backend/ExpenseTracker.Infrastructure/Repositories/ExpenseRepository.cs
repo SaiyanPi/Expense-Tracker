@@ -1,5 +1,6 @@
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
+using ExpenseTracker.Domain.Models;
 using ExpenseTracker.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -58,6 +59,96 @@ public class ExpenseRepository : IExpenseRepository
     public async Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Expenses.AnyAsync(e => e.Title == title, cancellationToken);
+    }
+
+    public async Task<decimal> GetTotalExpensesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Expenses.SumAsync(e => e.Amount, cancellationToken);
+    }
+
+    public async Task<decimal> GetTotalExpensesByEmailAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var total = await _dbContext.Expenses
+            .Where(e => e.UserId == userId)
+            .SumAsync(e => e.Amount, cancellationToken);
+        return total;
+    }
+
+    public async Task<IReadOnlyList<CategorySummary>> GetCategorySummaryAsync(CancellationToken cancellationToken = default)
+    {
+        var summaries = await _dbContext.Expenses
+            .Include(e => e.Category)
+            .GroupBy(e => e.Category.Name)
+            .Select(g => new CategorySummary
+            {
+                CategoryName = g.Key,
+                TotalAmount = g.Sum(e => e.Amount)
+            })
+            .ToListAsync(cancellationToken);
+
+        return summaries;
+    }
+
+    public async Task<IReadOnlyList<CategorySummary>> GetCategorySummaryByEmailAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var summaries = await _dbContext.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.UserId == userId)
+            .GroupBy(e => e.Category.Name)
+            .Select(g => new CategorySummary    
+            {
+                CategoryName = g.Key,
+                TotalAmount = g.Sum(e => e.Amount)
+            })
+            .ToListAsync(cancellationToken);
+
+        return summaries;  
+    }
+
+    public async Task<FilteredExpensesResult> FilterExpensesAsync(
+                                                                    DateTime? startDate,
+                                                                    DateTime? endDate,
+                                                                    decimal? minAmount,
+                                                                    decimal? maxAmount,
+                                                                    Guid? categoryId,
+                                                                    string? userId,
+                                                                    CancellationToken cancellationToken = default
+                                                                )
+    {
+        var query = _dbContext.Expenses
+            .Include(e => e.Category)
+            .AsQueryable();
+
+        query = query.Where(e => e. Date >= startDate && e.Date <= endDate);
+
+        if (minAmount.HasValue)
+        {
+            query = query.Where(e => e.Amount >= minAmount.Value);
+        }
+
+        if (maxAmount.HasValue)
+        {
+            query = query.Where(e => e.Amount <= maxAmount.Value);
+        }
+
+        if (categoryId.HasValue)
+        {
+            query = query.Where(e => e.CategoryId == categoryId.Value);
+        }
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            query = query.Where(e => e.UserId == userId);
+        }
+
+        
+        var expenses = await query.ToListAsync(cancellationToken);
+
+        return new FilteredExpensesResult
+        {
+            TotalAmount = expenses.Sum(e => e.Amount),
+            Expenses = expenses
+        };
     }
 
 }

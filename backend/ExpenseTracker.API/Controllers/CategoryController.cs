@@ -21,7 +21,9 @@ public class CategoryController : ControllerBase
         _mediator = mediator;
     }
 
+
     // GET: api/Category
+    //[Authorize(Policy = "CanViewAllUsersCategory")]
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
     {
@@ -31,6 +33,7 @@ public class CategoryController : ControllerBase
     }
 
     // GET: api/Category/email?email={email}
+    //[Authorize]
     [HttpGet("email")]
     public async Task<IActionResult> GetAllByEmail(string email, CancellationToken cancellationToken = default)
     {
@@ -40,6 +43,7 @@ public class CategoryController : ControllerBase
     }
 
     // GET: api/Category/{id}
+   //[Authorize("canViewAllUsersCategory")]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -86,4 +90,5 @@ public class CategoryController : ControllerBase
         await _mediator.Send(command, cancellationToken);
         return NoContent();
     }
+
 }

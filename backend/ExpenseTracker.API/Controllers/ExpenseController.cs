@@ -2,9 +2,14 @@ using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
 using ExpenseTracker.Application.Features.Expenses.Commands.DeleteExpense;
 using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
+using ExpenseTracker.Application.Features.Expenses.GetTotalExpenses;
+using ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesByEmail;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummary;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummaryByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetExpenseById;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetTotalExpensesByEmail;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -89,5 +94,66 @@ public class ExpenseController : ControllerBase
         var command = new DeleteExpenseCommand(id);
         await _mediator.Send(command, cancellationToken);
         return NoContent();
+    }
+
+    // GET: api/expense/total
+    [HttpGet("total")]
+    public async Task<IActionResult> GetTotalExpenses(CancellationToken cancellationToken = default)
+    {
+        var query = new GetTotalExpensesQuery();
+        var totalExpenses = await _mediator.Send(query, cancellationToken);
+        return Ok(totalExpenses);
+    }
+
+    // GET: api/expense/total-expenses/email?email=email
+    [HttpGet("total-expenses/email")]
+    public async Task<IActionResult> GetTotalExpensesByEmail(string email, CancellationToken cancellationToken = default)
+    {
+        var query = new GetTotalExpensesByEmailQuery(email);
+        var totalExpensesByEmail = await _mediator.Send(query, cancellationToken);
+        return Ok(totalExpensesByEmail);
+    }
+
+    // GET: api/expense/category-summary
+    [HttpGet("category-summary")]
+    public async Task<IActionResult> GetCategorySummary(CancellationToken cancellationToken = default)
+    {
+        var query = new GetCategorySummaryQuery();
+        var summary = await _mediator.Send(query, cancellationToken);
+        return Ok(summary);
+    }
+
+    // GET: api/expense/category-summary/email?email={email}
+    [HttpGet("category-summary/email")]
+    public async Task<IActionResult> GetCategorySummaryByEmail(string email, CancellationToken cancellationToken = default)
+    {
+        var query = new GetCategorySummaryByEmailQuery(email);
+        var summary = await _mediator.Send(query, cancellationToken);
+        return Ok(summary);
+    }
+
+    // GET: api/expense/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
+    [HttpGet("filter")]
+    public async Task<IActionResult> FilterExpenses(
+                                                    [FromQuery] DateTime? startDate,
+                                                    [FromQuery] DateTime? endDate,
+                                                    [FromQuery] decimal? minAmount,
+                                                    [FromQuery] decimal? maxAmount,
+                                                    [FromQuery] Guid? categoryId,
+                                                    [FromQuery] string? userId,
+                                                    CancellationToken cancellationToken = default
+                                                    )
+    {
+        var query = new FilterExpensesQuery(
+            startDate,
+            endDate,
+            minAmount,
+            maxAmount,
+            categoryId,
+            userId
+        );
+
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 }

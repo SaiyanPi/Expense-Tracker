@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.Common.Authorization;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Persistence.Identity;
@@ -89,6 +89,22 @@ public class IdentityRepository : IIdentityRepository
         // Add roles
         var roles = await _userManager.GetRolesAsync(appUser);
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+
+        // Add role based claims
+        foreach (var role in roles)
+        {
+            switch (role)
+            {
+                case AppRoles.Admin:
+                    claims.Add(new Claim(AppClaimTypes.can_view_all_users, "true"));
+                    claims.Add(new Claim(AppClaimTypes.can_view_all_users_category, "true"));
+                    claims.Add(new Claim(AppClaimTypes.can_view_all_users_expense, "true"));
+                    break;
+                case "User":
+                    claims.Add(new Claim("CanViewOwnCategory", "true"));
+                    break;
+            }
+        }
 
         // Signing
         var signingKey = new SymmetricSecurityKey(key);
