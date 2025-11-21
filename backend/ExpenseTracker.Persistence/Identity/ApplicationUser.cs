@@ -6,8 +6,8 @@ namespace ExpenseTracker.Persistence.Identity;
 public class ApplicationUser : IdentityUser
 {
     public string FullName { get; set; } = default!;
-    public string? RefreshToken { get; set; }
-    public DateTime? RefreshTokenExpiryTime { get; set; }
+    public string? RefreshToken { get; private set; }
+    public DateTime? RefreshTokenExpiryTime { get; private set; }
 
     // public ICollection<Category> Categories { get; set; } = new List<Category>();
     // public ICollection<Expense> Expenses { get; set; } = new List<Expense>();

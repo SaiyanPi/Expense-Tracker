@@ -2,10 +2,10 @@ namespace ExpenseTracker.Domain.Entities;
 
 public class Category
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public string Name { get; set; } = default!;
     public string? UserId { get; set; }     // foreign key
-    public ICollection<Expense> Expenses { get; set; } = new List<Expense>();       // collectional navigation 
+    public ICollection<Expense> Expenses { get; private set; } = new List<Expense>();       // collectional navigation 
 
 
 
