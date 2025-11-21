@@ -63,6 +63,11 @@ public class CategoryRepository : ICategoryRepository
         return await _dbContext.Categories.AnyAsync(c => c.Name == name && c.UserId == userId, cancellationToken);
     }
 
+    public async Task<bool> UserOwnsCategoryAsync(Guid categoryId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Categories.AnyAsync(c => c.Id == categoryId && c.UserId == userId, cancellationToken);
+    }
+
 }
 
 // This is the implementation of repositopry interface in domain layer

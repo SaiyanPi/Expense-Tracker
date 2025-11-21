@@ -29,16 +29,22 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
     {
         // check if the category exist
         var category = await _categoryRepository.GetByIdAsync(request.CreateExpenseDto.CategoryId, cancellationToken);
-        if (category is null)
-            throw new NotFoundException(nameof(Category), request.CreateExpenseDto.CategoryId);
-
-        // check if the user exist
-        if (request.CreateExpenseDto.UserId is not null)
+            if (category is null)
+                throw new NotFoundException(nameof(Category), request.CreateExpenseDto.CategoryId);
+                
+        if( request.CreateExpenseDto.UserId is not null)
         {
-            var user = await _userRepository.GetByIdAsync(request.CreateExpenseDto.UserId, cancellationToken);
-            if (user is null)
+            // check if the user exist
+            var userExists = await _userRepository.GetByIdAsync(request.CreateExpenseDto.UserId, cancellationToken);
+            if (userExists is null)
                 throw new NotFoundException(nameof(User), request.CreateExpenseDto.UserId);
+            
+            // check if the category belongs to the user
+            bool ownsCategory = await _categoryRepository.UserOwnsCategoryAsync(request.CreateExpenseDto.CategoryId, request.CreateExpenseDto.UserId, cancellationToken);
+            if (!ownsCategory)
+                throw new ConflictException($"Category with id '{request.CreateExpenseDto.CategoryId}' does not belong to user '{request.CreateExpenseDto.UserId}'.");
         }
+      
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
         await _expenseRepository.AddAsync(expense, cancellationToken);
         return _mapper.Map<ExpenseDto>(expense);
