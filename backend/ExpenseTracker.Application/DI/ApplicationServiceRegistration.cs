@@ -20,7 +20,8 @@ public static class ApplicationServiceRegistration
         services.AddAutoMapper(
             typeof(ExpenseMappingProfile).Assembly,
             typeof(CategoryMappingProfile).Assembly,
-            typeof(UserDomainMappingProfile).Assembly
+            typeof(UserDomainMappingProfile).Assembly,
+            typeof(BudgetMappingProfile).Assembly
         );
 
         // registering MediatR handlers

@@ -1,5 +1,4 @@
 namespace ExpenseTracker.Domain.Entities;
-
 public class Budget
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
@@ -17,14 +16,14 @@ public class Budget
         DateTime endDate,
         string? userId = default!, 
         Guid? categoryId = null)
-        {
-            Id = Guid.NewGuid();
-            Name = name;
-            Amount = amount;
-            StartDate = startDate;
-            EndDate = endDate;
-            UserId = userId;
-            CategoryId = categoryId;
-        }
+    {
+        Id = Guid.NewGuid();
+        Name = name;
+        Amount = amount;
+        StartDate = startDate;
+        EndDate = endDate;
+        UserId = userId;
+        CategoryId = categoryId;
+    }
 
 }

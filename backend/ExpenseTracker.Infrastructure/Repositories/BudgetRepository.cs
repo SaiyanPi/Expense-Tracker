@@ -14,12 +14,12 @@ public class BudgetRepository : IBudgetRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyList<Budget>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Budget>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.Budgets.ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Budget>> GetAllBudgetsByEmailAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Budget>> GetAllBudgetsByEmailAsync(string userId, CancellationToken cancellationToken = default)
     {
         var budgets = await _dbContext.Budgets
             .Where(b => b.UserId == userId)

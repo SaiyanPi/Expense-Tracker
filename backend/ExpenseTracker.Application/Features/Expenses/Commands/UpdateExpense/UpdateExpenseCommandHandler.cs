@@ -34,6 +34,7 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
                 throw new NotFoundException(nameof(Category), request.CategoryId.Value);
 
         }
+        
         _mapper.Map(request, expense);
 
         await _expenseRepository.UpdateAsync(expense, cancellationToken);
