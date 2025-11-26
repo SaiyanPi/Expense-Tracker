@@ -6,6 +6,7 @@ using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetById;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgets;
 using ExpenseTracker.Application.Features.Budgets.Commands.UpdateBudget;
 using ExpenseTracker.Application.Features.Budgets.Commands.DeleteBudget;
+using ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgetsByEmail;
 
 namespace ExpenseTracker.API.Controllers;   
 
@@ -29,6 +30,15 @@ public class BudgetController : ControllerBase
         return Ok(budgets);
     }
 
+    // GET: api/Budget/email?email={email}
+    [HttpGet("email")]
+    public async Task<IActionResult> GetAllBudgetsByEmail(string email, CancellationToken cancellationToken)
+    {
+        var query = new GetAllBudgetsByEmailQuery(email);
+        var budgets = await _mediator.Send(query, cancellationToken);
+        return Ok(budgets);
+    }
+    
     // GET: api/Budget/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetBudgetById(Guid id, CancellationToken cancellationToken)

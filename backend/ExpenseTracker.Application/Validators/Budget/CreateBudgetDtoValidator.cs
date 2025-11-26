@@ -14,7 +14,7 @@ public class CreateBudgetDtoValidator : AbstractValidator<CreateBudgetDto>
 
         RuleFor(x => x.StartDate)
         .NotEmpty().WithMessage("Start date is required.")
-        .Must(startDate => startDate >= DateTime.UtcNow.Date)
+        .Must(startDate => startDate >= DateTime.UtcNow.Date).WithMessage("Start date cannot be in the past.")
         .LessThan(x => x.EndDate).WithMessage("Start date must be earlier than end date.");
 
         RuleFor(x => x.EndDate)

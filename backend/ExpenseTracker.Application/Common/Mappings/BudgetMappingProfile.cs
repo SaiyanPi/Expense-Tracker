@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.DTOs.Budget;
+using ExpenseTracker.Application.Features.Budgets.Commands.UpdateBudget;
 using ExpenseTracker.Domain.Entities;
 
 namespace ExpenseTracker.Application.Common.Mappings;
@@ -19,9 +20,9 @@ public class BudgetMappingProfile : Profile
             .ForMember(dest => dest.UserId, opt => opt.Ignore());   // UserId itself can't be updated
         
         // MediatR UpdateCommand -> Entity
-        // CreateMap<UpdateBudgetCommand, Budget>()
-        //     .ForMember(dest => dest.Id, opt => opt.Ignore())
-        //     .ForMember(dest => dest.UserId, opt => opt.Ignore());
+        CreateMap<UpdateBudgetCommand, Budget>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
         // required to populate an edit form with existing Budget data
         CreateMap<Budget, UpdateBudgetDto>();
