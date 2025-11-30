@@ -1,5 +1,5 @@
 using ExpenseTracker.Application.Common.Interfaces.Services;
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.Auth;
 using MediatR;
 
 namespace ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;

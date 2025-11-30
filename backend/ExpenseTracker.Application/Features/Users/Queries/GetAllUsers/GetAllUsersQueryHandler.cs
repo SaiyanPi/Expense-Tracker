@@ -1,5 +1,5 @@
 using AutoMapper;
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 

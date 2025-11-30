@@ -1,6 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Domain.Entities;
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.Auth;
 
 namespace ExpenseTracker.Application.Common.Mappings;
 

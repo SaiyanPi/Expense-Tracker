@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Register services, repositories, etc.
 builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
-builder.Services.AddInfrastructureServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Add controllers / minimal APIs
 builder.Services.AddControllers();

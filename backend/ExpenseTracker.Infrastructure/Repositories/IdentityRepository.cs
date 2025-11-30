@@ -200,5 +200,52 @@ public class IdentityRepository : IIdentityRepository
         return result.Succeeded;
     }
 
-    
+
+    // generate email confirmation token
+    //------------------------------------
+    public async Task<string?> GenerateEmailConfirmationTokenAsync(string userId, CancellationToken cancellationToken)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return null;
+
+        return await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+    }
+
+
+    // confirm email
+    //------------------------------------
+    public async Task<bool> ConfirmEmailAsync(string userId, string token, CancellationToken cancellationToken)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return false;
+
+        var result = await _userManager.ConfirmEmailAsync(appUser, token);
+        return result.Succeeded;
+    }
+
+
+    // generate password reset token
+    //------------------------------------
+    public async Task<string?> GeneratePasswordResetTokenAsync(string userId, CancellationToken cancellationToken)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return null;
+
+        return await _userManager.GeneratePasswordResetTokenAsync(appUser);
+    }
+
+
+    // reset password
+    //------------------------------------
+    public async Task<bool> ResetPasswordAsync(string userId, string token, string newPassword, CancellationToken cancellationToken)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return false;
+
+        // decode token because it is URL encoded
+        var decodedToken = Uri.UnescapeDataString(token);
+
+        var result = await _userManager.ResetPasswordAsync(appUser, decodedToken, newPassword);
+        return result.Succeeded;
+    }
 }

@@ -1,7 +1,5 @@
 using System.Reflection;
-using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Mappings;
-using ExpenseTracker.Application.Services;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 

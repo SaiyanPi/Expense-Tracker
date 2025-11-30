@@ -1,6 +1,5 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
-using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;

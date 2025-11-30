@@ -1,10 +1,13 @@
 using ExpenseTracker.Application.Common.Authorization;
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Identity.Commands.ChangePassword;
+using ExpenseTracker.Application.Features.Identity.Commands.EmailConfirmation;
+using ExpenseTracker.Application.Features.Identity.Commands.ForgotPassword;
 using ExpenseTracker.Application.Features.Identity.Commands.Login;
 using ExpenseTracker.Application.Features.Identity.Commands.Logout;
 using ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;
 using ExpenseTracker.Application.Features.Identity.Commands.Register;
+using ExpenseTracker.Application.Features.Identity.Commands.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -95,6 +98,42 @@ public class AuthController : ControllerBase
         var command = new ChangePasswordCommand(dto);
         await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Password changed successfully" });
+    }
+
+    // Confirm Email
+    // GET: api/auth/confirm-email?userId={userId}&token={token}
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] VerifyEmailDto dto, CancellationToken cancellationToken)
+    {
+        var command = new EmailConfirmationCommand(dto);
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Email confirmed successfully" });
+    }
+
+    // Forgot Password - Request Reset Token
+    // POST: api/auth/forgot-password
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var command = new ForgotPasswordCommand(dto);
+        var token = await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Password reset token sent to email if it exists", Token = token });
+    }
+
+    // Reset Password
+    // POST: api/auth/reset-password?userId={userId}&token={token}
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var command = new ResetPasswordCommand(dto);
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Password has been reset successfully" });
     }
 }
 

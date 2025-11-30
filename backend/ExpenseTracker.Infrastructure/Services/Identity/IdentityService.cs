@@ -3,28 +3,31 @@ using System.Security.Claims;
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 
-namespace ExpenseTracker.Infrastructure.Identity.Services;
+namespace ExpenseTracker.Infrastructure.Services.Identity;
 
 public class IdentityService : IIdentityService
 {
     //private readonly IJwtTokenService _jwtTokenService;
     private readonly IIdentityRepository _identityRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IEmailService _emailService;
     private readonly IMapper _mapper;
 
     public IdentityService(
         IIdentityRepository identityRepository,
         IUserRepository userRepository,
+        IEmailService emailService,
         IMapper mapper)
     {
         _identityRepository = identityRepository;
         _userRepository = userRepository;
+        _emailService = emailService;
         _mapper = mapper;
     }
 
@@ -35,6 +38,7 @@ public class IdentityService : IIdentityService
             throw new ConflictException($"User with email {dto.Email} already exists.");
             
         var domainUser = _mapper.Map<User>(dto);
+
         var (Succeeded, UserId, Errors) = await _identityRepository.RegisterAsync(domainUser, dto.Password, role, cancellationToken);
         if (!Succeeded)
             throw new IdentityOperationException("User registration failed.");
@@ -42,6 +46,21 @@ public class IdentityService : IIdentityService
         var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken)
             ?? throw new Exception("User not found after registration.");
 
+        // 1. automatically generate email confirmation token
+        var emailConfirmationToken = await _identityRepository.GenerateEmailConfirmationTokenAsync(user.Id, cancellationToken);
+        if (emailConfirmationToken == null)
+            throw new IdentityOperationException("Failed to generate email confirmation token.");
+
+        // 2. build confirmation link (to be sent via email)
+        var confirmationLink = $"http://localhost:5167/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(emailConfirmationToken)}";
+        
+        // 3. send confirmation email (implementation omitted)
+        await _emailService.SendEmailAsync(
+            to: user.Email,
+            subject: "Confirm your email",
+            body: $"Please confirm your email by clicking this link: {confirmationLink}", 
+            cancellationToken: cancellationToken);
+            
         var accessToken = await _identityRepository.GenerateJwtTokenAsync(user);
         var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(user);
         return new AuthResultDto
@@ -135,7 +154,7 @@ public class IdentityService : IIdentityService
         if (string.IsNullOrWhiteSpace(email))
             throw new Application.Common.Exceptions.InvalidOperationException("Email claim not found in access token.");
 
-        Console.WriteLine("EMAIL FROM TOKEN: " + email);
+        //Console.WriteLine("EMAIL FROM TOKEN: " + email);
 
         // ---- STEP 3: Retrieve user by email ----
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
@@ -186,4 +205,62 @@ public class IdentityService : IIdentityService
             throw new IdentityOperationException("Password change failed. Current password may be incorrect.");
     }
 
+    // Email Confirmation
+    //-----------------------
+    public async Task RequestEmailConfirmationTokenAsync(RequestEmailConfirmationDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+
+        var token = await _identityRepository.GenerateEmailConfirmationTokenAsync(dto.UserId, cancellationToken);
+        if (token == null)
+            throw new IdentityOperationException("Failed to generate email confirmation token.");
+    }
+
+    public async Task ConfirmEmailAsync(VerifyEmailDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+        
+        var confirm = await _identityRepository.ConfirmEmailAsync(dto.UserId, dto.Token, cancellationToken);
+        if (!confirm)
+            throw new IdentityOperationException("Email confirmation failed.");
+    }
+
+    // Password Reset
+    //-----------------------
+    public async Task ForgotPasswordResetTokenAsync(ForgotPasswordDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+
+        var token = await _identityRepository.GeneratePasswordResetTokenAsync(dto.UserId, cancellationToken);
+        if (token == null)
+            throw new IdentityOperationException("Failed to generate password reset token.");
+
+        // build reset link (to be sent via email)
+        var resetLink = $"http://localhost:5167/api/auth/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+
+        // send resetLink via email (implementation omitted)
+        await _emailService.SendEmailAsync(
+            to: user.Email,
+            subject: "Password Reset Request",
+            body: $"You can reset your password by clicking this link: {resetLink}",
+            cancellationToken: cancellationToken);
+
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+
+        var reset = await _identityRepository.ResetPasswordAsync(dto.UserId, dto.Token, dto.NewPassword, cancellationToken);
+        if (!reset)
+            throw new IdentityOperationException("Password reset failed.");
+    }
 }

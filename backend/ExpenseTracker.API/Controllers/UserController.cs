@@ -1,4 +1,4 @@
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Users.Commands.DeleteUser;
 using ExpenseTracker.Application.Features.Users.Commands.UpdateUser;
 using ExpenseTracker.Application.Features.Users.Queries.GetAllUsers;

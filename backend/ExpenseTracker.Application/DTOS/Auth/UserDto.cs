@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Application.DTOs.User;
+namespace ExpenseTracker.Application.DTOs.Auth;
 
 public class UserDto
 {

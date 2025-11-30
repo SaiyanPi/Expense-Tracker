@@ -1,6 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
-using ExpenseTracker.Application.DTOs.User;
+using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
