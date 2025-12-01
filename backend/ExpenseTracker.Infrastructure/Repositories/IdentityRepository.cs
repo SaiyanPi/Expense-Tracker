@@ -121,7 +121,6 @@ public class IdentityRepository : IIdentityRepository
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
- 
 
 
     // Refresh Token Generation
@@ -246,6 +245,45 @@ public class IdentityRepository : IIdentityRepository
         var decodedToken = Uri.UnescapeDataString(token);
 
         var result = await _userManager.ResetPasswordAsync(appUser, decodedToken, newPassword);
+        return result.Succeeded;
+    }
+
+
+    // check if email is taken
+    //------------------------------------
+    public async Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var appUser = await _userManager.FindByEmailAsync(email);
+        if (appUser == null) return false;
+
+        return true;
+    }
+
+
+    // generate change email token
+    //------------------------------------
+    public async Task<string?> GenerateChangeEmailTokenAsync(string userId, string newEmail, CancellationToken cancellationToken = default)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return null;
+
+        return await _userManager.GenerateChangeEmailTokenAsync(appUser, newEmail);
+    }
+
+
+    // change email
+    //------------------------------------
+    public async Task<bool> ChangeEmailAsync(string userId, string newEmail, string token, CancellationToken cancellationToken = default)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null) return false;
+
+        var decodedToken = Uri.UnescapeDataString(token);
+
+        var result = await _userManager.ChangeEmailAsync(appUser, newEmail, decodedToken);
+
+        await _userManager.UpdateAsync(appUser);
+
         return result.Succeeded;
     }
 }

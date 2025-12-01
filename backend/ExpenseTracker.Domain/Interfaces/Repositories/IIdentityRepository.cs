@@ -23,4 +23,9 @@ public interface IIdentityRepository
     // password reset
     Task<string?> GeneratePasswordResetTokenAsync(string userId, CancellationToken cancellationToken = default);
     Task<bool> ResetPasswordAsync(string userId, string token, string newPassword, CancellationToken cancellationToken = default);
+
+    // change email
+    Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default);
+    Task<string?> GenerateChangeEmailTokenAsync(string userId, string newEmail, CancellationToken cancellationToken = default);
+    Task<bool> ChangeEmailAsync(string userId, string newEmail, string token, CancellationToken cancellationToken = default);
 }

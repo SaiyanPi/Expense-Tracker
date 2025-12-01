@@ -52,6 +52,7 @@ public class UserRepository : IUserRepository
         if (appUser is null) return false;
 
         _mapper.Map(user, appUser);
+        appUser.PhoneNumberConfirmed = false; // Require reconfirmation if phone number changed
         var result = await _userManager.UpdateAsync(appUser);
         return result.Succeeded;
     }

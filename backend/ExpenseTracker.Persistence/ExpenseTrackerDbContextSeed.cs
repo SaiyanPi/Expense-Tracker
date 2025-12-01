@@ -30,7 +30,10 @@ public class ExpenseTrackerDbContextSeed
                 FullName = "Admin User",
                 UserName = "admin@expensetracker.com",
                 Email = "admin@expensetracker.com",
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                PhoneNumber = "+1234567890",
+                PhoneNumberConfirmed = true
+
             };
 
             var adminUserResult = await userManager.CreateAsync(adminUser, "Admin@123");
@@ -46,7 +49,9 @@ public class ExpenseTrackerDbContextSeed
                 FullName = "Regular User",
                 UserName = "user@expensetracker.com",
                 Email = "user@expensetracker.com",
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                PhoneNumber = "+0987654321",
+                PhoneNumberConfirmed = true
             };
 
             var result = await userManager.CreateAsync(regularUser, "User@123");

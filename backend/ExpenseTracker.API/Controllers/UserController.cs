@@ -19,6 +19,7 @@ public class UserController : ControllerBase
     {
         _mediator = mediator;
     }
+    // USER MANAGEMENT
 
     // GET: api/user
     [HttpGet]
@@ -47,28 +48,6 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-    // POST: api/user
-    // [HttpPost]
-    // public async Task<IActionResult> Create([FromBody] RegisterUserDto dto, CancellationToken cancellationToken = default)
-    // {
-    //     if (!ModelState.IsValid)
-    //         return BadRequest(ModelState);
-
-    //     var newUserId = await _userService.RegisterAsync(dto, cancellationToken);
-    //     return CreatedAtAction(nameof(GetById), new { id = newUserId }, null);
-    // }
-
-    // PUT: api/user/{id}
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var command = new UpdateUserCommand(id, dto);
-        await _mediator.Send(command, cancellationToken);
-        return NoContent();
-    }
 
     // DELETE: api/user/{id}
     [HttpDelete("{id:guid}")]
@@ -76,6 +55,5 @@ public class UserController : ControllerBase
     {
         var command = new DeleteUserCommand(id);
         await _mediator.Send(command, cancellationToken);
-        return NoContent();
-    }
+        return Ok(new {Success = true, Message = "User deleted successfully." });    }
 }

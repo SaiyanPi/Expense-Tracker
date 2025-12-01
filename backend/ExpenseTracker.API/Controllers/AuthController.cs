@@ -119,8 +119,8 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
 
         var command = new ForgotPasswordCommand(dto);
-        var token = await _mediator.Send(command, cancellationToken);
-        return Ok(new { Success = true, Message = "Password reset token sent to email if it exists", Token = token });
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Password reset token sent to email if it exists" });
     }
 
     // Reset Password

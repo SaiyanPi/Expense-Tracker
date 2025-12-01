@@ -263,4 +263,34 @@ public class IdentityService : IIdentityService
         if (!reset)
             throw new IdentityOperationException("Password reset failed.");
     }
+
+    public async Task RequestChangeEmailAsync(ChangeEmailRequestDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+
+        var token = await _identityRepository.GenerateChangeEmailTokenAsync(user.Id, dto.NewEmail, cancellationToken);
+        if (token == null)
+            throw new IdentityOperationException("Failed to generate change email token.");
+
+        var confirmationLink = $"http://localhost:5167/api/profile/confirm-change-email?userId={user.Id}&newEmail={dto.NewEmail}&token={Uri.EscapeDataString(token)}";
+
+        await _emailService.SendEmailAsync(
+            to: dto.NewEmail,
+            subject: "Update Email Request",
+            body: $"Hello {user.FullName}, please confirm your email change by clicking this link: {confirmationLink}",
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task ConfirmChangeEmailAsync(ConfirmChangeEmailDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+
+        var changed = await _identityRepository.ChangeEmailAsync(dto.UserId, dto.NewEmail, dto.Token, cancellationToken);
+        if (!changed)
+            throw new IdentityOperationException("Change email confirmation failed.");
+    }
 }

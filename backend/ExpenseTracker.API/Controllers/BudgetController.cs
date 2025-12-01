@@ -78,7 +78,7 @@ public class BudgetController : ControllerBase
         };
         
         await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        return Ok(new {Success = true, Message = "Budget updated successfully" }); 
     }
 
     [HttpDelete("{id:guid}")]
@@ -86,7 +86,7 @@ public class BudgetController : ControllerBase
     {
         var command = new DeleteBudgetCommand(id);
         await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        return Ok(new {Success = true, Message = "Budget deleted successfully" }); 
     }
 
     

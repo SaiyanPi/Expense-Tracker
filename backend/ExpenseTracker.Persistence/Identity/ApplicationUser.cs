@@ -18,7 +18,8 @@ public class ApplicationUser : IdentityUser
     {
         Id = this.Id, // though Id is not defined here in ApplicationUser it is inherited from IdentityUser
         FullName = this.FullName,
-        Email = this.Email ?? string.Empty
+        Email = this.Email ?? string.Empty,
+        PhoneNumber = this.PhoneNumber ?? string.Empty
     };
 }
 

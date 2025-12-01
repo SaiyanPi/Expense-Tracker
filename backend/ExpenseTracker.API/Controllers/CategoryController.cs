@@ -79,7 +79,7 @@ public class CategoryController : ControllerBase
             Id = id
         };
         await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        return Ok(new {Success = true, Message = "Expense Category updated successfully" }); 
     }
 
     // DELETE: api/Category/{id}
@@ -88,7 +88,7 @@ public class CategoryController : ControllerBase
     {
         var command = new DeleteCategoryCommand(id);
         await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        return Ok(new {Success = true, Message = "Expense Category deleted successfully" }); 
     }
 
 }

@@ -17,4 +17,9 @@ public interface IIdentityService
     // password reset
     Task ForgotPasswordResetTokenAsync(ForgotPasswordDto dto, CancellationToken cancellationToken = default);
     Task ResetPasswordAsync(ResetPasswordDto dto, CancellationToken cancellationToken = default);
+    
+    // change email
+    Task RequestChangeEmailAsync(ChangeEmailRequestDto dto, CancellationToken cancellationToken = default);
+    Task ConfirmChangeEmailAsync(ConfirmChangeEmailDto dto, CancellationToken cancellationToken = default);
+    
 }

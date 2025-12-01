@@ -84,7 +84,7 @@ public class ExpenseController : ControllerBase
         };
         
         await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        return Ok(new {Success = true, Message = "Expense updated successfully" }); 
     }
 
     // DELETE: api/expense/{id}
@@ -93,7 +93,7 @@ public class ExpenseController : ControllerBase
     {
         var command = new DeleteExpenseCommand(id);
         await _mediator.Send(command, cancellationToken);
-        return NoContent();
+        return Ok(new {Success = true, Message = "Expense deleted successfully" });    
     }
 
     // GET: api/expense/total
