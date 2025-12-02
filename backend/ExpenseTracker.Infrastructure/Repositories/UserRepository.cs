@@ -17,6 +17,8 @@ public class UserRepository : IUserRepository
         _mapper = mapper;
     }
 
+    // USER MANAGEMENT
+
     // Get All Users
     // --------------
     public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -41,20 +43,6 @@ public class UserRepository : IUserRepository
     {
         var appUser = await _userManager.FindByEmailAsync(email);
         return appUser is null ? null : _mapper.Map<User>(appUser);
-    }
-
-
-    // Update User
-    // -------------
-    public async Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default)
-    {
-        var appUser = await _userManager.FindByIdAsync(user.Id);
-        if (appUser is null) return false;
-
-        _mapper.Map(user, appUser);
-        appUser.PhoneNumberConfirmed = false; // Require reconfirmation if phone number changed
-        var result = await _userManager.UpdateAsync(appUser);
-        return result.Succeeded;
     }
 
 

@@ -57,7 +57,7 @@ public class IdentityService : IIdentityService
         // 3. send confirmation email (implementation omitted)
         await _emailService.SendEmailAsync(
             to: user.Email,
-            subject: "Confirm your email",
+            subject: "Email Confirmation",
             body: $"Please confirm your email by clicking this link: {confirmationLink}", 
             cancellationToken: cancellationToken);
             
@@ -76,11 +76,6 @@ public class IdentityService : IIdentityService
         var domainUser = await _userRepository.GetByEmailAsync(dto.Email);
         if (domainUser is null)
             throw new UnauthorizedAccessException("Invalid credentials.");
-        
-        // load the ApplicationUser instance for ASP.NET Identity operations
-        // var appUser = await _userManager.FindByEmailAsync(dto.Email);
-        // if (appUser is null)
-        //     throw new UnauthorizedAccessException("Invalid credentials. {errors}");
 
         var valid = await _identityRepository.CheckPasswordAsync(dto.Email, dto.Password, cancellationToken);
         if (!valid)
@@ -100,25 +95,32 @@ public class IdentityService : IIdentityService
         };
     }
 
+    public async Task UpdateAsync(string userId, UpdateUserDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if(user is null)
+            throw new NotFoundException(nameof(User), userId);
+        
+        _mapper.Map(dto, user);
+
+        var updated = await _identityRepository.UpdateAsync(user, cancellationToken);
+        if(!updated)
+            throw new IdentityOperationException("User update failed.");
+    }
+
     public async Task LogoutAsync(LogoutUserDto dto, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);
         if( user is null)
             throw new NotFoundException(nameof(User), dto.Email);
 
-        var userId = user.Id;
-
-        var storedRefresh = await _identityRepository.GetRefreshTokenAsync(userId, cancellationToken);
+        var storedRefresh = await _identityRepository.GetRefreshTokenAsync(user.Id, cancellationToken);
         if (storedRefresh == null)
-        {
             throw new IdentityOperationException("Logout failed. No refresh token found.");
-        }
         
-        var revoked = await _identityRepository.RevokeRefreshTokenAsync(userId, storedRefresh, cancellationToken);
+        var revoked = await _identityRepository.RevokeRefreshTokenAsync(user.Id, storedRefresh, cancellationToken);
         if (!revoked)
-        {
             throw new IdentityOperationException("No active session, User already logged out.");
-        }
     }
 
     public async Task<AuthResultDto> RefreshTokenAsync( RefreshTokenDto dto,
@@ -247,7 +249,7 @@ public class IdentityService : IIdentityService
         // send resetLink via email (implementation omitted)
         await _emailService.SendEmailAsync(
             to: user.Email,
-            subject: "Password Reset Request",
+            subject: "Password Reset",
             body: $"You can reset your password by clicking this link: {resetLink}",
             cancellationToken: cancellationToken);
 
@@ -264,11 +266,17 @@ public class IdentityService : IIdentityService
             throw new IdentityOperationException("Password reset failed.");
     }
 
+    // Change email
+    // ---------------------
     public async Task RequestChangeEmailAsync(ChangeEmailRequestDto dto, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
         if (user == null)
             throw new NotFoundException(nameof(User), dto.UserId);
+        
+        var emailTaken = await _identityRepository.IsEmailTakenAsync(dto.NewEmail);
+        if(emailTaken is true)
+            throw new ConflictException($"User with email {dto.NewEmail} already exists.");
 
         var token = await _identityRepository.GenerateChangeEmailTokenAsync(user.Id, dto.NewEmail, cancellationToken);
         if (token == null)
@@ -278,7 +286,7 @@ public class IdentityService : IIdentityService
 
         await _emailService.SendEmailAsync(
             to: dto.NewEmail,
-            subject: "Update Email Request",
+            subject: "Change Email",
             body: $"Hello {user.FullName}, please confirm your email change by clicking this link: {confirmationLink}",
             cancellationToken: cancellationToken);
     }

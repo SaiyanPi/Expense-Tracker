@@ -1,6 +1,5 @@
 using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Users.Commands.DeleteUser;
-using ExpenseTracker.Application.Features.Users.Commands.UpdateUser;
 using ExpenseTracker.Application.Features.Users.Queries.GetAllUsers;
 using ExpenseTracker.Application.Features.Users.Queries.GetByEmail;
 using ExpenseTracker.Application.Features.Users.Queries.GetById;

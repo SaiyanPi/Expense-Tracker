@@ -28,8 +28,8 @@ public class ExpenseTrackerDbContextSeed
             var adminUser = new ApplicationUser
             {
                 FullName = "Admin User",
-                UserName = "admin@expensetracker.com",
-                Email = "admin@expensetracker.com",
+                UserName = "admin1",
+                Email = "admin1@expensetracker.com",
                 EmailConfirmed = true,
                 PhoneNumber = "+1234567890",
                 PhoneNumberConfirmed = true
@@ -47,8 +47,8 @@ public class ExpenseTrackerDbContextSeed
             var regularUser = new ApplicationUser
             {
                 FullName = "Regular User",
-                UserName = "user@expensetracker.com",
-                Email = "user@expensetracker.com",
+                UserName = "user1",
+                Email = "user1@expensetracker.com",
                 EmailConfirmed = true,
                 PhoneNumber = "+0987654321",
                 PhoneNumberConfirmed = true

@@ -1,7 +1,7 @@
 using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Identity.Commands.ConfirmChangeEmail;
 using ExpenseTracker.Application.Features.Identity.Commands.RequestChangeEmail;
-using ExpenseTracker.Application.Features.Users.Commands.UpdateUser;
+using ExpenseTracker.Application.Features.Identity.Commands.Update;
 using ExpenseTracker.Application.Features.Users.Queries.GetById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +36,13 @@ public class ProfileController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var command = new UpdateUserCommand(id, dto);
+        var command = new UpdateUserCommand(
+            dto.FullName,
+            dto.PhoneNumber
+        )
+        {
+            UserId = id
+        };
         await _mediator.Send(command, cancellationToken);
         return Ok(new {Success = true, Message = "Updated successfully" });
     }

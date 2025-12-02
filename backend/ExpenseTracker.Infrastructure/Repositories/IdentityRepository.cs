@@ -34,7 +34,15 @@ public class IdentityRepository : IIdentityRepository
     public async Task<(bool Succeeded, IEnumerable<string>? Errors, User? User)> RegisterAsync
         (User user, string password, string role, CancellationToken cancellationToken = default)
     {
-        var appUser = _mapper.Map<ApplicationUser>(user);
+        // using automapper(domainUser -> appUser) for creating identity may cause bugs and breaks identity rule
+        // var appUser = _mapper.Map<ApplicationUser>(user);
+        var appUser = new ApplicationUser
+        {
+            FullName = user.FullName,
+            Email = user.Email,
+            UserName = user.Email.Split('@')[0], // Identity requires this or else registration fails.
+            PhoneNumber = user.PhoneNumber
+        };
 
         var result = await _userManager.CreateAsync(appUser, password);
         if (!result.Succeeded)
@@ -43,15 +51,44 @@ public class IdentityRepository : IIdentityRepository
         await _userManager.AddToRoleAsync(appUser, role ?? "User");
       
 
-        // Convert ApplicationUser → Domain User
-        var domainUser = new User
-        {
-            Id = appUser.Id,
-            FullName = appUser.FullName,
-            Email = appUser.Email!,
-        };
+        // // Convert ApplicationUser → Domain User
+        // var domainUser = new User
+        // {
+        //     Id = appUser.Id,
+        //     FullName = appUser.FullName,
+        //     Email = appUser.Email!,
+        // };
+        // // return (true, null, domainUser);
 
-        return (true, null, domainUser);
+        return (true, null, _mapper.Map<User>(appUser));
+    }
+
+    // User Update
+    //-----------------------
+    public async Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default)
+    {
+        var appUser = await _userManager.FindByIdAsync(user.Id);
+        if (appUser is null) return false;
+
+        // if PhoneNumber is also updated then PhoneNumberConfirmed will be set to false
+        if(appUser.PhoneNumber != user.PhoneNumber)
+        {
+            appUser.PhoneNumberConfirmed = false;
+
+            appUser.FullName = user.FullName;
+            appUser.PhoneNumber = user.PhoneNumber;
+
+            await _userManager.UpdateAsync(appUser);
+            return true; 
+        }
+        appUser.PhoneNumberConfirmed = true;
+
+        // using automapper(domainUser -> appUser) for updating identity may cause bugs and breaks identity rule
+        appUser.FullName = user.FullName;
+        appUser.PhoneNumber = user.PhoneNumber;
+
+        await _userManager.UpdateAsync(appUser);
+        return true; 
     }
 
 
@@ -281,7 +318,7 @@ public class IdentityRepository : IIdentityRepository
         var decodedToken = Uri.UnescapeDataString(token);
 
         var result = await _userManager.ChangeEmailAsync(appUser, newEmail, decodedToken);
-
+        appUser.UserName = newEmail; //because we are using email as username, we need to update username as well else might get a problem when registering
         await _userManager.UpdateAsync(appUser);
 
         return result.Succeeded;
