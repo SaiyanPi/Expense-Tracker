@@ -1,6 +1,7 @@
 using ExpenseTracker.Application.Common.Authorization;
 using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Identity.Commands.ChangePassword;
+using ExpenseTracker.Application.Features.Identity.Commands.ConfirmPhone;
 using ExpenseTracker.Application.Features.Identity.Commands.EmailConfirmation;
 using ExpenseTracker.Application.Features.Identity.Commands.ForgotPassword;
 using ExpenseTracker.Application.Features.Identity.Commands.Login;
@@ -8,6 +9,7 @@ using ExpenseTracker.Application.Features.Identity.Commands.Logout;
 using ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;
 using ExpenseTracker.Application.Features.Identity.Commands.Register;
 using ExpenseTracker.Application.Features.Identity.Commands.ResetPassword;
+using ExpenseTracker.Application.Features.Identity.Commands.SendPhoneConfirmationCode;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -134,6 +136,30 @@ public class AuthController : ControllerBase
         var command = new ResetPasswordCommand(dto);
         await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Password has been reset successfully" });
+    }
+
+    // POST: api/auth/send-phone-otp
+    [HttpPost("send-phone-otp")]
+    public async Task<IActionResult> SendPhoneOtp([FromBody] PhoneConfirmationDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var command = new SendPhoneConfirmationCodeCommand(dto);
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "OTP sent (check your verified phone)." });
+    }
+
+    // POST: api/auth/send-phone-otp
+    [HttpPost("confirm-phone-otp")]
+    public async Task<IActionResult> ConfirmPhoneOtp([FromBody] VerifyPhoneDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var command = new ConfirmPhoneCommand(dto);
+        var success =await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Phone confirmed." });
     }
 }
 

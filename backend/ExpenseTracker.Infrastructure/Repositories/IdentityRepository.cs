@@ -323,4 +323,28 @@ public class IdentityRepository : IIdentityRepository
 
         return result.Succeeded;
     }
+
+
+    // phone confirmation
+    public async Task<string> GeneratePhoneConfirmationTokenAsync(string userId, string phoneNumber, CancellationToken cancellationToken = default)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null)
+            throw new KeyNotFoundException("User not found");
+
+        return await _userManager.GenerateChangePhoneNumberTokenAsync(appUser, phoneNumber);
+    }
+
+    public async Task<bool> ConfirmPhoneNumberAsync(string userId, string phoneNumber, string token, CancellationToken cancellationToken = default)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser == null)
+            throw new KeyNotFoundException("User not found");
+
+        var result = await _userManager.ChangePhoneNumberAsync(appUser, phoneNumber, token);
+        
+        return result.Succeeded;
+    }
+
+   
 }

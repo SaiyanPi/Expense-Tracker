@@ -30,4 +30,9 @@ public interface IIdentityRepository
     Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default);
     Task<string?> GenerateChangeEmailTokenAsync(string userId, string newEmail, CancellationToken cancellationToken = default);
     Task<bool> ChangeEmailAsync(string userId, string newEmail, string token, CancellationToken cancellationToken = default);
+
+    // phone confirmation
+    Task<string> GeneratePhoneConfirmationTokenAsync(string userId, string phoneNumber, CancellationToken cancellationToken = default);
+    Task<bool> ConfirmPhoneNumberAsync(string userId, string phoneNumber, string token, CancellationToken cancellationToken = default);
+
 }

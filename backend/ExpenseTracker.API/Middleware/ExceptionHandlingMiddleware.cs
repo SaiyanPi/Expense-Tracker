@@ -71,6 +71,7 @@ public class ExceptionHandlingMiddleware
             DomainException => HttpStatusCode.BadRequest,
             InvalidCredentialsException => HttpStatusCode.Unauthorized,  
             Application.Common.Exceptions.InvalidOperationException => HttpStatusCode.BadRequest,
+            EmailSendingException => HttpStatusCode.ServiceUnavailable,
             _ => HttpStatusCode.InternalServerError
         };
 

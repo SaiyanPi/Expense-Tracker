@@ -23,4 +23,7 @@ public interface IIdentityService
     Task RequestChangeEmailAsync(ChangeEmailRequestDto dto, CancellationToken cancellationToken = default);
     Task ConfirmChangeEmailAsync(ConfirmChangeEmailDto dto, CancellationToken cancellationToken = default);
     
+    // phone confirmation
+    Task GeneratePhoneConfirmationTokenAsync(PhoneConfirmationDto dto, CancellationToken cancellationToken = default);
+    Task ConfirmPhoneNumberAsync(VerifyPhoneDto dto, CancellationToken cancellationToken = default);
 }

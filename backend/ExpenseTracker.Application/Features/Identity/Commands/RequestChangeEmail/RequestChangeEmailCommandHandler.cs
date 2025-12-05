@@ -22,10 +22,6 @@ public class RequestChangeEmailCommandHandler : IRequestHandler<RequestChangeEma
 
     public async Task<Unit> Handle(RequestChangeEmailCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(request.ChangeEmailRequestDto.UserId);
-        if (user == null)
-            throw new NotFoundException(nameof(User), request.ChangeEmailRequestDto.UserId);
-
         await _identityService.RequestChangeEmailAsync(request.ChangeEmailRequestDto);
         return Unit.Value;
        

@@ -17,17 +17,21 @@ public class IdentityService : IIdentityService
     private readonly IIdentityRepository _identityRepository;
     private readonly IUserRepository _userRepository;
     private readonly IEmailService _emailService;
+    private readonly ISmsSenderService _twilioSmsSenderService;
+
     private readonly IMapper _mapper;
 
     public IdentityService(
         IIdentityRepository identityRepository,
         IUserRepository userRepository,
         IEmailService emailService,
+        ISmsSenderService twilioSmsSenderService,
         IMapper mapper)
     {
         _identityRepository = identityRepository;
         _userRepository = userRepository;
         _emailService = emailService;
+        _twilioSmsSenderService = twilioSmsSenderService;
         _mapper = mapper;
     }
 
@@ -39,28 +43,37 @@ public class IdentityService : IIdentityService
             
         var domainUser = _mapper.Map<User>(dto);
 
+        // create user in identity
         var (Succeeded, UserId, Errors) = await _identityRepository.RegisterAsync(domainUser, dto.Password, role, cancellationToken);
         if (!Succeeded)
             throw new IdentityOperationException("User registration failed.");
 
         var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken)
             ?? throw new Exception("User not found after registration.");
+        try
+        {
+            // 1. automatically generate email confirmation token
+            var emailConfirmationToken = await _identityRepository.GenerateEmailConfirmationTokenAsync(user.Id, cancellationToken);
+            if (emailConfirmationToken == null)
+                throw new IdentityOperationException("Failed to generate email confirmation token.");
 
-        // 1. automatically generate email confirmation token
-        var emailConfirmationToken = await _identityRepository.GenerateEmailConfirmationTokenAsync(user.Id, cancellationToken);
-        if (emailConfirmationToken == null)
-            throw new IdentityOperationException("Failed to generate email confirmation token.");
+            // 2. build confirmation link (to be sent via email)
+            var confirmationLink = $"http://localhost:5167/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(emailConfirmationToken)}";
 
-        // 2. build confirmation link (to be sent via email)
-        var confirmationLink = $"http://localhost:5167/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(emailConfirmationToken)}";
-        
-        // 3. send confirmation email (implementation omitted)
-        await _emailService.SendEmailAsync(
-            to: user.Email,
-            subject: "Email Confirmation",
-            body: $"Please confirm your email by clicking this link: {confirmationLink}", 
-            cancellationToken: cancellationToken);
-            
+            // 3. send confirmation email
+            await _emailService.SendEmailAsync(
+                to: user.Email,
+                subject: "Email Confirmation",
+                body: $"Please confirm your email by clicking this link: {confirmationLink}", 
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // rollback
+            await _userRepository.DeleteAsync(user, cancellationToken);
+            throw new EmailSendingException("Failed to send email confirmation link. Did you forget to run the local email server?", ex);
+        }
+      
         var accessToken = await _identityRepository.GenerateJwtTokenAsync(user);
         var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(user);
         return new AuthResultDto
@@ -301,4 +314,28 @@ public class IdentityService : IIdentityService
         if (!changed)
             throw new IdentityOperationException("Change email confirmation failed.");
     }
+
+    // phone confirmation
+    // --------------------
+    public async Task GeneratePhoneConfirmationTokenAsync(PhoneConfirmationDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+
+        var token = await _identityRepository.GeneratePhoneConfirmationTokenAsync(dto.UserId, dto.PhoneNumber);
+        await _twilioSmsSenderService.SendOtpAsync(dto.PhoneNumber, $"Your confirmation code is: {token}", cancellationToken);
+    }
+
+    public async Task ConfirmPhoneNumberAsync(VerifyPhoneDto dto, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), dto.UserId);
+
+        var success = await _identityRepository.ConfirmPhoneNumberAsync(dto.UserId, dto.PhoneNumber, dto.Token);
+        if (!success)
+            throw new Application.Common.Exceptions.InvalidOperationException("Invalid phone confirmation code.");
+    }
+
 }

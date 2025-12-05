@@ -3,6 +3,7 @@ using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Infrastructure.Repositories;
 using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.Identity;
+using ExpenseTracker.Infrastructure.Services.SMS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -35,6 +36,10 @@ public static class InfrastructureServiceRegistration
         // registering email service
         services.AddScoped<IEmailService, SmtpEmailService>();
         
+        // register sms sender service
+        services.AddScoped<ISmsSenderService, TwilioSmsSenderService>();
+        services.AddHttpClient<ISmsSenderService, AndroidSmsGatewayService>();
+
         return services;
     }
 }

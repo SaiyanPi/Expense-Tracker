@@ -20,10 +20,6 @@ public class ConfirmChangeEmailCommandHandler : IRequestHandler<ConfirmChangeEma
 
     public async Task<Unit> Handle(ConfirmChangeEmailCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(request.ConfirmChangeEmailDto.UserId);
-        if(user == null)
-            throw new NotFoundException(nameof(User), request.ConfirmChangeEmailDto.UserId);
-        
         await _identityService.ConfirmChangeEmailAsync(request.ConfirmChangeEmailDto);
         return Unit.Value;
     }
