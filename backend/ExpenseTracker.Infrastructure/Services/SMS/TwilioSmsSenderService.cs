@@ -46,7 +46,7 @@ public class TwilioSmsSenderService : ISmsSenderService
         );
 
         // Optional: log message SID for debugging
-        Console.WriteLine($"Twilio SMS sent. SID: {messageResult.Sid}");
+        // Console.WriteLine($"Twilio SMS sent. SID: {messageResult.Sid}");
     }
 
     private string FormatToE164(string phone)

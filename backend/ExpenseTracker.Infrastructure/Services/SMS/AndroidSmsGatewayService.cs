@@ -25,11 +25,17 @@ public class AndroidSmsGatewayService : ISmsSenderService
         }
     }
 
-    public async Task SendOtpAsync(string phoneNumber, string message, CancellationToken cancellationToken = default)
+    public async Task SendOtpAsync(string toPhoneNumber, string message, CancellationToken cancellationToken = default)
     {
+        if(string.IsNullOrWhiteSpace(toPhoneNumber))
+            throw new ArgumentException("Destinstion phone number cannot be empty.");
+
+        // Format to E.164 if missing '+' and country code
+        string formattedToPhoneNumber = FormatToE164(toPhoneNumber);
+
         var request = new {
             textMessage = new { text = $"Your OTP is: {message}" },
-            phoneNumbers = new [] { phoneNumber }
+            phoneNumbers = new [] { formattedToPhoneNumber }
         };
         var reqMsg = new HttpRequestMessage(HttpMethod.Post, _gatewayUrl)
         {
@@ -39,5 +45,14 @@ public class AndroidSmsGatewayService : ISmsSenderService
             reqMsg.Headers.Authorization = AuthenticationHeaderValue.Parse(_authHeader);
 
         await _httpClient.SendAsync(reqMsg);
+    }
+
+    private string FormatToE164(string toPhoneNumber)
+    {
+        // if already starts with '+', assume E.164
+        if (toPhoneNumber.StartsWith("+")) return toPhoneNumber;
+
+        // we can customize default country code (Nepal: +977)
+        return $"+977{toPhoneNumber}";
     }
 }
