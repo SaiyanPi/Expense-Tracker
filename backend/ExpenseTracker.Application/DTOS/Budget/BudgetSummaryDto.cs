@@ -1,9 +1,8 @@
-using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Models;
 
-namespace ExpenseTrackerDomain.Models;
+namespace ExpenseTracker.Application.DTOs.Budget;
 
-public class BudgetSummary
+public class BudgetSummaryDto
 {
     public decimal TotalBudget { get; set; }
     public decimal TotalExpenses { get; set; }

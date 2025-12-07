@@ -1,4 +1,5 @@
 using ExpenseTracker.Domain.Entities;
+using ExpenseTrackerDomain.Models;
 
 namespace ExpenseTracker.Domain.Interfaces.Repositories;
 
@@ -10,4 +11,7 @@ public interface IBudgetRepository
     Task AddAsync(Budget budget, CancellationToken cancellationToken = default);
     Task UpdateAsync(Budget budget, CancellationToken cancellationToken = default);
     Task DeleteAsync(Budget budget, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<BudgetSummary>> GetBudgetSummaryAsync(string userId, CancellationToken cancellationToken = default);
+
 }

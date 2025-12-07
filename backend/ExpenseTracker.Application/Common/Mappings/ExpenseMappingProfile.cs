@@ -2,6 +2,8 @@ using AutoMapper;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
+using ExpenseTracker.Domain.Models;
+using ExpenseTracker.Application.DTOs.Category;
 
 namespace ExpenseTracker.Application.Common.Mappings;
 
@@ -34,6 +36,8 @@ public class ExpenseMappingProfile : Profile
         // Entity -> Read DTO
         CreateMap<Expense, ExpenseDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+
+        CreateMap<CategorySummary, CategorySummaryDto>();
     }
     
 }

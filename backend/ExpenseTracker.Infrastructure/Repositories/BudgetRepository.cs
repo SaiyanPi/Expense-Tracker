@@ -1,6 +1,9 @@
+using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
+using ExpenseTracker.Domain.Models;
 using ExpenseTracker.Persistence;
+using ExpenseTrackerDomain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Infrastructure.Repositories;
@@ -16,7 +19,8 @@ public class BudgetRepository : IBudgetRepository
 
     public async Task<IEnumerable<Budget>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Budgets.ToListAsync(cancellationToken);
+        return await _dbContext.Budgets
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<Budget>> GetAllBudgetsByEmailAsync(string userId, CancellationToken cancellationToken = default)
@@ -50,4 +54,55 @@ public class BudgetRepository : IBudgetRepository
         _dbContext.Budgets.Remove(budget);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<BudgetSummary>> GetBudgetSummaryAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        // get all budgets for the user
+        var budgets = await _dbContext.Budgets
+            .Where(b => b.UserId == userId)
+            .ToListAsync(cancellationToken);
+        
+        if(!budgets.Any())
+            return new List<BudgetSummary>();
+        
+        // get date range based on all budgets
+        var minDate = budgets.Min(b => b.StartDate);
+        var maxDate = budgets.Max(b => b.EndDate);
+
+
+        // get all expenses relevant to these periods
+        var expenses = await _dbContext.Expenses
+            .Where(e => e.UserId == userId && e.Date >= minDate && e.Date <= maxDate)
+            .ToListAsync(cancellationToken);
+        
+        
+        var summary = new BudgetSummary
+        {
+            TotalBudget = budgets.Sum(b => b.Amount),
+            TotalExpenses = expenses.Sum(e => e.Amount)
+        };
+
+        // category-wise summary
+        summary.Categories = budgets
+            .GroupBy(b => b.CategoryId)
+            .Select(group =>
+            {
+                var categoryId = group.Key;
+                var categoryBudget = group.Sum(b => b.Amount);
+
+                var categorySpent = expenses.Where(e => e.CategoryId == categoryId).Sum(e => e.Amount);
+
+                return new CategorySummary
+                {
+                    CategoryId = categoryId ?? Guid.Empty,
+                    BudgetAmount = categoryBudget,
+                    ExpensesAmount = categorySpent
+                };
+            })
+            .ToList();
+        
+        return new List<BudgetSummary> { summary };
+
+    }
+
 }

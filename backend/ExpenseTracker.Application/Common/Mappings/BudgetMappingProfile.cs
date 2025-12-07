@@ -2,6 +2,7 @@ using AutoMapper;
 using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Application.Features.Budgets.Commands.UpdateBudget;
 using ExpenseTracker.Domain.Entities;
+using ExpenseTrackerDomain.Models;
 
 namespace ExpenseTracker.Application.Common.Mappings;
 
@@ -29,5 +30,10 @@ public class BudgetMappingProfile : Profile
         
         // Entity -> Read DTO
         CreateMap<Budget, BudgetDto>();
+
+        CreateMap<BudgetSummary, BudgetSummaryDto>()
+            .ForMember(dest => dest.Remaining, opt => opt.MapFrom(src => src.Remaining))
+            .ForMember(dest => dest.UsedPercentage, opt => opt.MapFrom(src => src. UsedPercentage))
+            .ForMember(dest => dest.IsOverBudget, opt => opt.MapFrom(src => src. IsOverBudget));
     }
 }
