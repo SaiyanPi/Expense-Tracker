@@ -1,11 +1,3 @@
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.csproj.AssemblyReference.cache
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\rpswa.dswa.cache.json
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.AssemblyInfoInputs.cache
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.AssemblyInfo.cs
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.csproj.CoreCompileInputs.cache
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\appsettings.json
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ExpenseTracker.API.staticwebassets.endpoints.json
@@ -64,6 +56,7 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Mono.TextTemplating.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -87,6 +80,7 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.Text.Encodings.Web.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.Text.Json.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.Windows.Extensions.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Twilio.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\cs\Microsoft.CodeAnalysis.resources.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\de\Microsoft.CodeAnalysis.resources.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\es\Microsoft.CodeAnalysis.resources.dll
@@ -173,6 +167,14 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ExpenseTracker.Infrastructure.pdb
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ExpenseTracker.Persistence.pdb
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ExpenseTracker.Domain.pdb
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.csproj.AssemblyReference.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.AssemblyInfoInputs.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.AssemblyInfo.cs
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.csproj.CoreCompileInputs.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\rjimswa.dswa.cache.json
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
@@ -187,5 +189,3 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.pdb
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.genruntimeconfig.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ref\ExpenseTracker.API.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Newtonsoft.Json.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Twilio.dll

@@ -37,6 +37,7 @@ public class ExpenseMappingProfile : Profile
         CreateMap<Expense, ExpenseDto>()
             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
+        // category summary
         CreateMap<CategorySummary, CategorySummaryDto>();
     }
     

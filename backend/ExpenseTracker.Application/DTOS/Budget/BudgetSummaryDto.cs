@@ -9,5 +9,5 @@ public class BudgetSummaryDto
     public decimal Remaining => TotalBudget - TotalExpenses;
     public double UsedPercentage => (double)(TotalExpenses / TotalBudget) * 100;
     public bool IsOverBudget => TotalExpenses > TotalBudget;
-    public IReadOnlyList<CategorySummary> Categories { get; set; } = new List<CategorySummary>();
+    public IReadOnlyList<BudgetCategorySummaryDto> Categories { get; set; } = new List<BudgetCategorySummaryDto>();
 }

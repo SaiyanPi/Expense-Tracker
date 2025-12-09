@@ -22,6 +22,6 @@ public class GetCategorySummaryQueryHandler : IRequestHandler<GetCategorySummary
     {
         var categorySummary = await _expenseRepository.GetCategorySummaryAsync(cancellationToken);
         
-        return new List<CategorySummaryDto> { _mapper.Map<CategorySummaryDto>(categorySummary) };
+        return _mapper.Map<List<CategorySummaryDto>>(categorySummary);
     }
 }   
