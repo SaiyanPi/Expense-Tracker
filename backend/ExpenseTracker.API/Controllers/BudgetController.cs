@@ -7,7 +7,7 @@ using ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgets;
 using ExpenseTracker.Application.Features.Budgets.Commands.UpdateBudget;
 using ExpenseTracker.Application.Features.Budgets.Commands.DeleteBudget;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgetsByEmail;
-using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetSummary;
+using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetSummaryByEmail;
 
 namespace ExpenseTracker.API.Controllers;   
 
@@ -91,9 +91,9 @@ public class BudgetController : ControllerBase
     }
 
     [HttpGet("budget-summary/email")]
-    public async Task<IActionResult> GetBudgetSummary(string email, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetBudgetSummaryByEmail(string email, CancellationToken cancellationToken = default)
     {
-        var query = new GetBudgetSummaryQuery(email);
+        var query = new GetBudgetSummaryByEmailQuery(email);
         var summary = await _mediator.Send(query, cancellationToken);
         return Ok(summary);
     }

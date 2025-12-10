@@ -121,6 +121,17 @@ public class IdentityService : IIdentityService
             throw new IdentityOperationException("User update failed.");
     }
 
+    public async Task DeleteAsync( string userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if(user is null)
+            throw new NotFoundException(nameof(User), userId);
+        
+        var delete = await _identityRepository.DeleteAsync(user, cancellationToken);
+        if(!delete)
+            throw new IdentityOperationException("Profile deletion failed.");
+    }
+
     public async Task LogoutAsync(LogoutUserDto dto, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken);

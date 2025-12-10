@@ -26,6 +26,10 @@ public class UpdateExpenseDtoValidator : AbstractValidator<UpdateExpenseDto>
         RuleFor(x => x.CategoryId)
             .Must(categoryId => categoryId == null || categoryId != Guid.Empty)
             .WithMessage("CategoryId must be a valid non-empty GUID when provided.");
+        
+        RuleFor(x => x.BudgetId)
+            .Must(budgetId => budgetId == null || budgetId != Guid.Empty)
+            .WithMessage("BudgetId must be a valid non-empty GUID when provided.");
 
     }
 }

@@ -27,7 +27,8 @@ public interface IExpenseRepository
                                                         Guid? categoryId,
                                                         string? userId,
                                                         CancellationToken cancellationToken = default
-                                                    ); 
+                                                    );
+    Task<IReadOnlyList<ExpenseSummaryForBudget>> GetAllExpensesForABudgetByEmailAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default);
 }
 
 

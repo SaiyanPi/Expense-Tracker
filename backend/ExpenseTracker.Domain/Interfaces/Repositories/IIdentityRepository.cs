@@ -8,6 +8,7 @@ public interface IIdentityRepository
         string role, CancellationToken cancellationToken = default);
     
     Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAsync(User user, CancellationToken cancellationToken = default);
     Task<bool> CheckPasswordAsync(string email, string password, CancellationToken cancellationToken = default);
 
     Task<string> GenerateJwtTokenAsync(User user, CancellationToken cancellationToken = default);

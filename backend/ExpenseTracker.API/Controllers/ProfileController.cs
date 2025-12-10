@@ -1,5 +1,6 @@
 using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Identity.Commands.ConfirmChangeEmail;
+using ExpenseTracker.Application.Features.Identity.Commands.DeleteMyAccount;
 using ExpenseTracker.Application.Features.Identity.Commands.RequestChangeEmail;
 using ExpenseTracker.Application.Features.Identity.Commands.Update;
 using ExpenseTracker.Application.Features.Users.Queries.GetById;
@@ -21,7 +22,7 @@ public class ProfileController : ControllerBase
 
     // GET: api/profile/{id}
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Profile(string id, CancellationToken cancellationToken = default)
     {
         var query = new GetByIdQuery(id);
         var user = await _mediator.Send(query, cancellationToken);
@@ -31,7 +32,7 @@ public class ProfileController : ControllerBase
 
     // PUT: api/profile/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateProfile(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -45,6 +46,16 @@ public class ProfileController : ControllerBase
         };
         await _mediator.Send(command, cancellationToken);
         return Ok(new {Success = true, Message = "Updated successfully" });
+    }
+
+
+    // DELETE: api/profile/{id}
+    [HttpPost("{id:guid}")]
+    public async Task<IActionResult> DeleteProfile(string id, CancellationToken cancellationToken)
+    {
+        var command = new DeleteProfileCommand(id);
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new {Success = true, Message = "Your profile has been deleted successfully." });    
     }
 
 

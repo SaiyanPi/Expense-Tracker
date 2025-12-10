@@ -7,5 +7,6 @@ public class UpdateExpenseDto
     public decimal Amount { get; set; }
     public DateTime Date { get; set; } = DateTime.UtcNow;
     public Guid? CategoryId { get; set; }    // foreign key
+    public Guid? BudgetId { get; set; }    // foreign key
    
 }

@@ -39,6 +39,9 @@ public class ExpenseMappingProfile : Profile
 
         // category summary
         CreateMap<CategorySummary, CategorySummaryDto>();
+
+        // mapping for ExpenseSummaryForBudget to ExpenseDto
+        CreateMap<ExpenseSummaryForBudget, ExpenseDto>();
     }
     
 }

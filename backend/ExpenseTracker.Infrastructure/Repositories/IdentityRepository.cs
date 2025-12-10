@@ -87,8 +87,19 @@ public class IdentityRepository : IIdentityRepository
         appUser.FullName = user.FullName;
         appUser.PhoneNumber = user.PhoneNumber;
 
-        await _userManager.UpdateAsync(appUser);
-        return true; 
+        var result = await _userManager.UpdateAsync(appUser);
+        return result.Succeeded;
+    }
+
+    // Delete profile
+    //-----------------
+    public async Task<bool> DeleteAsync(User user, CancellationToken cancellationToken = default)
+    {
+        var appUser = await _userManager.FindByIdAsync(user.Id);
+        if(appUser is null) return false;
+
+        var result = await _userManager.DeleteAsync(appUser);
+        return result.Succeeded;
     }
 
 

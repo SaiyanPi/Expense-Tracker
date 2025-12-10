@@ -1,19 +1,20 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.DTOs.Budget;
+using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetSummaryByEmail;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetSummary;
 
-public class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSummaryQuery, List<BudgetSummaryDto>>
+public class GetBudgetSummaryByEmailQueryHandler : IRequestHandler<GetBudgetSummaryByEmailQuery, List<BudgetSummaryDto>>
 {
     private readonly IBudgetRepository _budgetRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
 
-    public GetBudgetSummaryQueryHandler(IBudgetRepository budgetRepository,
+    public GetBudgetSummaryByEmailQueryHandler(IBudgetRepository budgetRepository,
         IUserRepository userRepository,
         IMapper mapper)
     {
@@ -22,7 +23,7 @@ public class GetBudgetSummaryQueryHandler : IRequestHandler<GetBudgetSummaryQuer
         _mapper = mapper;
     }
 
-    public async Task<List<BudgetSummaryDto>> Handle(GetBudgetSummaryQuery request, CancellationToken cancellationToken)
+    public async Task<List<BudgetSummaryDto>> Handle(GetBudgetSummaryByEmailQuery request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null)

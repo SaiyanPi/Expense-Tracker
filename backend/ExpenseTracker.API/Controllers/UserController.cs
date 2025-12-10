@@ -54,5 +54,6 @@ public class UserController : ControllerBase
     {
         var command = new DeleteUserCommand(id);
         await _mediator.Send(command, cancellationToken);
-        return Ok(new {Success = true, Message = "User deleted successfully." });    }
+        return Ok(new {Success = true, Message = "User deleted successfully." });    
+    }
 }

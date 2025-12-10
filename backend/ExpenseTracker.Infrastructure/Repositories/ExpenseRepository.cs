@@ -1,3 +1,4 @@
+using AutoMapper;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Domain.Models;
@@ -149,6 +150,27 @@ public class ExpenseRepository : IExpenseRepository
             TotalAmount = expenses.Sum(e => e.Amount),
             Expenses = expenses
         };
+    }
+
+    public async Task<IReadOnlyList<ExpenseSummaryForBudget>> GetAllExpensesForABudgetByEmailAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default)
+    {
+        var expensesOfBudget = await _dbContext.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.BudgetId == budgetId && e.UserId == userId)
+            .Select(e => new ExpenseSummaryForBudget
+            {
+                Title = e.Title,
+                Amount = e.Amount,
+                Date = e.Date,
+                CategoryId = e.Category.Id,
+                CategoryName = e.Category.Name,
+                BudgetId = e.BudgetId,
+                UserId = e.UserId
+            })
+        .ToListAsync(cancellationToken);
+        
+        return expensesOfBudget;
+        
     }
 
 }
