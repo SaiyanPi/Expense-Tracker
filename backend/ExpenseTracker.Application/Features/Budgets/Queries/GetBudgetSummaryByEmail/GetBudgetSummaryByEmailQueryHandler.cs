@@ -2,6 +2,7 @@ using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetSummaryByEmail;
+using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 
@@ -27,10 +28,10 @@ public class GetBudgetSummaryByEmailQueryHandler : IRequestHandler<GetBudgetSumm
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null)
-            throw new NotFoundException(nameof(BudgetSummaryDto), request.Email);
+            throw new NotFoundException(nameof(User), request.Email);
 
-        var budgetSummary = await _budgetRepository.GetBudgetSummaryAsync(user.Id, cancellationToken);
+        var budgetSummaryByEmail = await _budgetRepository.GetBudgetSummaryByEmailAsync(user.Id, cancellationToken);
 
-        return _mapper.Map<List<BudgetSummaryDto>>(budgetSummary) ;
+        return _mapper.Map<List<BudgetSummaryDto>>(budgetSummaryByEmail) ;
     }
 }

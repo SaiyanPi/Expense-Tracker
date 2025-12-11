@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.DTOs.Budget;
+using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Application.Features.Budgets.Commands.UpdateBudget;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Models;
@@ -40,5 +41,10 @@ public class BudgetMappingProfile : Profile
         
         CreateMap<BudgetCategorySummary, BudgetCategorySummaryDto>();
         // ---------------
+
+        //
+        CreateMap<BudgetDetailWithExpensesSummary, BudgetDetailWithExpensesDto>();
+        CreateMap<ExpenseSummary, ExpenseDto>();
+
     }
 }

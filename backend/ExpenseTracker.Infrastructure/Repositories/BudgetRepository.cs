@@ -55,7 +55,7 @@ public class BudgetRepository : IBudgetRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<BudgetSummary>> GetBudgetSummaryAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<BudgetSummary>> GetBudgetSummaryByEmailAsync(string userId, CancellationToken cancellationToken = default)
     {
         // 1. get all budgets with categoryId for the user
         var budgets = await _dbContext.Budgets
@@ -119,4 +119,58 @@ public class BudgetRepository : IBudgetRepository
 
     }
 
+    public async Task<BudgetDetailWithExpensesSummary> GetBudgetDetailWithExpensesByEmailAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default)
+    {
+        // 1. Load budget
+        var budget = await _dbContext.Budgets
+            .Where(b => b.Id == budgetId && b.UserId == userId)
+            .Select(b => new
+            {
+                b.Id,
+                b.Name,
+                Limit = b.Amount,
+                b.IsActive
+
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        if (budget == null)
+        {
+            return new BudgetDetailWithExpensesSummary();
+        }
+
+        // 2. load related expenses
+        var expenses = await _dbContext.Expenses
+            .Where(e => e.BudgetId == budgetId && e.UserId == userId)
+            .Select(e => new ExpenseSummary
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Description = e.Description,
+                Amount = e.Amount,
+                Date = e.Date,
+                CategoryId = e.Category.Id,
+                CategoryName = e.Category.Name,   
+                BudgetId = e.BudgetId,
+                UserId = e.UserId
+            })
+            .ToListAsync(cancellationToken);
+        
+        // 3. Calculate value
+        var totalSpent = expenses.Sum(expenses => expenses.Amount);
+        
+        // 4. Build and return domain model
+        return new BudgetDetailWithExpensesSummary
+        {
+            Id = budget.Id,
+            Name = budget.Name,
+            Limit = budget.Limit,
+            TotalSpent = totalSpent,
+            IsActive = budget.IsActive,
+            Expenses = expenses
+        };
+
+     
+
+    }           
 }
