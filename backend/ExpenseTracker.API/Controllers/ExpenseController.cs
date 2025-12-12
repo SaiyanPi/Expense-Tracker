@@ -7,6 +7,7 @@ using ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesForABudgetByEmail;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesForCategoryByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummary;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummaryByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetExpenseById;
@@ -165,5 +166,14 @@ public class ExpenseController : ControllerBase
         var query = new GetAllExpensesForABudgetByEmailQuery(budgetId, email);
         var expensesForBudget = await _mediator.Send(query, cancellationToken);
         return Ok(expensesForBudget);
+    }
+
+    // GET: api/expense/category-expenses?categoryId={categoryId}&email={email}
+    [HttpGet("category-expenses")]
+    public async Task<IActionResult> GetExpensesForCategoryByEmail([FromQuery] Guid categoryId, [FromQuery] string email, CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllExpensesForCategoryByEmailQuery(categoryId, email);
+        var expensesForCategory = await _mediator.Send(query, cancellationToken);
+        return Ok(expensesForCategory);
     }
 }

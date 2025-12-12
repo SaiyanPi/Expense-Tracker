@@ -42,6 +42,11 @@ public class ExpenseMappingProfile : Profile
 
         // mapping for ExpenseSummaryForBudget to ExpenseDto
         CreateMap<ExpenseSummaryForBudget, ExpenseDto>();
+
+        // mapping for ExpenseSummaryForCategory to ExpenseDto
+        CreateMap<ExpenseSummaryForCategory, ExpenseDto>()
+            .ForMember(dest => dest.Description, opt => opt.Ignore());
+           
     }
     
 }

@@ -173,6 +173,28 @@ public class ExpenseRepository : IExpenseRepository
         
     }
 
+    public async Task<IReadOnlyList<ExpenseSummaryForCategory>> GetExpensesForACategoryByEmailAsync(Guid categoryId, string userId, CancellationToken cancellationToken = default)
+    {
+        var expensesOfCategory = await _dbContext.Expenses
+            .Include(e => e.Category)
+            .Where(e => e.CategoryId == categoryId && e.UserId == userId)
+            .Select(e => new ExpenseSummaryForCategory
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Amount = e.Amount,
+                Date = e.Date,
+                CategoryId = e.Category.Id,
+                CategoryName = e.Category.Name,
+                BudgetId = e.BudgetId,
+                UserId = e.UserId!
+            })
+        .ToListAsync(cancellationToken);
+        
+        return expensesOfCategory;
+        
+    }
+
 }
 
 // This is the implementation of repositopry interface in domain layer
