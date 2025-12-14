@@ -36,6 +36,7 @@ public class FilterExpenseQueryHandler : IRequestHandler<FilterExpensesQuery, Fi
                 Amount = e.Amount,
                 Date = e.Date,
                 CategoryId = e.CategoryId ?? Guid.Empty,
+                CategoryName = e.Category?.Name ?? string.Empty,
                 UserId = e.UserId ?? string.Empty,
             }).ToList()
         };

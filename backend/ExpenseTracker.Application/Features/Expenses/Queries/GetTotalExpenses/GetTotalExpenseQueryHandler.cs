@@ -15,7 +15,7 @@ public class GetTotalExpensesQueryHandler : IRequestHandler<GetTotalExpensesQuer
 
     public async Task<TotalExpenseDto> Handle(GetTotalExpensesQuery request, CancellationToken cancellationToken)
     {
-        var totalAmount = await _expenseRepository.GetTotalExpensesAsync(cancellationToken);
+        var totalAmount = await _expenseRepository.GetTotalExpenseAsync(cancellationToken);
         return new TotalExpenseDto { TotalAmount = totalAmount }; 
     }
 }

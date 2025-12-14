@@ -1,24 +1,38 @@
 using AutoMapper;
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpenses;
 
-public class GetAllExpensesQueryHandler : IRequestHandler<GetAllExpensesQuery, IReadOnlyList<ExpenseDto>>
+public class GetAllExpensesQueryHandler : IRequestHandler<GetAllExpensesQuery, PagedResult<ExpenseDto>>
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly IMapper _mapper;
 
-    public GetAllExpensesQueryHandler(IExpenseRepository expenseRepository, IMapper mapper)
+    public GetAllExpensesQueryHandler(
+        IExpenseRepository expenseRepository,
+        IMapper mapper)
     {
         _expenseRepository = expenseRepository;
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<ExpenseDto>> Handle(GetAllExpensesQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<ExpenseDto>> Handle(
+        GetAllExpensesQuery request,
+        CancellationToken cancellationToken)
     {
-        var expenses = await _expenseRepository.GetAllAsync(cancellationToken);
-        return _mapper.Map<IReadOnlyList<ExpenseDto>>(expenses);
+        var query = request.Paging;
+
+        var(expenses, totalCount) = await _expenseRepository.GetAllAsync(
+            skip: query.Skip,
+            take: query.EffectivePageSize,
+            sortBy: query.SortBy,
+            sortDesc: query.SortDesc,
+            cancellationToken: cancellationToken);
+
+        var mappedExpenses = _mapper.Map<IReadOnlyList<ExpenseDto>>(expenses);
+        return new PagedResult<ExpenseDto>(mappedExpenses, totalCount, query.EffectivePage, query.EffectivePageSize);
     }
 }

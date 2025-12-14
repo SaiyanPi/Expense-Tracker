@@ -5,20 +5,58 @@ namespace ExpenseTracker.Domain.Interfaces.Repositories;
 
 public interface IExpenseRepository
 {
-    Task<IReadOnlyList<Expense>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<Expense>> GetAllExpensesByEmailAsync(string userId, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Expense> Expenses, int TotalCount)> GetAllAsync(
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+        
+    Task<(IReadOnlyList<Expense> Expenses, int TotalCount)> GetExpensesByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+    
+    Task<(IReadOnlyList<ExpenseSummaryForBudget> Expenses, int TotalCount)> GetAllExpensesForABudgetByEmailAsync(
+        Guid budgetId,
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+    
+    Task<(IReadOnlyList<ExpenseSummaryForCategory> Expenses, int TotalCount)> GetExpensesForACategoryByEmailAsync(
+        Guid categoryId,
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+    
+    Task<(IReadOnlyList<CategorySummary> CategorySummary, int TotalCount)> GetCategorySummaryAsync(
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+
+    Task<(IReadOnlyList<CategorySummary> CategorySummaryByEmail, int TotalCount)> GetCategorySummaryByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+
     Task<Expense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task AddAsync(Expense expense, CancellationToken cancellationToken = default);
-    Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default);
-    Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default);
+    Task<decimal> GetTotalExpenseAsync(CancellationToken cancellationToken = default);
+    Task<decimal> GetTotalExpenseByEmailAsync(string userId, CancellationToken cancellationToken = default);
 
-
-    // Additional method to check for existing title for validation in service in Application layer
-    Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default);
-    Task<decimal> GetTotalExpensesAsync(CancellationToken cancellationToken = default);
-    Task<decimal> GetTotalExpensesByEmailAsync(string userId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<CategorySummary>> GetCategorySummaryAsync(CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<CategorySummary>> GetCategorySummaryByEmailAsync(string userId, CancellationToken cancellationToken = default);
     Task<FilteredExpensesResult> FilterExpensesAsync(
                                                         DateTime? startDate,
                                                         DateTime? endDate,
@@ -28,8 +66,15 @@ public interface IExpenseRepository
                                                         string? userId,
                                                         CancellationToken cancellationToken = default
                                                     );
-    Task<IReadOnlyList<ExpenseSummaryForBudget>> GetAllExpensesForABudgetByEmailAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<ExpenseSummaryForCategory>> GetExpensesForACategoryByEmailAsync(Guid categoryId, string userId, CancellationToken cancellationToken = default);
+
+    Task AddAsync(Expense expense, CancellationToken cancellationToken = default);
+    Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default);
+
+
+    // Additional method to check for existing title for validation in service in Application layer
+    Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default);
+
 }
 
 

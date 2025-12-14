@@ -1,18 +1,20 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummaryByEmail;
 
-public class GetCategorySummaryByEmailQueryHandler : IRequestHandler<GetCategorySummaryByEmailQuery, List<CategorySummaryDto>>
+public class GetCategorySummaryByEmailQueryHandler : IRequestHandler<GetCategorySummaryByEmailQuery, PagedResult<CategorySummaryDto>>
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
-    public GetCategorySummaryByEmailQueryHandler(IExpenseRepository expenseRepository,
+    public GetCategorySummaryByEmailQueryHandler(
+        IExpenseRepository expenseRepository,
         IUserRepository userRepository,
         IMapper mapper)
     {
@@ -21,13 +23,23 @@ public class GetCategorySummaryByEmailQueryHandler : IRequestHandler<GetCategory
         _mapper = mapper;
     }
 
-    public async Task<List<CategorySummaryDto>> Handle(GetCategorySummaryByEmailQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<CategorySummaryDto>> Handle(
+        GetCategorySummaryByEmailQuery request,
+        CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null)
             throw new NotFoundException(nameof(CategorySummaryDto), request.Email);
-   
-        var categorySummaryByEmail = await _expenseRepository.GetCategorySummaryByEmailAsync(user.Id, cancellationToken);
+
+        var query = request.Paging;
+
+        var (categorySummaryByEmail, totalCount) = await _expenseRepository.GetCategorySummaryByEmailAsync(
+            user.Id,
+            skip: query.Skip,
+            take: query.EffectivePageSize,
+            sortBy: query.SortBy,
+            sortDesc: query.SortDesc,
+            cancellationToken: cancellationToken);
         // var categorySummaryDto = categorySummaryByEmail
         //     .Select(cs => new CategorySummaryDto
         //     {
@@ -36,6 +48,7 @@ public class GetCategorySummaryByEmailQueryHandler : IRequestHandler<GetCategory
         //     })
         //     .ToList();
 
-        return _mapper.Map<List<CategorySummaryDto>>(categorySummaryByEmail) ;
+        var mappedCategorySummaryByEmail = _mapper.Map<IReadOnlyList<CategorySummaryDto>>(categorySummaryByEmail);
+        return new PagedResult<CategorySummaryDto>(mappedCategorySummaryByEmail, totalCount, query.EffectivePage, query.EffectivePageSize);
     }
 }

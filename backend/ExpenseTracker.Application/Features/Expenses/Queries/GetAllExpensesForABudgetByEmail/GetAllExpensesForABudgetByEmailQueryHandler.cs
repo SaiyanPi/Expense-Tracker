@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -7,7 +8,7 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesForABudgetByEmail;
 
-public record GetAllExpensesForABudgetByEmailQueryHandler : IRequestHandler<GetAllExpensesForABudgetByEmailQuery, IReadOnlyList<ExpenseDto>>
+public record GetAllExpensesForABudgetByEmailQueryHandler : IRequestHandler<GetAllExpensesForABudgetByEmailQuery, PagedResult<ExpenseDto>>
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly IBudgetRepository _budgetRepository;
@@ -26,7 +27,9 @@ public record GetAllExpensesForABudgetByEmailQueryHandler : IRequestHandler<GetA
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<ExpenseDto>> Handle(GetAllExpensesForABudgetByEmailQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<ExpenseDto>> Handle(
+        GetAllExpensesForABudgetByEmailQuery request,
+        CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null)
@@ -36,9 +39,20 @@ public record GetAllExpensesForABudgetByEmailQueryHandler : IRequestHandler<GetA
         if (budget == null)
             throw new NotFoundException(nameof(Budget), request.BudgetId);
         
-        var expenseSummaryForBudget = await _expenseRepository.GetAllExpensesForABudgetByEmailAsync(budget.Id, user.Id, cancellationToken);
+        var query = request.Paging;
 
-        return _mapper.Map<IReadOnlyList<ExpenseDto>>(expenseSummaryForBudget);
+        var(expenses, totalCount) = await _expenseRepository.GetAllExpensesForABudgetByEmailAsync(
+            budget.Id,
+            user.Id,
+            skip: query.Skip,
+            take: query.EffectivePageSize,
+            sortBy: query.SortBy,
+            sortDesc: query.SortDesc,
+            cancellationToken: cancellationToken);
+        
+        var mappedExpenses = _mapper.Map<IReadOnlyList<ExpenseDto>>(expenses);
+        return new PagedResult<ExpenseDto>(mappedExpenses, totalCount, query.EffectivePage, query.EffectivePageSize);
+
     }
     
 }
