@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 
 namespace ExpenseTracker.Application.DTOs.Budget;
@@ -13,5 +14,5 @@ public class BudgetDetailWithExpensesDto
     public bool IsOverBudget => TotalSpent > Limit;
     public bool IsActive { get; set; }
 
-    public List<ExpenseDto> Expenses { get; set; } = new();
+    public PagedResult<ExpenseDto> Expenses { get; set; } = default!;
 }

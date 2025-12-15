@@ -1,6 +1,8 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Budget;
+using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
@@ -30,12 +32,37 @@ public class GetBudgetDetailWithExpensesByEmailQueryHandler : IRequestHandler<Ge
         if (budget == null)
             throw new NotFoundException(nameof(Budget), request.BudgetId);
         
-        var user = await _userRepository.GetByEmailAsync(request.email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if(user == null)
-            throw new NotFoundException(nameof(User), request.email);
+            throw new NotFoundException(nameof(User), request.Email);
         
-        var budgetDetailWithExpensesByEmailSummary = await _budgetRepository.GetBudgetDetailWithExpensesByEmailAsync(budget.Id, user.Id, cancellationToken);
+        var query = request.Paging;
 
-        return _mapper.Map<BudgetDetailWithExpensesDto>(budgetDetailWithExpensesByEmailSummary);
+        var budgetDetailWithExpensesByEmailSummary = await _budgetRepository.GetBudgetDetailWithExpensesByEmailAsync(
+            budget.Id,
+            user.Id,
+            
+            skip: query.Skip,
+            take: query.EffectivePageSize,
+            sortBy: query.SortBy,
+            sortDesc: query.SortDesc,
+            cancellationToken: cancellationToken);
+        
+        var mappedExpenses = _mapper.Map<IReadOnlyList<ExpenseDto>>(budgetDetailWithExpensesByEmailSummary.Expenses);
+        
+        var pagedExpenses = new PagedResult<ExpenseDto>(
+            mappedExpenses,
+            budgetDetailWithExpensesByEmailSummary.TotalCount,
+            query.EffectivePage,
+            query.EffectivePageSize);
+        
+        return new BudgetDetailWithExpensesDto
+        {
+            Id = budgetDetailWithExpensesByEmailSummary.Id,
+            Name = budgetDetailWithExpensesByEmailSummary.Name,
+            Limit = budgetDetailWithExpensesByEmailSummary.Limit,
+            TotalSpent = budgetDetailWithExpensesByEmailSummary.TotalSpent,
+            Expenses = pagedExpenses
+        };
     }
 }

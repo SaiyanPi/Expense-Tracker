@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -17,18 +18,54 @@ public class BudgetRepository : IBudgetRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<Budget>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<Budget> Budgets, int totalCount)> GetAllAsync(
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Budgets
-            .ToListAsync(cancellationToken);
-    }
+        var query = _dbContext.Budgets
+            .AsQueryable();
 
-    public async Task<IEnumerable<Budget>> GetAllBudgetsByEmailAsync(string userId, CancellationToken cancellationToken = default)
-    {
-        var budgets = await _dbContext.Budgets
-            .Where(b => b.UserId == userId)
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+        
+        // apply sorting
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var budgets = await query
+            .Skip(skip)
+            .Take(take)
             .ToListAsync(cancellationToken);
-        return budgets;
+
+        return (budgets, totalCount);
+    }
+   
+
+    public async Task<(IEnumerable<Budget> Budgets, int totalCount)> GetAllBudgetsByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Budgets
+            .Where(b => b.UserId == userId)
+            .AsQueryable();
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var budgets = await query
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return (budgets, totalCount);
     }
 
     public async Task<Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -37,25 +74,84 @@ public class BudgetRepository : IBudgetRepository
         return budget;
     }
 
-    public async Task AddAsync(Budget budget, CancellationToken cancellationToken = default)
+    public async Task<BudgetDetailWithExpensesSummary> GetBudgetDetailWithExpensesByEmailAsync(
+        Guid budgetId,
+        string userId,
+        
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        await _dbContext.Budgets.AddAsync(budget, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
+        // 1. Load budget
+        var budget = await _dbContext.Budgets
+            .Where(b => b.Id == budgetId && b.UserId == userId)
+            .Select(b => new
+            {
+                b.Id,
+                b.Name,
+                Limit = b.Amount,
+                b.IsActive
 
-    public async Task UpdateAsync(Budget budget, CancellationToken cancellationToken = default)
-    {
-        _dbContext.Budgets.Update(budget);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task DeleteAsync(Budget budget, CancellationToken cancellationToken = default)
-    {
-        _dbContext.Budgets.Remove(budget);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
+        if (budget == null)
+        {
+            return new BudgetDetailWithExpensesSummary();
+        }
+        var query = _dbContext.Expenses
+            .Where(e => e.BudgetId == budgetId && e.UserId == userId)
+            .Select(e => new ExpenseSummary
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Description = e.Description,
+                Amount = e.Amount,
+                Date = e.Date,
+                CategoryId = e.Category.Id,
+                CategoryName = e.Category.Name,   
+                BudgetId = e.BudgetId,
+                UserId = e.UserId
+            })
+            .AsQueryable();
+        
+        var totalCount = await query.CountAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<BudgetSummary>> GetBudgetSummaryByEmailAsync(string userId, CancellationToken cancellationToken = default)
+        // apply sorting
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        // 2. load related expenses
+        var expenses = await query
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+        
+        // 3. Calculate value
+        var totalSpent = expenses.Sum(expenses => expenses.Amount);
+        
+        // 4. Build and return domain model
+        return new BudgetDetailWithExpensesSummary
+        {
+            Id = budget.Id,
+            Name = budget.Name,
+            Limit = budget.Limit,
+            TotalSpent = totalSpent,
+            IsActive = budget.IsActive,
+            Expenses = expenses,
+            TotalCount = totalCount
+        };
+    }           
+
+    public async Task<BudgetsSummary> GetBudgetsSummaryByEmailAsync(
+        string userId, 
+        
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
         // 1. get all budgets with categoryId for the user
         var budgets = await _dbContext.Budgets
@@ -63,7 +159,9 @@ public class BudgetRepository : IBudgetRepository
             .ToListAsync(cancellationToken);
         
         if(!budgets.Any())
-            return new List<BudgetSummary>();
+        {
+            return new BudgetsSummary();
+        }
         
         // 2. get date range based on all budgets
         var minDate = budgets.Min(b => b.StartDate);
@@ -88,14 +186,14 @@ public class BudgetRepository : IBudgetRepository
             .ToListAsync(cancellationToken);
 
         // 5. Generate summary            
-        var summary = new BudgetSummary
+        var summary = new BudgetsSummary
         {
             TotalBudget = budgets.Sum(b => b.Amount),
             TotalExpenses = expenses.Sum(e => e.Amount)
         };
 
         // 6. category-wise summary
-        summary.Categories = budgets
+        var query = budgets
             .GroupBy(b => b.CategoryId)
             .Select(group =>
             {
@@ -106,71 +204,50 @@ public class BudgetRepository : IBudgetRepository
                 var categoryEntity = categories.FirstOrDefault(c => c.Id == categoryId);
                 
                 return new BudgetCategorySummary
-                {
+                     {
                     CategoryId = categoryId ?? Guid.Empty,
                     BudgetAmount = categoryBudget,
                     ExpensesAmount = categorySpent,
                     CategoryName = categoryEntity?.Name ?? string.Empty
                 };
             })
+            .AsQueryable();
+
+        //  var totalCount = await query.CountAsync(cancellationToken);
+        // Above line leads to exception because query is not an EF query anymore since it is not fresh from db but from already loaded
+        // in memory(step 1). So we use the below line instead.
+
+        //var totalCount = query.Count();
+
+        // apply sorting
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        summary.Categories = query
+            .Skip(skip)
+            .Take(take)
             .ToList();
         
-        return new List<BudgetSummary> { summary };
+        summary.TotalCount = query.Count();
+        
+        return summary;
 
+    }       
+
+    public async Task AddAsync(Budget budget, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Budgets.AddAsync(budget, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<BudgetDetailWithExpensesSummary> GetBudgetDetailWithExpensesByEmailAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Budget budget, CancellationToken cancellationToken = default)
     {
-        // 1. Load budget
-        var budget = await _dbContext.Budgets
-            .Where(b => b.Id == budgetId && b.UserId == userId)
-            .Select(b => new
-            {
-                b.Id,
-                b.Name,
-                Limit = b.Amount,
-                b.IsActive
+        _dbContext.Budgets.Update(budget);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-        
-        if (budget == null)
-        {
-            return new BudgetDetailWithExpensesSummary();
-        }
-
-        // 2. load related expenses
-        var expenses = await _dbContext.Expenses
-            .Where(e => e.BudgetId == budgetId && e.UserId == userId)
-            .Select(e => new ExpenseSummary
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Description = e.Description,
-                Amount = e.Amount,
-                Date = e.Date,
-                CategoryId = e.Category.Id,
-                CategoryName = e.Category.Name,   
-                BudgetId = e.BudgetId,
-                UserId = e.UserId
-            })
-            .ToListAsync(cancellationToken);
-        
-        // 3. Calculate value
-        var totalSpent = expenses.Sum(expenses => expenses.Amount);
-        
-        // 4. Build and return domain model
-        return new BudgetDetailWithExpensesSummary
-        {
-            Id = budget.Id,
-            Name = budget.Name,
-            Limit = budget.Limit,
-            TotalSpent = totalSpent,
-            IsActive = budget.IsActive,
-            Expenses = expenses
-        };
-
-     
-
-    }           
+    public async Task DeleteAsync(Budget budget, CancellationToken cancellationToken = default)
+    {
+        _dbContext.Budgets.Remove(budget);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

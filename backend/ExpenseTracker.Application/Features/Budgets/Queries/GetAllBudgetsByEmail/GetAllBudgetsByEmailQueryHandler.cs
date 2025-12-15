@@ -1,12 +1,13 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 
 namespace ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgetsByEmail;
 
-public class GetAllBudgetQueryHandler : IRequestHandler<GetAllBudgetsByEmailQuery, IReadOnlyList<BudgetDto>>
+public class GetAllBudgetQueryHandler : IRequestHandler<GetAllBudgetsByEmailQuery, PagedResult<BudgetDto>>
 {
     private readonly IBudgetRepository _budgetRepository;
     private readonly IUserRepository _userRepository;
@@ -24,13 +25,29 @@ public class GetAllBudgetQueryHandler : IRequestHandler<GetAllBudgetsByEmailQuer
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<BudgetDto>> Handle(GetAllBudgetsByEmailQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<BudgetDto>> Handle(
+        GetAllBudgetsByEmailQuery request,
+        CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null)
             throw new NotFoundException(nameof(Domain.Entities.User), request.Email);
 
-        var budgets = await _budgetRepository.GetAllBudgetsByEmailAsync(user.Id, cancellationToken);
-        return _mapper.Map<IReadOnlyList<BudgetDto>>(budgets);
+        var query = request.Paging;
+
+        var (budgets, totalCount) = await _budgetRepository.GetAllBudgetsByEmailAsync(
+            user.Id,
+            skip: query.Skip,
+            take: query.EffectivePageSize,
+            sortBy: query.SortBy,
+            sortDesc: query.SortDesc,
+            cancellationToken: cancellationToken);
+        
+        var mappedBudgets = _mapper.Map<IReadOnlyList<BudgetDto>>(budgets);
+        return new PagedResult<BudgetDto>(
+            mappedBudgets,
+            totalCount,
+            query.EffectivePage,
+            query.EffectivePageSize);
     }
 }

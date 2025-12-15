@@ -7,8 +7,9 @@ using ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgets;
 using ExpenseTracker.Application.Features.Budgets.Commands.UpdateBudget;
 using ExpenseTracker.Application.Features.Budgets.Commands.DeleteBudget;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgetsByEmail;
-using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetSummaryByEmail;
+using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetsSummaryByEmail;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetDetailWithExpensesByEmail;
+using ExpenseTracker.Application.Common.Pagination;
 
 namespace ExpenseTracker.API.Controllers;   
 
@@ -25,18 +26,29 @@ public class BudgetController : ControllerBase
     
     // GET: api/Budget
     [HttpGet]
-    public async Task<IActionResult> GetAllBudgets(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetAllBudgetQuery();
+        var query = new GetAllBudgetQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
         var budgets = await _mediator.Send(query, cancellationToken);
         return Ok(budgets);
     }
 
     // GET: api/Budget/email?email={email}
     [HttpGet("email")]
-    public async Task<IActionResult> GetAllBudgetsByEmail(string email, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllBudgetsByEmail(
+        string email,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetAllBudgetsByEmailQuery(email);
+        var query = new GetAllBudgetsByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
         var budgets = await _mediator.Send(query, cancellationToken);
         return Ok(budgets);
     }
@@ -48,6 +60,44 @@ public class BudgetController : ControllerBase
         var query = new GetBudgetByIdQuery(id);
         var budget = await _mediator.Send(query, cancellationToken);
         return Ok(budget);
+    }
+
+    // GET: api/budget/budget-detail-with-expenses?budgetId={budgetId}&email={email}
+    [HttpGet("budget-detail-with-expenses")]
+    public async Task<IActionResult> GetBudgetDetailWithExpensesByEmail(
+        [FromQuery] Guid budgetId,
+        [FromQuery] string email,
+
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetBudgetDetailWithExpensesByEmailQuery(
+            budgetId,
+            email,
+            new PagedQuery(page, pageSize, sortBy, sortDesc));
+
+        var budgetDetailWithExpensesByEmail = await _mediator.Send(query, cancellationToken);
+        return Ok(budgetDetailWithExpensesByEmail);
+    }
+
+    
+    // GET: api/budget/budget-summary/email?email={email}
+    [HttpGet("budget-summary/email")]
+    public async Task<IActionResult> GetBudgetSummaryByEmail(
+        [FromQuery] string email, 
+
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetBudgetsSummaryByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var budgetsSummary = await _mediator.Send(query, cancellationToken);
+        return Ok(budgetsSummary);
     }
 
     // POST: api/Budget
@@ -94,23 +144,4 @@ public class BudgetController : ControllerBase
         return Ok(new {Success = true, Message = "Budget deleted successfully" }); 
     }
 
-    // GET: api/budget/budget-summary/email?email={email}
-    [HttpGet("budget-summary/email")]
-    public async Task<IActionResult> GetBudgetSummaryByEmail([FromQuery] string email, CancellationToken cancellationToken = default)
-    {
-        var query = new GetBudgetSummaryByEmailQuery(email);
-        var summary = await _mediator.Send(query, cancellationToken);
-        return Ok(summary);
-    }
-
-    // GET: api/budget/budget-detail-with-expenses?budgetId={budgetId}&email={email}
-    [HttpGet("budget-detail-with-expenses")]
-    public async Task<IActionResult> GetBudgetDetailWithExpensesByEmail([FromQuery] Guid budgetId, [FromQuery] string email, CancellationToken cancellationToken = default)
-    {
-        var query = new GetBudgetDetailWithExpensesByEmailQuery(budgetId, email);
-        var budgetDetailWithExpensesByEmail = await _mediator.Send(query, cancellationToken);
-        return Ok(budgetDetailWithExpensesByEmail);
-    }
-
-    
 }

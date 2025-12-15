@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Persistence;
@@ -13,19 +14,53 @@ public class CategoryRepository : ICategoryRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<(IReadOnlyList<Category> Categories, int TotalCount)> GetAllAsync(
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        var categories = await _dbContext.Categories.ToListAsync();
-        return categories;
+        var query = _dbContext.Categories
+            .AsQueryable();
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+        
+        // apply sorting
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var categories = await query
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return (categories, totalCount);
     }
 
-    public async Task<IReadOnlyList<Category>> GetAllCategoriesByEmailAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<(IReadOnlyList<Category> Categories, int TotalCount)> GetAllCategoriesByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-
-        var categories = await _dbContext.Categories
+        var query = _dbContext.Categories
             .Where(c => c.UserId == userId)
+            .AsQueryable();
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+        
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var categories = await query
+            .Skip(skip)
+            .Take(take)
             .ToListAsync(cancellationToken);
-        return categories;
+
+        return (categories, totalCount);
     }
 
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

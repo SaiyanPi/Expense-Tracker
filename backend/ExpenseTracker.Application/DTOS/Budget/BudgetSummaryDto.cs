@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Domain.Models;
 
 namespace ExpenseTracker.Application.DTOs.Budget;
@@ -9,5 +10,5 @@ public class BudgetSummaryDto
     public decimal Remaining => TotalBudget - TotalExpenses;
     public decimal UsedPercentage => TotalBudget == 0 ? 0 : (TotalExpenses / TotalBudget) * 100;
     public bool IsOverBudget => TotalExpenses > TotalBudget;
-    public IReadOnlyList<BudgetCategorySummaryDto> Categories { get; set; } = new List<BudgetCategorySummaryDto>();
+    public PagedResult<BudgetCategorySummaryDto> Categories { get; set; } = default!;
 }

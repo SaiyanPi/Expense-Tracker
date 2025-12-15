@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Application.Features.Categories.Commands.CreateCategory;
 using ExpenseTracker.Application.Features.Categories.Commands.DeleteCategory;
@@ -25,9 +26,14 @@ public class CategoryController : ControllerBase
     // GET: api/Category
     //[Authorize(Policy = "CanViewAllUsersCategory")]
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetAllCategoriesQuery();
+        var query = new GetAllCategoriesQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
         var categories = await _mediator.Send(query, cancellationToken);
         return Ok(categories);
     }
@@ -35,9 +41,15 @@ public class CategoryController : ControllerBase
     // GET: api/Category/email?email={email}
     //[Authorize]
     [HttpGet("email")]
-    public async Task<IActionResult> GetAllByEmail(string email, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAllByEmail(
+        string email,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetAllCategoriesByEmailQuery(email);
+        var query = new GetAllCategoriesByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
         var categories = await _mediator.Send(query, cancellationToken);
         return Ok(categories);
     }

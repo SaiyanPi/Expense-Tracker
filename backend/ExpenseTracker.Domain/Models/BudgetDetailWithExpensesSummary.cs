@@ -11,8 +11,8 @@ public class BudgetDetailWithExpensesSummary
     public decimal PercentageUsed => Limit == 0 ? 0 : (TotalSpent / Limit) * 100;
     public bool IsOverBudget => TotalSpent > Limit;
     public bool IsActive { get; set; }
+    public IReadOnlyList<ExpenseSummary> Expenses { get; set; } = default!;
 
-
-
-    public List<ExpenseSummary> Expenses { get; set; } = new();
+    // for paging info
+    public int TotalCount { get; set; }
 }

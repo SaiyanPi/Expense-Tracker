@@ -9,4 +9,5 @@ public class BudgetCategorySummary
     public decimal Remaining => BudgetAmount - ExpensesAmount;
     public double UsedPercentage => (double)(ExpensesAmount / BudgetAmount) * 100;
     public bool IsOverBudget => ExpensesAmount > BudgetAmount;
+
 }

@@ -34,7 +34,7 @@ public class BudgetMappingProfile : Profile
         CreateMap<Budget, BudgetDto>();
 
         // Budget summary
-        CreateMap<BudgetSummary, BudgetSummaryDto>()
+        CreateMap<BudgetsSummary, BudgetSummaryDto>()
             .ForMember(dest => dest.Remaining, opt => opt.MapFrom(src => src.Remaining))
             .ForMember(dest => dest.UsedPercentage, opt => opt.MapFrom(src => src. UsedPercentage))
             .ForMember(dest => dest.IsOverBudget, opt => opt.MapFrom(src => src. IsOverBudget));

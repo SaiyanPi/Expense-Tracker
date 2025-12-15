@@ -4,9 +4,21 @@ namespace ExpenseTracker.Domain.Interfaces.Repositories;
 
 public interface ICategoryRepository
 {
-    Task<IReadOnlyList<Category>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Category> Categories, int TotalCount)> GetAllAsync(
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Category>> GetAllCategoriesByEmailAsync(string userId, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Category> Categories, int TotalCount)> GetAllCategoriesByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+        
     Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task AddAsync(Category category, CancellationToken cancellationToken = default);
     Task UpdateAsync(Category category, CancellationToken cancellationToken = default);
