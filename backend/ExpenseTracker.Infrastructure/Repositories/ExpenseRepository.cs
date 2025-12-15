@@ -258,15 +258,19 @@ public class ExpenseRepository : IExpenseRepository
         return total;
     }
 
-    public async Task<FilteredExpensesResult> FilterExpensesAsync(
-                                                                    DateTime? startDate,
-                                                                    DateTime? endDate,
-                                                                    decimal? minAmount,
-                                                                    decimal? maxAmount,
-                                                                    Guid? categoryId,
-                                                                    string? userId,
-                                                                    CancellationToken cancellationToken = default
-                                                                )
+    public async Task<FilteredExpensesResult> GetFilterExpensesAsync(
+        DateTime? startDate,
+        DateTime? endDate,
+        decimal? minAmount,
+        decimal? maxAmount,
+        Guid? categoryId,
+        string? userId,
+
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
             .Include(e => e.Category)
@@ -294,13 +298,21 @@ public class ExpenseRepository : IExpenseRepository
             query = query.Where(e => e.UserId == userId);
         }
 
+        var totalCount = await query.CountAsync(cancellationToken);
         
-        var expenses = await query.ToListAsync(cancellationToken);
+        // apply sorting after filtering query
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var expenses = await query
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
 
         return new FilteredExpensesResult
         {
             TotalAmount = expenses.Sum(e => e.Amount),
-            Expenses = expenses
+            Expenses = expenses,
+            TotalCount = totalCount
         };
     }
 

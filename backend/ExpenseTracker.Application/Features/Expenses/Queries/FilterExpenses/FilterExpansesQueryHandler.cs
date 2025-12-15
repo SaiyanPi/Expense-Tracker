@@ -1,3 +1,5 @@
+using AutoMapper;
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
@@ -7,38 +9,45 @@ namespace ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
 public class FilterExpenseQueryHandler : IRequestHandler<FilterExpensesQuery, FilteredExpensesResultDto>
 {
     private readonly IExpenseRepository _expenseRepository;
+    private readonly IMapper _mapper;
 
-    public FilterExpenseQueryHandler(IExpenseRepository expenseRepository)
+    public FilterExpenseQueryHandler(
+        IExpenseRepository expenseRepository,
+        IMapper mapper)
     {
         _expenseRepository = expenseRepository;
+        _mapper = mapper;
     }
 
     public async Task<FilteredExpensesResultDto> Handle(FilterExpensesQuery request, CancellationToken cancellationToken)
     {
-        var filteredExpenses = await _expenseRepository.FilterExpensesAsync(
+        var query = request.Paging;
+
+        var filteredExpenses = await _expenseRepository.GetFilterExpensesAsync(
             request.StartDate,
             request.EndDate,
             request.MinAmount,
             request.MaxAmount,
             request.CategoryId,
             request.UserId,
-            cancellationToken);
 
-    
+            skip: query.Skip,
+            take: query.EffectivePageSize,
+            sortBy: query.SortBy,
+            sortDesc: query.SortDesc,
+            cancellationToken: cancellationToken);
+
+        var mappedExpenses = _mapper.Map<IReadOnlyList<ExpenseDto>>(filteredExpenses.Expenses);
+        var pagedExpenses = new PagedResult<ExpenseDto>(
+            mappedExpenses,
+            filteredExpenses.TotalCount,
+            query.EffectivePage,
+            query.EffectivePageSize);
+
         return new FilteredExpensesResultDto
         {
-            TotalAmount = filteredExpenses.TotalAmount ,
-            Expenses = filteredExpenses.Expenses.Select(e => new FilteredExpenseDto
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Description = e.Description,
-                Amount = e.Amount,
-                Date = e.Date,
-                CategoryId = e.CategoryId ?? Guid.Empty,
-                CategoryName = e.Category?.Name ?? string.Empty,
-                UserId = e.UserId ?? string.Empty,
-            }).ToList()
+            TotalAmount = filteredExpenses.TotalAmount,
+            Expenses = pagedExpenses
         };
     }
 }

@@ -1,7 +1,10 @@
+using ExpenseTracker.Application.Common.Pagination;
+
 namespace ExpenseTracker.Application.DTOs.Expense;
 
 public class FilteredExpensesResultDto
 {
     public decimal TotalAmount { get; set; }
-    public List<FilteredExpenseDto> Expenses { get; set; } = new();
+    public PagedResult<ExpenseDto> Expenses { get; set; } = default!;
+
 }

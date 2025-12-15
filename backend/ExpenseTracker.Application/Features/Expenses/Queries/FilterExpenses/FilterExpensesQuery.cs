@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 using MediatR;
 
@@ -9,5 +10,6 @@ public record FilterExpensesQuery(
     decimal? MinAmount, 
     decimal? MaxAmount,
     Guid? CategoryId,
-    string? UserId
+    string? UserId,
+    PagedQuery Paging
 ) : IRequest<FilteredExpensesResultDto>;

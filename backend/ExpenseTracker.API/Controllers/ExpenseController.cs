@@ -137,13 +137,43 @@ public class ExpenseController : ControllerBase
         return Ok(totalExpenses);
     }
 
-    // GET: api/expense/total-expenses/email?email=email
-    [HttpGet("total-expenses/email")]
+    // GET: api/expense/total-expense/email?email=email
+    [HttpGet("total-expense/email")]
     public async Task<IActionResult> GetTotalExpenseByEmail(string email, CancellationToken cancellationToken = default)
     {
         var query = new GetTotalExpenseByEmailQuery(email);
         var totalExpensesByEmail = await _mediator.Send(query, cancellationToken);
         return Ok(totalExpensesByEmail);
+    }
+
+    // GET: api/expense/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
+    [HttpGet("filter")]
+    public async Task<IActionResult> FilterExpenses(
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate,
+        [FromQuery] decimal? minAmount,
+        [FromQuery] decimal? maxAmount,
+        [FromQuery] Guid? categoryId,
+        [FromQuery] string? userId,
+
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new FilterExpensesQuery(
+            startDate,
+            endDate,
+            minAmount,
+            maxAmount,
+            categoryId,
+            userId,
+
+            new PagedQuery(page, pageSize, sortBy, sortDesc));
+
+        var filteredExpenses = await _mediator.Send(query, cancellationToken);
+        return Ok(filteredExpenses);
     }
 
     // POST: api/expense
@@ -188,33 +218,5 @@ public class ExpenseController : ControllerBase
         await _mediator.Send(command, cancellationToken);
         return Ok(new {Success = true, Message = "Expense deleted successfully" });    
     }
-
-    // GET: api/expense/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
-    [HttpGet("filter")]
-    public async Task<IActionResult> FilterExpenses(
-                                                    [FromQuery] DateTime? startDate,
-                                                    [FromQuery] DateTime? endDate,
-                                                    [FromQuery] decimal? minAmount,
-                                                    [FromQuery] decimal? maxAmount,
-                                                    [FromQuery] Guid? categoryId,
-                                                    [FromQuery] string? userId,
-                                                    CancellationToken cancellationToken = default
-                                                    )
-    {
-        var query = new FilterExpensesQuery(
-            startDate,
-            endDate,
-            minAmount,
-            maxAmount,
-            categoryId,
-            userId
-        );
-
-        var result = await _mediator.Send(query, cancellationToken);
-        return Ok(result);
-    }
-
-
-
     
 }
