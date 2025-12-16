@@ -8,7 +8,8 @@ public record UpdateExpenseCommand(
     string Description,
     decimal Amount,
     DateTime Date,
-    Guid? CategoryId
+    Guid? CategoryId,
+    Guid? BudgetId
 ) : IRequest<Unit>
 {
     public Guid Id { get; init; }

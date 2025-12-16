@@ -39,11 +39,17 @@ public class BudgetMappingProfile : Profile
             .ForMember(dest => dest.UsedPercentage, opt => opt.MapFrom(src => src. UsedPercentage))
             .ForMember(dest => dest.IsOverBudget, opt => opt.MapFrom(src => src. IsOverBudget));
         
-        CreateMap<BudgetCategorySummary, BudgetCategorySummaryDto>();
+        CreateMap<BudgetCategorySummary, BudgetCategorySummaryDto>()
+            .ForMember(dest => dest.Remaining, opt => opt.MapFrom(src => src.Remaining))
+            .ForMember(dest => dest.UsedPercentage, opt => opt.MapFrom(src => src. UsedPercentage))
+            .ForMember(dest => dest.IsOverBudget, opt => opt.MapFrom(src => src. IsOverBudget));
         // ---------------
 
-        //
-        CreateMap<BudgetDetailWithExpensesSummary, BudgetDetailWithExpensesDto>();
+        // for detailed budget view with expenses
+        CreateMap<BudgetDetailWithExpensesSummary, BudgetDetailWithExpensesDto>()
+            .ForMember(dest => dest.Remaining, opt => opt.MapFrom(src => src.Remaining))
+            .ForMember(dest => dest.PercentageUsed, opt => opt.MapFrom(src => src. PercentageUsed))
+            .ForMember(dest => dest.IsOverBudget, opt => opt.MapFrom(src => src. IsOverBudget));
         CreateMap<ExpenseSummary, ExpenseDto>();
 
     }

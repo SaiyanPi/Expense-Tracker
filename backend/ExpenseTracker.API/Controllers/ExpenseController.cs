@@ -200,7 +200,8 @@ public class ExpenseController : ControllerBase
             dto.Description,
             dto.Amount,
             dto.Date,
-            dto.CategoryId
+            dto.CategoryId,
+            dto.BudgetId
         )
         {
             Id = id

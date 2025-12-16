@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Users.Commands.DeleteUser;
 using ExpenseTracker.Application.Features.Users.Queries.GetAllUsers;
@@ -10,26 +11,31 @@ namespace ExpenseTracker.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UserManagementController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public UserController(IMediator mediator)
+    public UserManagementController(IMediator mediator)
     {
         _mediator = mediator;
     }
     // USER MANAGEMENT
 
-    // GET: api/user
+    // GET: api/userManagement
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetAllUsersQuery();
+        var query = new GetAllUsersQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
         var users = await _mediator.Send(query, cancellationToken);
         return Ok(users);
     }
 
-    // GET: api/user/{id}
+    // GET: api/userManagement/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken = default)
     {
@@ -38,7 +44,7 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
-    // GET: api/user/email/{email}
+    // GET: api/userManagement/email/{email}
     [HttpGet("email/{email}")]
     public async Task<IActionResult> GetByEmail(string email, CancellationToken cancellationToken = default)
     {
@@ -48,7 +54,7 @@ public class UserController : ControllerBase
     }
 
 
-    // DELETE: api/user/{id}
+    // DELETE: api/userManagement/{id}
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
     {

@@ -41,7 +41,9 @@ public class ExpenseMappingProfile : Profile
         CreateMap<CategorySummary, CategorySummaryDto>();
 
         // mapping for ExpenseSummaryForBudget to ExpenseDto
-        CreateMap<ExpenseSummaryForBudget, ExpenseDto>();
+        CreateMap<ExpenseSummaryForBudget, ExpenseDto>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Description, opt => opt.Ignore());
 
         // mapping for ExpenseSummaryForCategory to ExpenseDto
         CreateMap<ExpenseSummaryForCategory, ExpenseDto>()

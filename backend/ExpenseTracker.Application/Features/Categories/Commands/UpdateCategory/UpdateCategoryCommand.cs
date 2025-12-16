@@ -4,8 +4,7 @@ namespace ExpenseTracker.Application.Features.Categories.Commands.UpdateCategory
 
 public record UpdateCategoryCommand(
     // Guid Id,
-    string Name,
-    string? UserId
+    string Name
 ) : IRequest<Unit>
 {
     public Guid Id { get; init; } // set by controller, not from body

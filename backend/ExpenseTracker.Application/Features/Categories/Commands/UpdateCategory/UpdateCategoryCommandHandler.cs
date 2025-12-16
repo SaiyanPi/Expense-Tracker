@@ -25,19 +25,19 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
         if (category == null)
             throw new NotFoundException(nameof(Category), request.Id);
         
-        // business rule: category name must be unique per user
-        if (request.UserId != null)
-        {
-            // first check if the user exist
-            var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
-            if (user == null)
-                throw new NotFoundException(nameof(User), request.UserId);
+        // // business rule: category name must be unique per user
+        // if (request.UserId != null)
+        // {
+        //     // first check if the user exist
+        //     var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+        //     if (user == null)
+        //         throw new NotFoundException(nameof(User), request.UserId);
 
-            // then check for uniqueness
-            var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(request.Name, request.UserId, cancellationToken);
-            if (exists && !string.Equals(category.Name, request.Name, StringComparison.OrdinalIgnoreCase))
-                throw new ValidationException($"Category with name '{request.Name}' already exists for user '{request.UserId}'.");
-        }
+        //     // then check for uniqueness
+        //     var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(request.Name, request.UserId, cancellationToken);
+        //     if (exists && !string.Equals(category.Name, request.Name, StringComparison.OrdinalIgnoreCase))
+        //         throw new ValidationException($"Category with name '{request.Name}' already exists for user '{request.UserId}'.");
+        // }
 
         _mapper.Map(request, category);
 

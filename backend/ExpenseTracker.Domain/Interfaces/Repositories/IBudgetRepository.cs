@@ -41,6 +41,7 @@ public interface IBudgetRepository
         string? sortBy = null,
         bool sortDesc = false,
         CancellationToken cancellationToken = default);
+        
     Task AddAsync(Budget budget, CancellationToken cancellationToken = default);
     Task UpdateAsync(Budget budget, CancellationToken cancellationToken = default);
     Task DeleteAsync(Budget budget, CancellationToken cancellationToken = default);

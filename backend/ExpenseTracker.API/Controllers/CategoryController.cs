@@ -84,8 +84,7 @@ public class CategoryController : ControllerBase
             return BadRequest(ModelState);
 
         var command = new UpdateCategoryCommand(
-            dto.Name,
-            dto.UserId
+            dto.Name
         )
         {
             Id = id

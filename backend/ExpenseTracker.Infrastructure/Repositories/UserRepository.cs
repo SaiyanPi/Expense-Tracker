@@ -1,4 +1,5 @@
 using AutoMapper;
+using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Persistence.Identity;
@@ -21,10 +22,29 @@ public class UserRepository : IUserRepository
 
     // Get All Users
     // --------------
-    public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<(IReadOnlyList<User> Users, int TotalCount)> GetAllAsync(
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
     {
-        var appUsers = await _userManager.Users.ToListAsync();
-        return _mapper.Map<IReadOnlyList<User>>(appUsers);
+        var query = _userManager.Users
+            .AsQueryable();
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        query = query.ApplySorting(sortBy, sortDesc);
+        
+        var appUsers = await query
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        var users = _mapper.Map<IReadOnlyList<User>>(appUsers);
+       
+        return (users, totalCount);
     }
 
 
