@@ -235,6 +235,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.105.0, )"
+            },
             "Twilio": {
               "target": "Package",
               "version": "[7.13.8, )"

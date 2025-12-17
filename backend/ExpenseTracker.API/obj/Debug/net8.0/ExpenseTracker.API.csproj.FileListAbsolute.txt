@@ -189,3 +189,11 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.pdb
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.genruntimeconfig.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ref\ExpenseTracker.API.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ClosedXML.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ClosedXML.Parser.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ExcelNumberFormat.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\RBush.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\SixLabors.Fonts.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.IO.Packaging.dll

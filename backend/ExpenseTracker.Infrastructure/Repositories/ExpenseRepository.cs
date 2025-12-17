@@ -334,6 +334,19 @@ public class ExpenseRepository : IExpenseRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<IReadOnlyList<Expense>> GetExpensesForExportAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        var expenses = await _dbContext.Expenses
+            .Include(e => e.Category)
+            .Include(e => e.Budget)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return expenses;
+    }
+
     // Additional method to check for existing title for validation in service in Application layer
     public async Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default)
     {

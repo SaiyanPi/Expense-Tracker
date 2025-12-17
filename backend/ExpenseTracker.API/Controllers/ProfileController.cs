@@ -32,7 +32,7 @@ public class ProfileController : ControllerBase
 
     // PUT: api/profile/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateProfile(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateProfile(string id, [FromBody] UpdateUserDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -51,7 +51,7 @@ public class ProfileController : ControllerBase
 
     // DELETE: api/profile/{id}
     [HttpPost("{id:guid}")]
-    public async Task<IActionResult> DeleteProfile(string id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteProfile(string id, CancellationToken cancellationToken = default)
     {
         var command = new DeleteProfileCommand(id);
         await _mediator.Send(command, cancellationToken);
@@ -61,7 +61,7 @@ public class ProfileController : ControllerBase
 
     //POST: api/profile/change-email
     [HttpPost("change-email")]
-    public async Task<IActionResult> RequestChangeEmail([FromBody] ChangeEmailRequestDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> RequestChangeEmail([FromBody] ChangeEmailRequestDto dto, CancellationToken cancellationToken = default)
     {
         if(!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -74,7 +74,7 @@ public class ProfileController : ControllerBase
 
     // GET: api/profile/confirm-change-email?userId={UserId}&newEmail={newEmail}&token={token}
     [HttpGet("confirm-change-email")]
-    public async Task<IActionResult> ConfirmChangeEmail([FromQuery] ConfirmChangeEmailDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmChangeEmail([FromQuery] ConfirmChangeEmailDto dto, CancellationToken cancellationToken = default)
     {
         if(!ModelState.IsValid)
             return BadRequest(ModelState);

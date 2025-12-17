@@ -56,7 +56,7 @@ public class UserManagementController : ControllerBase
 
     // DELETE: api/userManagement/{id}
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(string id, CancellationToken cancellationToken = default)
     {
         var command = new DeleteUserCommand(id);
         await _mediator.Send(command, cancellationToken);

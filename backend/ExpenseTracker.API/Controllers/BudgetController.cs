@@ -55,7 +55,7 @@ public class BudgetController : ControllerBase
     
     // GET: api/Budget/{id}
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetBudgetById(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetBudgetById(Guid id, CancellationToken cancellationToken = default)
     {
         var query = new GetBudgetByIdQuery(id);
         var budget = await _mediator.Send(query, cancellationToken);
@@ -102,7 +102,7 @@ public class BudgetController : ControllerBase
 
     // POST: api/Budget
     [HttpPost]
-    public async Task<IActionResult> CreateBudget([FromBody] CreateBudgetDto createBudgetDto, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateBudget([FromBody] CreateBudgetDto createBudgetDto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -115,7 +115,7 @@ public class BudgetController : ControllerBase
     
     // PUT: api/budget/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateBudget(Guid id, [FromBody] UpdateBudgetDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateBudget(Guid id, [FromBody] UpdateBudgetDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -137,7 +137,7 @@ public class BudgetController : ControllerBase
 
     // DELETE: api/budget/{id}
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteBudget(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteBudget(Guid id, CancellationToken cancellationToken = default)
     {
         var command = new DeleteBudgetCommand(id);
         await _mediator.Send(command, cancellationToken);

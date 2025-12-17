@@ -26,4 +26,7 @@ public class Budget
         CategoryId = categoryId;
     }
 
+
+    public ICollection<Expense> Expenses { get; private set; } = new List<Expense>();  
+
 }

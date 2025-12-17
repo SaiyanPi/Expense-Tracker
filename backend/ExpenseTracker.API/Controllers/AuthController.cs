@@ -28,13 +28,13 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register-user")]
-    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto, CancellationToken cancellationToken = default)
     {
         return await Register(dto, AppRoles.User, cancellationToken);
     }
 
     [HttpPost("register-admin")]
-    public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto, CancellationToken cancellationToken = default)
     {
         return await Register(dto, AppRoles.Admin, cancellationToken);
     }
@@ -44,7 +44,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/register
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, string role, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto, string role, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/login
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login([FromBody] LoginUserDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -68,7 +68,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/refresh
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState); 
@@ -80,7 +80,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/logout
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] LogoutUserDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Logout([FromBody] LogoutUserDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -92,7 +92,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/change-password
     [HttpPost("change-password")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -105,7 +105,7 @@ public class AuthController : ControllerBase
     // Confirm Email
     // GET: api/auth/confirm-email?userId={userId}&token={token}
     [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] VerifyEmailDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmEmail([FromQuery] VerifyEmailDto dto, CancellationToken cancellationToken = default)
     {
         var command = new EmailConfirmationCommand(dto);
         await _mediator.Send(command, cancellationToken);
@@ -115,7 +115,7 @@ public class AuthController : ControllerBase
     // Forgot Password - Request Reset Token
     // POST: api/auth/forgot-password
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -128,7 +128,7 @@ public class AuthController : ControllerBase
     // Reset Password
     // POST: api/auth/reset-password?userId={userId}&token={token}
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -140,7 +140,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/send-phone-otp
     [HttpPost("send-phone-otp")]
-    public async Task<IActionResult> SendPhoneOtp([FromBody] PhoneConfirmationDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> SendPhoneOtp([FromBody] PhoneConfirmationDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -152,7 +152,7 @@ public class AuthController : ControllerBase
 
     // POST: api/auth/send-phone-otp
     [HttpPost("confirm-phone-otp")]
-    public async Task<IActionResult> ConfirmPhoneOtp([FromBody] VerifyPhoneDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmPhoneOtp([FromBody] VerifyPhoneDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);

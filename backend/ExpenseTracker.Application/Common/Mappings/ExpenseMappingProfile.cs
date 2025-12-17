@@ -4,6 +4,7 @@ using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
 using ExpenseTracker.Domain.Models;
 using ExpenseTracker.Application.DTOs.Category;
+using ExpenseTracker.Application.DTOS.Expense;
 
 namespace ExpenseTracker.Application.Common.Mappings;
 
@@ -52,6 +53,11 @@ public class ExpenseMappingProfile : Profile
         // Partial mapping for FilteredExpenseDto
         // CreateMap<Expense, FilteredExpenseDto>()
         //     .ForMember(dest => dest.CategoryName, opt => opt.Ignore());
+
+        // Entity -> Export DTO
+        CreateMap<Expense, ExpenseExportDto>()
+            .ForMember(dest => dest.Budget, opt => opt.MapFrom(src => src.Budget != null ? src.Budget.Name : null))
+            .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name));
            
     }
     

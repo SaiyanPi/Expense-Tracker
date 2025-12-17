@@ -111,6 +111,8 @@ namespace ExpenseTracker.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BudgetId");
+
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
@@ -349,6 +351,10 @@ namespace ExpenseTracker.Persistence.Migrations
 
             modelBuilder.Entity("ExpenseTracker.Domain.Entities.Expense", b =>
                 {
+                    b.HasOne("ExpenseTracker.Domain.Entities.Budget", "Budget")
+                        .WithMany("Expenses")
+                        .HasForeignKey("BudgetId");
+
                     b.HasOne("ExpenseTracker.Domain.Entities.Category", "Category")
                         .WithMany("Expenses")
                         .HasForeignKey("CategoryId")
@@ -358,6 +364,8 @@ namespace ExpenseTracker.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Budget");
 
                     b.Navigation("Category");
                 });
@@ -411,6 +419,11 @@ namespace ExpenseTracker.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ExpenseTracker.Domain.Entities.Budget", b =>
+                {
+                    b.Navigation("Expenses");
                 });
 
             modelBuilder.Entity("ExpenseTracker.Domain.Entities.Category", b =>

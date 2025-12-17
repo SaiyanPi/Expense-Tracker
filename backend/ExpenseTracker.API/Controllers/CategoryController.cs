@@ -78,7 +78,7 @@ public class CategoryController : ControllerBase
     
     // PUT: api/Category/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -95,7 +95,7 @@ public class CategoryController : ControllerBase
 
     // DELETE: api/Category/{id}
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         var command = new DeleteCategoryCommand(id);
         await _mediator.Send(command, cancellationToken);

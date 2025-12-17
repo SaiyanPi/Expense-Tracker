@@ -4,6 +4,7 @@ using ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
 using ExpenseTracker.Application.Features.Expenses.Commands.DeleteExpense;
 using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
 using ExpenseTracker.Application.Features.Expenses.GetTotalExpenses;
+using ExpenseTracker.Application.Features.Expenses.Queries.ExportExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesByEmail;
@@ -190,7 +191,7 @@ public class ExpenseController : ControllerBase
 
     // PUT: api/expense/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateExpenseDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateExpenseDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -213,11 +214,29 @@ public class ExpenseController : ControllerBase
 
     // DELETE: api/expense/{id}
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         var command = new DeleteExpenseCommand(id);
         await _mediator.Send(command, cancellationToken);
         return Ok(new {Success = true, Message = "Expense deleted successfully" });    
     }
-    
+
+    // GET: api/expense/export?userId={userId}&format={format}
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportExpenses(
+        [FromQuery] string userId,
+        [FromQuery] string format,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new ExportExpensesQuery(userId, format);
+
+        var exportResult = await _mediator.Send(query, cancellationToken);
+
+        // return Ok(exportResult); // doesn't download the file
+
+        return File(
+            exportResult.Content,
+            exportResult.ContentType,
+            exportResult.FileName);
+        }
 }
