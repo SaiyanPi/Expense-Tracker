@@ -28,6 +28,8 @@ public class ExportExpensesQueryHandler : IRequestHandler<ExportExpensesQuery, E
     {
         var expenses = await _repository.GetExpensesForExportAsync(
             request.UserId,
+            request.startDate,
+            request.endDate,
             cancellationToken);
 
         var mappedExpenses = _mapper.Map<IReadOnlyList<ExpenseExportDto>>(expenses);

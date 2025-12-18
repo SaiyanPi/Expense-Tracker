@@ -1,4 +1,5 @@
 using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Domain.Models;
 
 namespace ExpenseTracker.Domain.Interfaces.Repositories;
 
@@ -17,13 +18,13 @@ public interface IDashboardRepository
         DateTime endDate,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<(string Category, decimal TotalAmount)>> GetExpensesByCategoryForMonthAsync(
+    Task<IReadOnlyList<DashboardCategoryExpenseSummary>> GetExpensesByCategoryForMonthAsync(
         string userId,
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyList<(DateOnly Date, decimal TotalAmount)>> GetDailyExpensesForMonthAsync(
+    Task<IReadOnlyList<DashboardDailyExpenseSummary>> GetDailyExpensesForMonthAsync(
         string userId,
         DateTime startDate,
         DateTime endDate,

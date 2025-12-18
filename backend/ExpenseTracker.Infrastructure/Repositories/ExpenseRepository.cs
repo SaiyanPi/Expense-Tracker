@@ -336,11 +336,14 @@ public class ExpenseRepository : IExpenseRepository
 
     public async Task<IReadOnlyList<Expense>> GetExpensesForExportAsync(
         string userId,
+        DateTime startDate, 
+        DateTime endDate, 
         CancellationToken cancellationToken = default)
     {
         var expenses = await _dbContext.Expenses
             .Include(e => e.Category)
             .Include(e => e.Budget)
+            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date <= endDate)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 

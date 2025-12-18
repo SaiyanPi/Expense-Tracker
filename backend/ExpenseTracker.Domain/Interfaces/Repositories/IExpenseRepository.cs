@@ -77,6 +77,8 @@ public interface IExpenseRepository
 
     Task<IReadOnlyList<Expense>> GetExpensesForExportAsync(
         string userId,
+        DateTime startDate, 
+        DateTime endDate, 
         CancellationToken cancellationToken = default);
 
 

@@ -10,6 +10,11 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Azure.Identity.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ClosedXML.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ClosedXML.Parser.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ExcelNumberFormat.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\FluentValidation.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
@@ -57,6 +62,8 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Mono.TextTemplating.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\RBush.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\SixLabors.Fonts.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -72,6 +79,7 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.Drawing.Common.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.Formats.Asn1.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.IO.Packaging.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.IO.Pipelines.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.Memory.Data.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.Runtime.Caching.dll
@@ -189,11 +197,3 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.pdb
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ExpenseTracker.API.genruntimeconfig.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net8.0\ref\ExpenseTracker.API.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ClosedXML.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ClosedXML.Parser.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\ExcelNumberFormat.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\RBush.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\SixLabors.Fonts.dll
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\bin\Debug\net8.0\System.IO.Packaging.dll

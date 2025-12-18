@@ -225,10 +225,12 @@ public class ExpenseController : ControllerBase
     [HttpGet("export")]
     public async Task<IActionResult> ExportExpenses(
         [FromQuery] string userId,
+        [FromQuery] DateTime startDate,
+        [FromQuery] DateTime endDate,
         [FromQuery] string format,
         CancellationToken cancellationToken = default)
     {
-        var query = new ExportExpensesQuery(userId, format);
+        var query = new ExportExpensesQuery(userId, startDate, endDate, format);
 
         var exportResult = await _mediator.Send(query, cancellationToken);
 
@@ -238,5 +240,5 @@ public class ExpenseController : ControllerBase
             exportResult.Content,
             exportResult.ContentType,
             exportResult.FileName);
-        }
+    }
 }

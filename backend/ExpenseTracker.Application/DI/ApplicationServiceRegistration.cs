@@ -1,6 +1,8 @@
 using System.Reflection;
+using ExpenseTracker.Application.Common.Behaviours;
 using ExpenseTracker.Application.Common.Mappings;
 using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ExpenseTracker.Application.DI;
@@ -19,7 +21,8 @@ public static class ApplicationServiceRegistration
             typeof(ExpenseMappingProfile).Assembly,
             typeof(CategoryMappingProfile).Assembly,
             typeof(UserDomainMappingProfile).Assembly,
-            typeof(BudgetMappingProfile).Assembly
+            typeof(BudgetMappingProfile).Assembly,
+            typeof(DashboardMappingProfile).Assembly
         );
 
         // registering MediatR handlers
@@ -29,6 +32,10 @@ public static class ApplicationServiceRegistration
         
         // Register FluentValidation validators automatically
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        //  Register MediatR pipeline behavior for ExportExpensesValidator class
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+
 
         return services;
     }

@@ -41,6 +41,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<ISmsSenderService, TwilioSmsSenderService>();
         services.AddHttpClient<ISmsSenderService, AndroidSmsGatewayService>();
         services.AddScoped<IExpenseExportService, ExpenseExportService>();
+        services.AddScoped<IDashboardRepository, DashBoardRepository>();
 
         return services;
     }
