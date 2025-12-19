@@ -1,5 +1,4 @@
 using ExpenseTracker.Application.Common.Pagination;
-using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Domain.Models;
@@ -26,6 +25,7 @@ public class BudgetRepository : IBudgetRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Budgets
+            .AsNoTracking()
             .AsQueryable();
 
         var totalCount = await query
@@ -53,6 +53,7 @@ public class BudgetRepository : IBudgetRepository
     {
         var query = _dbContext.Budgets
             .Where(b => b.UserId == userId)
+            .AsNoTracking()
             .AsQueryable();
 
         var totalCount = await query
@@ -70,8 +71,17 @@ public class BudgetRepository : IBudgetRepository
 
     public async Task<Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var budget = await _dbContext.Budgets.FindAsync(id);
+        var budget = await _dbContext.Budgets
+            .FindAsync(id);
+            
         return budget;
+    }
+
+    public async Task<bool> GetBudgetStatusByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Budgets
+            .Where(b => b.Id == id && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
+            .FirstOrDefaultAsync(cancellationToken) != null;
     }
 
     public async Task<BudgetDetailWithExpensesSummary> GetBudgetDetailWithExpensesByEmailAsync(
@@ -249,5 +259,11 @@ public class BudgetRepository : IBudgetRepository
     {
         _dbContext.Budgets.Remove(budget);
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<bool> UserOwnsBudgetAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Budgets
+            .AnyAsync(b => b.Id == budgetId && b.UserId == userId, cancellationToken);
     }
 }

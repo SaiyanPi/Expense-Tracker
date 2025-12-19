@@ -30,6 +30,7 @@ public class UserRepository : IUserRepository
         CancellationToken cancellationToken = default)
     {
         var query = _userManager.Users
+            .AsNoTracking()
             .AsQueryable();
 
         var totalCount = await query

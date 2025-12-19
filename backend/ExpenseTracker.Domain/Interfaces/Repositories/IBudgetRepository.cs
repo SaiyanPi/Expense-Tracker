@@ -22,6 +22,7 @@ public interface IBudgetRepository
         CancellationToken cancellationToken = default);
 
     Task <Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task <bool> GetBudgetStatusByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<BudgetDetailWithExpensesSummary> GetBudgetDetailWithExpensesByEmailAsync(
         Guid budgetId,
@@ -45,5 +46,7 @@ public interface IBudgetRepository
     Task AddAsync(Budget budget, CancellationToken cancellationToken = default);
     Task UpdateAsync(Budget budget, CancellationToken cancellationToken = default);
     Task DeleteAsync(Budget budget, CancellationToken cancellationToken = default);
+
+    Task<bool> UserOwnsBudgetAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default);
 
 }

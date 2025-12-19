@@ -22,6 +22,7 @@ public class CategoryRepository : ICategoryRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Categories
+            .AsNoTracking()
             .AsQueryable();
 
         var totalCount = await query
@@ -48,6 +49,7 @@ public class CategoryRepository : ICategoryRepository
     {
         var query = _dbContext.Categories
             .Where(c => c.UserId == userId)
+            .AsNoTracking()
             .AsQueryable();
 
         var totalCount = await query
@@ -95,12 +97,14 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<bool> ExistsByNameAndUserIdAsync(string name, string userId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Categories.AnyAsync(c => c.Name == name && c.UserId == userId, cancellationToken);
+        return await _dbContext.Categories
+            .AnyAsync(c => c.Name == name && c.UserId == userId, cancellationToken);
     }
 
     public async Task<bool> UserOwnsCategoryAsync(Guid categoryId, string userId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Categories.AnyAsync(c => c.Id == categoryId && c.UserId == userId, cancellationToken);
+        return await _dbContext.Categories
+            .AnyAsync(c => c.Id == categoryId && c.UserId == userId, cancellationToken);
     }
 
 }

@@ -8,6 +8,6 @@ public class CreateExpenseDto
     public DateTime Date { get; set; } = DateTime.UtcNow;
     public Guid CategoryId { get; set; }    // foreign key
     public Guid? BudgetId { get; set; }     // foreign key
-    public string? UserId { get; set; }     // foreign key
+    public string UserId { get; set; } = default!;    // foreign key
    
 }

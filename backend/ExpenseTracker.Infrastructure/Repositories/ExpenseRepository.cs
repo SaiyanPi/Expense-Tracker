@@ -24,6 +24,7 @@ public class ExpenseRepository : IExpenseRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
+            .AsNoTracking()
             .AsQueryable();
         
         var totalCount = await _dbContext.Expenses
@@ -57,6 +58,7 @@ public class ExpenseRepository : IExpenseRepository
     {
         var query = _dbContext.Expenses
             .Where(e => e.UserId == userId)
+            .AsNoTracking()
             .AsQueryable();
         
         var totalCount = await query
@@ -83,8 +85,9 @@ public class ExpenseRepository : IExpenseRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
-            .Include(e => e.Category)
+            //.Include(e => e.Category) // it does nothing, Include() is ignored when projecting with Select(). EF Core automatically generates the necessary JOIN for Category without tracking it.
             .Where(e => e.BudgetId == budgetId && e.UserId == userId)
+            .AsNoTracking()
             .AsQueryable();
         
         var totalCount = await query
@@ -121,8 +124,9 @@ public class ExpenseRepository : IExpenseRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
-            .Include(e => e.Category)
+            //.Include(e => e.Category)
             .Where(e => e.CategoryId == categoryId && e.UserId == userId)
+            .AsNoTracking()
             .AsQueryable();
         
         var totalCount = await query
@@ -158,14 +162,16 @@ public class ExpenseRepository : IExpenseRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
-            .Include(e => e.Category)
-            .AsQueryable()
-            .GroupBy(e => e.Category.Name)
+            //.Include(e => e.Category)
+            .AsNoTracking()
+            .GroupBy(e => new { e.CategoryId, e.Category.Name })
+
             .Select(g => new CategorySummary
             {
-                CategoryName = g.Key,
+                CategoryName = g.Key.Name,
                 TotalAmount = g.Sum(e => e.Amount)
-            });
+            })
+            .AsQueryable();
         
         var totalCount = await query
             .CountAsync(cancellationToken);
@@ -203,15 +209,16 @@ public class ExpenseRepository : IExpenseRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
-            .Include(e => e.Category)
+            .AsNoTracking()
+            //.Include(e => e.Category)
             .Where(e => e.UserId == userId)
-            .AsQueryable()
             .GroupBy(e => e.Category.Name)
             .Select(g => new CategorySummary
             {
                 CategoryName = g.Key,
                 TotalAmount = g.Sum(e => e.Amount)
-            });
+            })
+            .AsQueryable();
         
         var totalCount = await query
             .CountAsync(cancellationToken);
@@ -359,4 +366,6 @@ public class ExpenseRepository : IExpenseRepository
 
 }
 
-// This is the implementation of repositopry interface in domain layer
+
+// Tip: AsQueryable() is actually meant for in-memory collection. Here in repository, we are starting
+//      from EF DbSet so we don't actually need it. 
