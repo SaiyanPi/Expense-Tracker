@@ -3,4 +3,5 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Identity.Commands.ResetPassword;
 
-public record ResetPasswordCommand(ResetPasswordDto ResetPasswordDto) : IRequest<Unit>;
+public record ResetPasswordCommand( string UserId, string Token, ResetPasswordDto ResetPasswordDto) 
+    : IRequest<Unit>;

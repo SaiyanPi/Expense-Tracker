@@ -5,6 +5,8 @@ using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.ExpenseExport;
 using ExpenseTracker.Infrastructure.Services.Identity;
 using ExpenseTracker.Infrastructure.Services.SMS;
+using ExpenseTracker.Infrastructure.Services.UserAccessor;
+using ExpenseTracker.Infrastructure.Services.UserRole;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -22,6 +24,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IIdentityRepository, IdentityRepository>();
         services.AddScoped<IBudgetRepository, BudgetRepository>();
+         services.AddScoped<IDashboardRepository, DashBoardRepository>();
 
         // registering identity service
         services.AddScoped<IIdentityService, IdentityService>();
@@ -38,10 +41,15 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IEmailService, SmtpEmailService>();
         
         // register sms sender service
-        services.AddScoped<ISmsSenderService, TwilioSmsSenderService>();
+        // services.AddScoped<ISmsSenderService, TwilioSmsSenderService>();
         services.AddHttpClient<ISmsSenderService, AndroidSmsGatewayService>();
+        
         services.AddScoped<IExpenseExportService, ExpenseExportService>();
-        services.AddScoped<IDashboardRepository, DashBoardRepository>();
+        services.AddScoped<IUserRoleService, UserRoleService>();
+
+        // registering user accessor service
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserAccessor, UserAccessor>();
 
         return services;
     }

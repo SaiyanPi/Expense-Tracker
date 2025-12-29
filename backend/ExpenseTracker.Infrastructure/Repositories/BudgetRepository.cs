@@ -39,6 +39,7 @@ public class BudgetRepository : IBudgetRepository
             .Take(take)
             .ToListAsync(cancellationToken);
 
+        
         return (budgets, totalCount);
     }
    
@@ -72,7 +73,8 @@ public class BudgetRepository : IBudgetRepository
     public async Task<Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var budget = await _dbContext.Budgets
-            .FindAsync(id);
+            .Include(b => b.Expenses)   // this is required for Deletion to check if the budget has any expense(s)
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
             
         return budget;
     }
@@ -97,12 +99,12 @@ public class BudgetRepository : IBudgetRepository
         // 1. Load budget
         var budget = await _dbContext.Budgets
             .Where(b => b.Id == budgetId && b.UserId == userId)
-            .Select(b => new
+            .Select(b => new BudgetDetailWithExpensesSummary
             {
-                b.Id,
-                b.Name,
+                Id = b.Id,
+                Name = b.Name,
                 Limit = b.Amount,
-                b.IsActive
+                IsActive = b.IsActive
 
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -120,8 +122,8 @@ public class BudgetRepository : IBudgetRepository
                 Description = e.Description,
                 Amount = e.Amount,
                 Date = e.Date,
-                CategoryId = e.Category.Id,
-                CategoryName = e.Category.Name,   
+                CategoryId = e.Category != null ? e.Category.Id : null,
+                CategoryName = e.Category != null ? e.Category.Name : null,  
                 BudgetId = e.BudgetId,
                 UserId = e.UserId
             })
@@ -163,7 +165,7 @@ public class BudgetRepository : IBudgetRepository
         bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        // 1. get all budgets with categoryId for the user
+        // 1. get all budgets for the user
         var budgets = await _dbContext.Budgets
             .Where(b => b.UserId == userId)
             .ToListAsync(cancellationToken);
@@ -214,11 +216,11 @@ public class BudgetRepository : IBudgetRepository
                 var categoryEntity = categories.FirstOrDefault(c => c.Id == categoryId);
                 
                 return new BudgetCategorySummary
-                     {
-                    CategoryId = categoryId ?? Guid.Empty,
+                {
                     BudgetAmount = categoryBudget,
                     ExpensesAmount = categorySpent,
-                    CategoryName = categoryEntity?.Name ?? string.Empty
+                    CategoryId = categoryId ?? null,
+                    CategoryName = categoryEntity?.Name ?? null
                 };
             })
             .AsQueryable();
@@ -265,5 +267,15 @@ public class BudgetRepository : IBudgetRepository
     {
         return await _dbContext.Budgets
             .AnyAsync(b => b.Id == budgetId && b.UserId == userId, cancellationToken);
+    }
+
+    public async Task<bool>ExistByNameUserIdAndCategoryIdAsync(string name, string userId, Guid? excludeBudgetId, Guid catId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Budgets.AnyAsync(b =>
+            b.Name == name &&
+            b.UserId == userId &&
+            (!excludeBudgetId.HasValue || b.Id != excludeBudgetId) &&
+            b.CategoryId == catId,
+            cancellationToken);
     }
 }

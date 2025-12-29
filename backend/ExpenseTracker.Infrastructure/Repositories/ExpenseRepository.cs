@@ -1,9 +1,11 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Pagination;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetExpenseById;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Domain.Models;
 using ExpenseTracker.Persistence;
+using ExpenseTracker.Persistence.Migrations;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Infrastructure.Repositories;
@@ -98,13 +100,14 @@ public class ExpenseRepository : IExpenseRepository
         var expensesOfBudget = await query
             .Select(e => new ExpenseSummaryForBudget
             {
+                Id = e.Id,
                 Title = e.Title,
                 Amount = e.Amount,
                 Date = e.Date,
-                CategoryId = e.Category.Id,
-                CategoryName = e.Category.Name,
-                BudgetId = e.BudgetId,
-                UserId = e.UserId
+                CategoryId = e.Category != null ? e.Category.Id : null,
+                CategoryName = e.Category != null ? e.Category.Name : null,
+                BudgetId = e.Budget.Id,
+                UserId = e.UserId!
             })
             .Skip(skip)
             .Take(take)
@@ -361,6 +364,12 @@ public class ExpenseRepository : IExpenseRepository
     public async Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Expenses.AnyAsync(e => e.Title == title, cancellationToken);
+    }
+
+    public async Task<bool> UserOwnsExpenseAsync(Guid expenseId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Expenses
+            .AnyAsync(e => e.Id == expenseId && e.UserId == userId, cancellationToken);
     }
     
 

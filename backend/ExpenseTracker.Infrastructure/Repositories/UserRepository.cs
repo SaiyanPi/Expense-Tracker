@@ -2,19 +2,25 @@ using AutoMapper;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
+using ExpenseTracker.Persistence;
 using ExpenseTracker.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Twilio.Types;
 
 namespace ExpenseTracker.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ExpenseTrackerDbContext _dbContext;
     private readonly IMapper _mapper;
-    public UserRepository(UserManager<ApplicationUser> userManager, IMapper mapper)
+    public UserRepository(UserManager<ApplicationUser> userManager,
+        ExpenseTrackerDbContext dbContext,
+        IMapper mapper)
     {
         _userManager = userManager;
+        _dbContext = dbContext;
         _mapper = mapper;
     }
 
@@ -66,17 +72,19 @@ public class UserRepository : IUserRepository
         return appUser is null ? null : _mapper.Map<User>(appUser);
     }
 
-
-    // Delete User
-    // -------------
-    public async Task<bool> DeleteAsync(User user, CancellationToken cancellationToken = default)
+    // Get User by refreshToken
+    // ------------------------
+    public async Task<string?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var appUser = await _userManager.FindByIdAsync(user.Id);
-        if (appUser is null) return false;
-
-        var result = await _userManager.DeleteAsync(appUser);
-        return result.Succeeded;
-    
+        var token = await _dbContext.UserTokens
+            .Where(t =>
+                t.LoginProvider == "ExpenseTracker" &&
+                t.Name == "RefreshToken" &&
+                t.Value == refreshToken)
+            .Select(t => t.UserId)
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        return token;
     }
 
 }

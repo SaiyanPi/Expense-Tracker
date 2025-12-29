@@ -34,7 +34,7 @@ public class AndroidSmsGatewayService : ISmsSenderService
         string formattedToPhoneNumber = FormatToE164(toPhoneNumber);
 
         var request = new {
-            textMessage = new { text = $"Your OTP is: {message}" },
+            textMessage = new { text = $"{message}" },
             phoneNumbers = new [] { formattedToPhoneNumber }
         };
         var reqMsg = new HttpRequestMessage(HttpMethod.Post, _gatewayUrl)

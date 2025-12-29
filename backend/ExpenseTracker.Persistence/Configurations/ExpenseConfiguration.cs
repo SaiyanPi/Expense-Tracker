@@ -25,7 +25,7 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .IsRequired();
 
         builder.Property(e => e.CategoryId)
-            .IsRequired(false);
+            .IsRequired(false); // optional but explicit
 
          builder.HasOne<ApplicationUser>()
             .WithMany()
@@ -35,6 +35,11 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
         builder.HasOne(e => e.Category)
             .WithMany(c => c.Expenses)
             .HasForeignKey(e => e.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+        
+        builder.HasOne(e => e.Budget)
+            .WithMany(b => b.Expenses)
+            .HasForeignKey(e => e.BudgetId)
             .OnDelete(DeleteBehavior.SetNull);
     }
 }

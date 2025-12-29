@@ -23,6 +23,8 @@ public class GetAllExpensesQueryHandler : IRequestHandler<GetAllExpensesQuery, P
         GetAllExpensesQuery request,
         CancellationToken cancellationToken)
     {
+        // BUISNESS RULE:
+        // Only admin can view all expenses(all user's expenses)
         var query = request.Paging;
 
         var(expenses, totalCount) = await _expenseRepository.GetAllAsync(

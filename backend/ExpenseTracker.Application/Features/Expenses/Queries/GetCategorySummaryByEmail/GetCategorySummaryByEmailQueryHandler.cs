@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -11,15 +12,18 @@ public class GetCategorySummaryByEmailQueryHandler : IRequestHandler<GetCategory
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
 
     public GetCategorySummaryByEmailQueryHandler(
         IExpenseRepository expenseRepository,
         IUserRepository userRepository,
+        IUserAccessor userAccessor,
         IMapper mapper)
     {
         _expenseRepository = expenseRepository;
-        _userRepository = userRepository;   
+        _userRepository = userRepository;
+        _userAccessor = userAccessor;   
         _mapper = mapper;
     }
 
@@ -27,14 +31,12 @@ public class GetCategorySummaryByEmailQueryHandler : IRequestHandler<GetCategory
         GetCategorySummaryByEmailQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (user == null)
-            throw new NotFoundException(nameof(CategorySummaryDto), request.Email);
+        var userId = _userAccessor.UserId;
 
         var query = request.Paging;
 
         var (categorySummaryByEmail, totalCount) = await _expenseRepository.GetCategorySummaryByEmailAsync(
-            user.Id,
+            userId,
             skip: query.Skip,
             take: query.EffectivePageSize,
             sortBy: query.SortBy,

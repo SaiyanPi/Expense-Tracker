@@ -353,7 +353,8 @@ namespace ExpenseTracker.Persistence.Migrations
                 {
                     b.HasOne("ExpenseTracker.Domain.Entities.Budget", "Budget")
                         .WithMany("Expenses")
-                        .HasForeignKey("BudgetId");
+                        .HasForeignKey("BudgetId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("ExpenseTracker.Domain.Entities.Category", "Category")
                         .WithMany("Expenses")

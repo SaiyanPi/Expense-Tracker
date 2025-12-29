@@ -1,14 +1,16 @@
+using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.Application.Common.Pagination;
-using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Users.Commands.DeleteUser;
 using ExpenseTracker.Application.Features.Users.Queries.GetAllUsers;
 using ExpenseTracker.Application.Features.Users.Queries.GetByEmail;
 using ExpenseTracker.Application.Features.Users.Queries.GetById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
 
+[Authorize(Policy = UserManagementPermission.All)]
 [ApiController]
 [Route("api/[controller]")]
 public class UserManagementController : ControllerBase
@@ -39,7 +41,7 @@ public class UserManagementController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken = default)
     {
-        var query = new GetByIdQuery(id);
+        var query = new GetByIdQuery { UserId = id };
         var user = await _mediator.Send(query, cancellationToken);
         return Ok(user);
     }

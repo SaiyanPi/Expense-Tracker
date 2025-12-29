@@ -11,7 +11,7 @@ public class Expense
     public Guid? BudgetId { get; set; }     // foreign key
     public string? UserId { get; set; }     // foreign key
     public Category Category { get; private set; } = default!;      // reference navigation to Category
-    public Budget? Budget { get; private set; } = default!;        // reference navigation to Budget
+    public Budget Budget { get; private set; } = default!;        // reference navigation to Budget
     
     //  public ApplicationUser User { get; set; }   // ❌ breaks Clean Architecture
     // (domain layer must not depend on persistence layer)

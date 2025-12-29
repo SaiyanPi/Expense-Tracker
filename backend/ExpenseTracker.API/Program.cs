@@ -10,9 +10,16 @@ using Microsoft.AspNetCore.Identity;
 using ExpenseTracker.API.Middleware;
 using FluentValidation.AspNetCore;
 using FluentValidation;
+using ExpenseTracker.Application.Common.Authorization.Permissions;
+using ExpenseTracker.Application.Common.Authorization;
+using QuestPDF.Infrastructure;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// qualifying for community license (required for pdf export)
+QuestPDF.Settings.License = LicenseType.Community;
+
 
 // Register services, repositories, etc.
 builder.Services.AddApplicationServices();
@@ -57,6 +64,71 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// add authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    // Expense policies
+    options.AddPolicy(ExpensePermission.View, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, ExpensePermission.View));
+    options.AddPolicy(ExpensePermission.Create, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, ExpensePermission.Create));
+    options.AddPolicy(ExpensePermission.Update, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, ExpensePermission.Update));
+    options.AddPolicy(ExpensePermission.Delete, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, ExpensePermission.Delete));
+    options.AddPolicy(ExpensePermission.ViewAll, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, ExpensePermission.ViewAll));
+    
+    // Expense filter policy(access to both admin and regular user)
+    options.AddPolicy("Expense.Filter", policy =>
+        policy.RequireAssertion(context => 
+        context.User.HasClaim(AppClaimTypes.Permission, ExpensePermission.View) ||
+        context.User.HasClaim(AppClaimTypes.Permission, ExpensePermission.ViewAll)
+        ));
+
+    // Category policies
+    options.AddPolicy(CategoryPermission.View, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, CategoryPermission.View));
+    options.AddPolicy(CategoryPermission.Create, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, CategoryPermission.Create));
+    options.AddPolicy(CategoryPermission.Update, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, CategoryPermission.Update));
+    options.AddPolicy(CategoryPermission.Delete, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, CategoryPermission.Delete));
+    options.AddPolicy(CategoryPermission.ViewAll, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, CategoryPermission.ViewAll));
+
+    // Budget policies
+    options.AddPolicy(BudgetPermission.View, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, BudgetPermission.View));
+    options.AddPolicy(BudgetPermission.Create, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, BudgetPermission.Create));
+    options.AddPolicy(BudgetPermission.Update, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, BudgetPermission.Update));
+    options.AddPolicy(BudgetPermission.Delete, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, BudgetPermission.Delete));
+    options.AddPolicy(BudgetPermission.ViewAll, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, BudgetPermission.ViewAll));
+    
+    // Dashboard policy
+    options.AddPolicy(DashboardPermission.View, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, DashboardPermission.View));
+    
+    // UserManagement policy
+    options.AddPolicy(UserManagementPermission.All, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, UserManagementPermission.All));
+    
+    // // Profile policies
+    // options.AddPolicy(ProfilePermission.View, policy =>
+    //     policy.RequireClaim(AppClaimTypes.Permission, ProfilePermission.View));
+    // options.AddPolicy(ProfilePermission.Update, policy =>
+    //     policy.RequireClaim(AppClaimTypes.Permission, ProfilePermission.Update));
+    // options.AddPolicy(ProfilePermission.Delete, policy =>
+    //     policy.RequireClaim(AppClaimTypes.Permission, ProfilePermission.Delete));
+  
+
+    
+});
 
 
 var app = builder.Build();

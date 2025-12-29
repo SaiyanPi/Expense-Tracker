@@ -89,16 +89,16 @@ public class CategoryRepository : ICategoryRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    // Additional method to check for existing name for validation in service in Application layer
-    // public async Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken = default)
-    // {
-    //     return await _dbContext.Categories.AnyAsync(c => c.Name == name, cancellationToken);
-    // }
+    // Additional method to check for existing name for validation in service in handlers
+  
 
-    public async Task<bool> ExistsByNameAndUserIdAsync(string name, string userId, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsByNameAndUserIdAsync(string name, string userId, Guid? excludeCategoryId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Categories
-            .AnyAsync(c => c.Name == name && c.UserId == userId, cancellationToken);
+        return await _dbContext.Categories.AnyAsync(c =>
+            c.Name == name &&
+            c.UserId == userId &&
+            (!excludeCategoryId.HasValue || c.Id != excludeCategoryId),
+            cancellationToken);
     }
 
     public async Task<bool> UserOwnsCategoryAsync(Guid categoryId, string userId, CancellationToken cancellationToken = default)

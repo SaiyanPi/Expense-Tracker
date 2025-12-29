@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetsSummaryByEmail;
@@ -13,29 +14,31 @@ public class GetBudgetsSummaryByEmailQueryHandler : IRequestHandler<GetBudgetsSu
 {
     private readonly IBudgetRepository _budgetRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
 
 
-    public GetBudgetsSummaryByEmailQueryHandler(IBudgetRepository budgetRepository,
+    public GetBudgetsSummaryByEmailQueryHandler(
+        IBudgetRepository budgetRepository,
         IUserRepository userRepository,
+        IUserAccessor userAccessor,
         IMapper mapper)
     {
         _budgetRepository = budgetRepository;
         _userRepository = userRepository;
+        _userAccessor = userAccessor;
         _mapper = mapper;
     }
 
     public async Task<BudgetSummaryDto> Handle(GetBudgetsSummaryByEmailQuery request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (user == null)
-            throw new NotFoundException(nameof(User), request.Email);
+        var userId = _userAccessor.UserId;
 
         var query = request.Paging;
 
 
         var budgetSummaryByEmail = await _budgetRepository.GetBudgetsSummaryByEmailAsync(
-            user.Id, 
+            userId, 
 
             skip: query.Skip,
             take: query.EffectivePageSize,

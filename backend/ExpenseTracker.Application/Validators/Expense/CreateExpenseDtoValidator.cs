@@ -30,9 +30,6 @@ public class CreateExpenseDtoValidator : AbstractValidator<CreateExpenseDto>
         RuleFor(x => x.BudgetId)
             .Must(budgetId => budgetId == null || budgetId != Guid.Empty)
             .WithMessage("BudgetId must be a valid GUID when provided.");
-        
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("UserId is required");
 
         // // Apply rule only when UserId is provided (not null or empty)
         // When(x => !string.IsNullOrWhiteSpace(x.UserId), () =>

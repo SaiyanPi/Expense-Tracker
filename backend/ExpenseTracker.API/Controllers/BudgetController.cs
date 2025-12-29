@@ -10,6 +10,8 @@ using ExpenseTracker.Application.Features.Budgets.Queries.GetAllBudgetsByEmail;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetsSummaryByEmail;
 using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetDetailWithExpensesByEmail;
 using ExpenseTracker.Application.Common.Pagination;
+using Microsoft.AspNetCore.Authorization;
+using ExpenseTracker.Application.Common.Authorization.Permissions;
 
 namespace ExpenseTracker.API.Controllers;   
 
@@ -25,6 +27,7 @@ public class BudgetController : ControllerBase
     }
     
     // GET: api/Budget
+    [Authorize(Policy = BudgetPermission.ViewAll)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
@@ -38,22 +41,23 @@ public class BudgetController : ControllerBase
         return Ok(budgets);
     }
 
-    // GET: api/Budget/email?email={email}
-    [HttpGet("email")]
+    // GET: api/Budget/my
+    [Authorize(Policy = BudgetPermission.View)]
+    [HttpGet("my")]
     public async Task<IActionResult> GetAllBudgetsByEmail(
-        string email,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
         [FromQuery] string? sortBy = null,
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllBudgetsByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllBudgetsByEmailQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
         var budgets = await _mediator.Send(query, cancellationToken);
         return Ok(budgets);
     }
     
     // GET: api/Budget/{id}
+    [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetBudgetById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -62,11 +66,11 @@ public class BudgetController : ControllerBase
         return Ok(budget);
     }
 
-    // GET: api/budget/budget-detail-with-expenses?budgetId={budgetId}&email={email}
+    // GET: api/budget/budget-detail-with-expenses?budgetId={budgetId}
+    [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("budget-detail-with-expenses")]
     public async Task<IActionResult> GetBudgetDetailWithExpensesByEmail(
         [FromQuery] Guid budgetId,
-        [FromQuery] string email,
 
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
@@ -76,7 +80,6 @@ public class BudgetController : ControllerBase
     {
         var query = new GetBudgetDetailWithExpensesByEmailQuery(
             budgetId,
-            email,
             new PagedQuery(page, pageSize, sortBy, sortDesc));
 
         var budgetDetailWithExpensesByEmail = await _mediator.Send(query, cancellationToken);
@@ -85,22 +88,22 @@ public class BudgetController : ControllerBase
 
     
     // GET: api/budget/budget-summary/email?email={email}
+    [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("budget-summary/email")]
     public async Task<IActionResult> GetBudgetSummaryByEmail(
-        [FromQuery] string email, 
-
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
         [FromQuery] string? sortBy = null,
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetBudgetsSummaryByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetBudgetsSummaryByEmailQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
         var budgetsSummary = await _mediator.Send(query, cancellationToken);
         return Ok(budgetsSummary);
     }
 
     // POST: api/Budget
+    [Authorize(Policy = BudgetPermission.Create)]
     [HttpPost]
     public async Task<IActionResult> CreateBudget([FromBody] CreateBudgetDto createBudgetDto, CancellationToken cancellationToken = default)
     {
@@ -114,6 +117,7 @@ public class BudgetController : ControllerBase
 
     
     // PUT: api/budget/{id}
+    [Authorize(Policy = BudgetPermission.Update)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateBudget(Guid id, [FromBody] UpdateBudgetDto dto, CancellationToken cancellationToken = default)
     {
@@ -136,6 +140,7 @@ public class BudgetController : ControllerBase
     }
 
     // DELETE: api/budget/{id}
+    [Authorize(Policy = BudgetPermission.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteBudget(Guid id, CancellationToken cancellationToken = default)
     {

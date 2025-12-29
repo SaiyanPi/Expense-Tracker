@@ -48,5 +48,6 @@ public interface IBudgetRepository
     Task DeleteAsync(Budget budget, CancellationToken cancellationToken = default);
 
     Task<bool> UserOwnsBudgetAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default);
-
+    Task<bool> ExistByNameUserIdAndCategoryIdAsync(string name, string userId, Guid? excludeBudgetId, Guid catId, CancellationToken cancellationToken = default);
+    //Task<bool> HasExpensesAsync(Guid budgetId, Cancel)
 }

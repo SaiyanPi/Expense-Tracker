@@ -26,6 +26,6 @@ public interface ICategoryRepository
 
     // Additional method to check for existing name for validation in service in Application layer
     //Task<bool> ExistsByNameAsync(string name, CancellationToken cancellationToken = default);
-    Task<bool> ExistsByNameAndUserIdAsync(string name, string userId, CancellationToken cancellationToken = default);
+    Task<bool> ExistsByNameAndUserIdAsync(string name, string userId, Guid? excludeCategoryId, CancellationToken cancellationToken = default);
     Task<bool> UserOwnsCategoryAsync(Guid categoryId, string userId, CancellationToken cancellationToken = default);
 }

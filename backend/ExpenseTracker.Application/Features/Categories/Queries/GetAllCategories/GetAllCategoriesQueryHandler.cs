@@ -23,6 +23,8 @@ public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuer
         GetAllCategoriesQuery request,
         CancellationToken cancellationToken)
     {
+        // BUISNESS RULE:
+        // Only admin can view all categories(categories of all user)
         var query = request.Paging;
 
         var (categories, totalCount) = await _categoryRepository.GetAllAsync(

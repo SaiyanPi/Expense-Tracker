@@ -1,4 +1,5 @@
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
@@ -8,19 +9,33 @@ namespace ExpenseTracker.Application.Features.Users.Commands.DeleteUser;
 public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
 {
     private readonly IUserRepository _userRepository;
-
-    public DeleteUserCommandHandler(IUserRepository userRepository)
+    private readonly IIdentityService _identityService;
+    private readonly IUserRoleService _userRoleService;
+    public DeleteUserCommandHandler(
+        IUserRepository userRepository,
+        IIdentityService identityService,
+        IUserRoleService userRoleService
+        )
     {
         _userRepository = userRepository;
+        _identityService = identityService;
+        _userRoleService = userRoleService;
     }       
 
     public async Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (user == null)
-            throw new NotFoundException(nameof(User), request.Id);
+        // BUISNESS RULE:
+        // admin can only delete regular users, cannot delete other admins
 
-        await _userRepository.DeleteAsync(user, cancellationToken);
+        var isAdmin = await _userRoleService.IsAdminAsync(request.UserId);
+        if(isAdmin)
+        throw new ForbiddenException("You cannot delete another admin.");
+
+        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+        if (user == null)
+            throw new NotFoundException(nameof(User), request.UserId);
+
+        await _identityService.DeleteAsync(user.Id, cancellationToken);
         return Unit.Value;
     }
 }   

@@ -6,4 +6,6 @@ public interface IExpenseExportService
 {
     byte[] ExportToCsv(IReadOnlyList<ExpenseExportDto> expenses);
     byte[] ExportToExcel(IReadOnlyList<ExpenseExportDto> expenses);
+    byte[] ExportToPdf(IReadOnlyList<ExpenseExportDto> expenses);
+    
 }

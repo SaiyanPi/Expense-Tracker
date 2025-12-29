@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -11,60 +12,61 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly ICategoryRepository _categoryRepository;
-    private readonly IUserRepository _userRepository;
     private readonly IBudgetRepository _budgetRepository;
+    private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
 
     public CreateExpenseCommandHandler(IExpenseRepository expenseRepository,
         ICategoryRepository categoryRepository,
-        IUserRepository userRepository,
         IBudgetRepository budgetRepository,
+        IUserAccessor userAccessor,
         IMapper mapper)
     {
         _expenseRepository = expenseRepository;
         _categoryRepository = categoryRepository;
-        _userRepository = userRepository;
         _budgetRepository = budgetRepository;
+        _userAccessor = userAccessor;
         _mapper = mapper;
     }
 
     public async Task<ExpenseDto> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
     {
-        // check if the user exist
-        var user = await _userRepository.GetByIdAsync(request.CreateExpenseDto.UserId, cancellationToken);
-        if (user is null)
-            throw new NotFoundException(nameof(User), request.CreateExpenseDto.UserId);
+        // BUISNESS RULE:
+        // Admins cannot create expenses
+        // Duplicate titles allowed
         
-        // check if the category exist
-        var category = await _categoryRepository.GetByIdAsync(request.CreateExpenseDto.CategoryId, cancellationToken);
-            if (category is null)
-                throw new NotFoundException(nameof(Category), request.CreateExpenseDto.CategoryId);
+        var userId = _userAccessor.UserId;
 
-        // check if the category belongs to the user
-        bool ownsCategory = await _categoryRepository.UserOwnsCategoryAsync(request.CreateExpenseDto.CategoryId, request.CreateExpenseDto.UserId, cancellationToken);
-        if (!ownsCategory)
-            throw new ConflictException($"Category with id '{request.CreateExpenseDto.CategoryId}' does not belong to user '{request.CreateExpenseDto.UserId}'.");
-
-        if (request.CreateExpenseDto.BudgetId.HasValue)
+        if (!string.IsNullOrWhiteSpace(request.CreateExpenseDto.UserId))
         {
-            // check if the budget exist
-            var budgetExists = await _budgetRepository.GetByIdAsync(request.CreateExpenseDto.BudgetId.Value, cancellationToken);
-            if (budgetExists is null)
-                throw new NotFoundException(nameof(Budget), request.CreateExpenseDto.BudgetId.Value);
+            throw new BadRequestException("No permission. Try again without providing UserId field.");
+        }
 
+        // category validation
+        if(request.CreateExpenseDto.CategoryId is Guid categoryId)  // equivalent to if(request.CreateExpenseDto.CategoryId.HasValue)
+        {   
+            // check if the category belongs to the user
+            bool ownsCategory = await _categoryRepository.UserOwnsCategoryAsync(categoryId, userId, cancellationToken);
+            if (!ownsCategory)
+                throw new ConflictException($"You don't have a Category with id '{categoryId}'.");
+        }
+        
+        // budget validation
+        if (request.CreateExpenseDto.BudgetId is Guid budgetId)
+        {
             // check if the budget belongs to the user
-            bool ownsBudget = await _budgetRepository.UserOwnsBudgetAsync(request.CreateExpenseDto.BudgetId.Value, request.CreateExpenseDto.UserId, cancellationToken);
+            bool ownsBudget = await _budgetRepository.UserOwnsBudgetAsync(budgetId, userId, cancellationToken);
             if (!ownsBudget)
-                throw new ConflictException($"Budget with id '{request.CreateExpenseDto.BudgetId}' does not belong to user '{request.CreateExpenseDto.UserId}'.");
+                throw new ConflictException($"You don't have the Budget with id '{budgetId}'.");
 
             // check the budget isActive 
-            var budget = await _budgetRepository.GetBudgetStatusByIdAsync(request.CreateExpenseDto.BudgetId.Value, cancellationToken);
+            var budget = await _budgetRepository.GetBudgetStatusByIdAsync(budgetId, cancellationToken);
             if (!budget)
                 throw new NotFoundException("You cannot create an expense for an inactive/expired budget.");
-            
         }
       
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
+        expense.UserId = userId;
         await _expenseRepository.AddAsync(expense, cancellationToken);
         return _mapper.Map<ExpenseDto>(expense);
     }

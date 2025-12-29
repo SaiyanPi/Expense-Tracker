@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Entities;
@@ -12,15 +13,18 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
 
     public GetAllExpensesByEmailQueryHandler(
         IExpenseRepository expenseRepository,
         IUserRepository userRepository, 
+        IUserAccessor userAccessor,
         IMapper mapper)
     {
         _expenseRepository = expenseRepository;
         _userRepository = userRepository;
+        _userAccessor = userAccessor;
         _mapper = mapper;
     }
 
@@ -28,14 +32,15 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
         GetAllExpensesByEmailQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (user == null)
-            throw new NotFoundException(nameof(User), request.Email);
+        // BUISNESS RULE:
+        // Only user can view their own expenses
+
+        var userId = _userAccessor.UserId;
         
         var query = request.Paging;
 
         var(expenses, totalCount) = await _expenseRepository.GetExpensesByEmailAsync(
-            user.Id,
+            userId,
             skip: query.Skip,
             take: query.EffectivePageSize,
             sortBy: query.SortBy,

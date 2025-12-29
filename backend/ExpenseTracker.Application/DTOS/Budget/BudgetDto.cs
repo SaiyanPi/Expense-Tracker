@@ -1,3 +1,5 @@
+using ExpenseTracker.Application.DTOs.Expense;
+
 namespace ExpenseTracker.Application.DTOs.Budget;
 
 public class BudgetDto
@@ -9,5 +11,7 @@ public class BudgetDto
     public DateTime EndDate { get; set; }
     public string UserId { get; set; } = default!;
     public Guid? CategoryId { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsActive => DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
+    
+    //public IReadOnlyList<ExpenseDto> Expenses { get; set; } = [];
 }

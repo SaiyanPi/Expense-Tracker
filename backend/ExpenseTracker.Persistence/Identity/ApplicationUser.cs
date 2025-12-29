@@ -9,8 +9,14 @@ public class ApplicationUser : IdentityUser
     public string? RefreshToken { get; private set; }
     public DateTime? RefreshTokenExpiryTime { get; private set; }
 
+    // adds a navigation property from ApplicationUser → AspNetUserTokens table
+    // which we will need in refreshToken method
+    // public virtual ICollection<IdentityUserToken<string>> UserTokens { get; set; } = default!;
+
+
     // public ICollection<Category> Categories { get; set; } = new List<Category>();
     // public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+
 
 
     // conversion/Mapping method to convert the ApplicationUser(IdentityUser) object into a Domain.Entities.User object

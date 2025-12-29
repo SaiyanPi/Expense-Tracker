@@ -3,4 +3,4 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;
 
-public record RefreshTokenCommand(RefreshTokenDto RefreshTokenDto) : IRequest<AuthResultDto>;
+public record RefreshTokenCommand( RefreshTokenDto RefreshTokenDto) : IRequest<AuthResultDto>;

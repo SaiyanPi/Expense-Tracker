@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Application.Features.Categories.Commands.CreateCategory;
@@ -7,6 +8,7 @@ using ExpenseTracker.Application.Features.Categories.Queries.GetAllCategories;
 using ExpenseTracker.Application.Features.Categories.Queries.GetAllCategoriesByEmail;
 using ExpenseTracker.Application.Features.Categories.Queries.GetCategoryById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CategoryTracker.API.Controllers;
@@ -24,7 +26,7 @@ public class CategoryController : ControllerBase
 
 
     // GET: api/Category
-    //[Authorize(Policy = "CanViewAllUsersCategory")]
+    [Authorize(Policy = CategoryPermission.ViewAll)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
@@ -38,24 +40,23 @@ public class CategoryController : ControllerBase
         return Ok(categories);
     }
 
-    // GET: api/Category/email?email={email}
-    //[Authorize]
-    [HttpGet("email")]
+    // GET: api/Category/my
+    [Authorize(Policy = CategoryPermission.View)]
+    [HttpGet("my")]
     public async Task<IActionResult> GetAllByEmail(
-        string email,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
         [FromQuery] string? sortBy = null,
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllCategoriesByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllCategoriesByEmailQuery( new PagedQuery(page, pageSize, sortBy, sortDesc));
         var categories = await _mediator.Send(query, cancellationToken);
         return Ok(categories);
     }
 
     // GET: api/Category/{id}
-   //[Authorize("canViewAllUsersCategory")]
+    [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -65,6 +66,7 @@ public class CategoryController : ControllerBase
     }
 
     // POST: api/Category
+    [Authorize(Policy = CategoryPermission.Create)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto, CancellationToken cancellationToken = default)
     {
@@ -77,6 +79,7 @@ public class CategoryController : ControllerBase
     }
     
     // PUT: api/Category/{id}
+    [Authorize(Policy = CategoryPermission.Update)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryDto dto, CancellationToken cancellationToken = default)
     {
@@ -94,6 +97,7 @@ public class CategoryController : ControllerBase
     }
 
     // DELETE: api/Category/{id}
+    [Authorize(Policy = CategoryPermission.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {

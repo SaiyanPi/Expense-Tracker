@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
@@ -10,12 +11,21 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
 {
     private readonly ICategoryRepository _categoryRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUserAccessor _userAccessor;
+    private readonly IUserRoleService _userRoleService;
     private readonly IMapper _mapper;
 
-    public UpdateCategoryCommandHandler(ICategoryRepository categoryRepository, IUserRepository userRepository, IMapper mapper)
+    public UpdateCategoryCommandHandler(
+        ICategoryRepository categoryRepository,
+        IUserRepository userRepository,
+        IUserAccessor userAccessor,
+        IUserRoleService userRoleService,
+        IMapper mapper)
     {
         _categoryRepository = categoryRepository;
         _userRepository = userRepository;
+        _userAccessor = userAccessor;
+        _userRoleService = userRoleService;
         _mapper = mapper;
     }
 
@@ -24,23 +34,42 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
         var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken);
         if (category == null)
             throw new NotFoundException(nameof(Category), request.Id);
-        
-        // // business rule: category name must be unique per user
-        // if (request.UserId != null)
-        // {
-        //     // first check if the user exist
-        //     var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
-        //     if (user == null)
-        //         throw new NotFoundException(nameof(User), request.UserId);
 
-        //     // then check for uniqueness
-        //     var exists = await _categoryRepository.ExistsByNameAndUserIdAsync(request.Name, request.UserId, cancellationToken);
-        //     if (exists && !string.Equals(category.Name, request.Name, StringComparison.OrdinalIgnoreCase))
-        //         throw new ValidationException($"Category with name '{request.Name}' already exists for user '{request.UserId}'.");
-        // }
+        var userId = _userAccessor.UserId;
+        var isAdmin = await _userRoleService.IsAdminAsync(userId);
+
+        // BUISNESS RULES: 
+        // admins can only update category with null userId
+        // only specific user can update category with the specific userId
+        if (category.UserId is null)
+        {
+            // System category → admin only
+            if (!isAdmin)
+                throw new ForbiddenException("Only admins can update system categories.");
+        }
+        else
+        {
+            // User category → owner only (admins are NOT allowed)
+            if (category.UserId != userId)
+                throw new ForbiddenException("You cannot update this category.");
+        }
+
+        // Check for uniqueness of category name
+        if (!string.Equals(category.Name, request.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            var userIdToCheck = category.UserId ?? string.Empty; // null or specific user
+
+            var nameExists = await _categoryRepository.ExistsByNameAndUserIdAsync(
+                request.Name,
+                userIdToCheck,
+                category.Id,
+                cancellationToken);
+
+            if (nameExists)
+                throw new ValidationException($"Category with name '{request.Name}' already exists.");
+        }
 
         _mapper.Map(request, category);
-
         await _categoryRepository.UpdateAsync(category, cancellationToken);
         return Unit.Value;
     }

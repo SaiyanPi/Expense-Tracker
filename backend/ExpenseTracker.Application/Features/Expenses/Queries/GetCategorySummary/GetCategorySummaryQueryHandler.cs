@@ -23,6 +23,8 @@ public class GetCategorySummaryQueryHandler : IRequestHandler<GetCategorySummary
         GetCategorySummaryQuery request,
         CancellationToken cancellationToken)
     {
+        // BUISNESS RULE:
+        // Only admin can view category summarry(all user's/sub total category summary)
         var query = request.Paging;
 
         var (categorySummary, totalCount) = await _expenseRepository.GetCategorySummaryAsync(

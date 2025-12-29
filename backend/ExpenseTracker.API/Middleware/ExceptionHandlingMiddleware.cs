@@ -64,6 +64,7 @@ public class ExceptionHandlingMiddleware
             FluentValidation.ValidationException => HttpStatusCode.BadRequest,
             ValidationException => HttpStatusCode.BadRequest,
             NotFoundException => HttpStatusCode.NotFound,
+            BadRequestException => HttpStatusCode.BadRequest,
             UnauthorizedException => HttpStatusCode.Unauthorized,
             ForbiddenException => HttpStatusCode.Forbidden,
             ConflictException => HttpStatusCode.Conflict,

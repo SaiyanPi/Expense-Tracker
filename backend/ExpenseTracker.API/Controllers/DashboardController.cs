@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ExpenseTracker.Application.Features.Dashboard.Query;
+using Microsoft.AspNetCore.Authorization;
+using ExpenseTracker.Application.Common.Authorization.Permissions;
 
 namespace ExpenseTracker.API.Controllers;   
 
@@ -15,12 +17,12 @@ public class DashboardController : ControllerBase
         _mediator = mediator;
     }
 
+    // api/dashboard
+    [Authorize(Policy = DashboardPermission.View)]
     [HttpGet("dashboard")]
-    public async Task<IActionResult> GetMonthlyDashboard(
-        [FromQuery]string userId,
-        CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetMonthlyDashboard(CancellationToken cancellationToken = default)
     {
-        var query = new GetMonthlyDashboardQuery(userId);
+        var query = new GetMonthlyDashboardQuery();
         var dashboardSummary = await _mediator.Send(query, cancellationToken);
         return Ok(dashboardSummary);
     }

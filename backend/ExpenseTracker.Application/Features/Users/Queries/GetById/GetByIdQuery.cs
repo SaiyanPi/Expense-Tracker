@@ -3,4 +3,9 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Users.Queries.GetById;
 
-public record GetByIdQuery(string Id) : IRequest<UserDto>;
+public record GetByIdQuery : IRequest<UserDto>
+{
+    // Optional: if null, handler will decide based on admin or not
+    public string? UserId { get; set; }
+
+}

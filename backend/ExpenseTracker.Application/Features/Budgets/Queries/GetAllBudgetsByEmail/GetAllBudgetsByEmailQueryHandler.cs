@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -11,17 +12,20 @@ public class GetAllBudgetQueryHandler : IRequestHandler<GetAllBudgetsByEmailQuer
 {
     private readonly IBudgetRepository _budgetRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
 
     public GetAllBudgetQueryHandler
     (
         IBudgetRepository budgetRepository,
         IUserRepository userRepository,
+        IUserAccessor userAccessor,
         IMapper mapper
     )
     {
         _budgetRepository = budgetRepository;
         _userRepository = userRepository;
+        _userAccessor = userAccessor;
         _mapper = mapper;
     }
 
@@ -29,14 +33,12 @@ public class GetAllBudgetQueryHandler : IRequestHandler<GetAllBudgetsByEmailQuer
         GetAllBudgetsByEmailQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (user == null)
-            throw new NotFoundException(nameof(Domain.Entities.User), request.Email);
+        var userId = _userAccessor.UserId;
 
         var query = request.Paging;
 
         var (budgets, totalCount) = await _budgetRepository.GetAllBudgetsByEmailAsync(
-            user.Id,
+            userId,
             skip: query.Skip,
             take: query.EffectivePageSize,
             sortBy: query.SortBy,

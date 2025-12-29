@@ -15,6 +15,9 @@ public class GetTotalExpensesQueryHandler : IRequestHandler<GetTotalExpensesQuer
 
     public async Task<TotalExpenseDto> Handle(GetTotalExpensesQuery request, CancellationToken cancellationToken)
     {
+        // BUISNESS RULE:
+        // Only admin can view total expenses (all user's expenses total)
+        
         var totalAmount = await _expenseRepository.GetTotalExpenseAsync(cancellationToken);
         return new TotalExpenseDto { TotalAmount = totalAmount }; 
     }

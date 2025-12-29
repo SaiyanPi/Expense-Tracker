@@ -1,6 +1,8 @@
 using ExpenseTracker.Application.Common.Authorization;
+using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Identity.Commands.ChangePassword;
+using ExpenseTracker.Application.Features.Identity.Commands.ConfirmChangeEmail;
 using ExpenseTracker.Application.Features.Identity.Commands.ConfirmPhone;
 using ExpenseTracker.Application.Features.Identity.Commands.EmailConfirmation;
 using ExpenseTracker.Application.Features.Identity.Commands.ForgotPassword;
@@ -8,9 +10,11 @@ using ExpenseTracker.Application.Features.Identity.Commands.Login;
 using ExpenseTracker.Application.Features.Identity.Commands.Logout;
 using ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;
 using ExpenseTracker.Application.Features.Identity.Commands.Register;
+using ExpenseTracker.Application.Features.Identity.Commands.RequestChangeEmail;
 using ExpenseTracker.Application.Features.Identity.Commands.ResetPassword;
 using ExpenseTracker.Application.Features.Identity.Commands.SendPhoneConfirmationCode;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -25,7 +29,7 @@ public class AuthController : ControllerBase
     public AuthController(IMediator mediator)
     {
         _mediator = mediator;
-    }
+    } 
 
     [HttpPost("register-user")]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto dto, CancellationToken cancellationToken = default)
@@ -67,30 +71,44 @@ public class AuthController : ControllerBase
     }
 
     // POST: api/auth/refresh
+    // [Authorize]
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenDto dto, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState); 
         
-        var command = new RefreshTokenCommand(dto);
-        var result = await _mediator.Send(command, cancellationToken);
-        return Ok(result); // Same AuthResultDto
+         try
+        {
+            var command = new RefreshTokenCommand(dto);
+            var result = await _mediator.Send(command, cancellationToken);
+            return Ok(result); // AuthResultDto
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { Message = "Invalid or expired refresh token." });
+        }
+        catch (IdentityOperationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     // POST: api/auth/logout
+    [Authorize]
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] LogoutUserDto dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var command = new LogoutUserCommand(dto);
+        var command = new LogoutUserCommand();
         await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Logged out successfully" });
     }
 
     // POST: api/auth/change-password
+    [Authorize]
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto, CancellationToken cancellationToken = default)
     {
@@ -104,6 +122,7 @@ public class AuthController : ControllerBase
 
     // Confirm Email
     // GET: api/auth/confirm-email?userId={userId}&token={token}
+    [AllowAnonymous]
     [HttpGet("confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromQuery] VerifyEmailDto dto, CancellationToken cancellationToken = default)
     {
@@ -114,6 +133,7 @@ public class AuthController : ControllerBase
 
     // Forgot Password - Request Reset Token
     // POST: api/auth/forgot-password
+    [AllowAnonymous]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto, CancellationToken cancellationToken = default)
     {
@@ -127,18 +147,24 @@ public class AuthController : ControllerBase
 
     // Reset Password
     // POST: api/auth/reset-password?userId={userId}&token={token}
+    [AllowAnonymous]
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ResetPassword(
+        [FromQuery] string userId,
+        [FromQuery] string token,
+        [FromBody] ResetPasswordDto dto, 
+        CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var command = new ResetPasswordCommand(dto);
+        var command = new ResetPasswordCommand(userId, token, dto);
         await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Password has been reset successfully" });
     }
 
     // POST: api/auth/send-phone-otp
+    [AllowAnonymous]
     [HttpPost("send-phone-otp")]
     public async Task<IActionResult> SendPhoneOtp([FromBody] PhoneConfirmationDto dto, CancellationToken cancellationToken = default)
     {
@@ -151,6 +177,7 @@ public class AuthController : ControllerBase
     }
 
     // POST: api/auth/send-phone-otp
+    [AllowAnonymous]
     [HttpPost("confirm-phone-otp")]
     public async Task<IActionResult> ConfirmPhoneOtp([FromBody] VerifyPhoneDto dto, CancellationToken cancellationToken = default)
     {
@@ -160,6 +187,32 @@ public class AuthController : ControllerBase
         var command = new ConfirmPhoneCommand(dto);
         var success =await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Phone confirmed." });
+    }
+
+    //POST: api/auth/change-email
+    [HttpPost("change-email")]
+    public async Task<IActionResult> RequestChangeEmail([FromBody] ChangeEmailRequestDto dto, CancellationToken cancellationToken = default)
+    {
+        if(!ModelState.IsValid)
+            return BadRequest(ModelState);
+        
+        var command = new RequestChangeEmailCommand(dto);
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new {Success = true, Message = "Email change confirmation link sent to your new email"});
+    }
+
+
+    // GET: api/auth/confirm-change-email?userId={UserId}&newEmail={newEmail}&token={token}
+    [AllowAnonymous]
+    [HttpGet("confirm-change-email")]
+    public async Task<IActionResult> ConfirmChangeEmail([FromQuery] ConfirmChangeEmailDto dto, CancellationToken cancellationToken = default)
+    {
+        if(!ModelState.IsValid)
+            return BadRequest(ModelState);
+        
+        var command = new ConfirmChangeEmailCommand(dto);
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new {Success = true, Message = "Email has been changed successfully"});
     }
 }
 

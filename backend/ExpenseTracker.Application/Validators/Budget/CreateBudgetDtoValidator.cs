@@ -21,12 +21,20 @@ public class CreateBudgetDtoValidator : AbstractValidator<CreateBudgetDto>
             .NotEmpty().WithMessage("End date is required.")
             .GreaterThan(x => x.StartDate).WithMessage("End date must be later than start date.");
 
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
+        // Apply rule only when UserId is provided (not null or empty)
+        When(x => !string.IsNullOrWhiteSpace(x.UserId), () =>
+        {
+            RuleFor(x => x.UserId!)
+                .Must(BeAValidGuid)
+                .WithMessage("UserId must be a valid GUID when provided.");
+        });
         
         RuleFor(x => x.CategoryId)
             .Must(categoryId => categoryId == null || categoryId != Guid.Empty)
             .WithMessage("CategoryId must be a valid non-empty GUID when provided.");
     }
+
+    private bool BeAValidGuid(string userId)
+        => Guid.TryParse(userId, out _);
 
 }

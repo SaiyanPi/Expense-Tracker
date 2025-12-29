@@ -42,13 +42,10 @@ public class ExpenseMappingProfile : Profile
         CreateMap<CategorySummary, CategorySummaryDto>();
 
         // mapping for ExpenseSummaryForBudget to ExpenseDto
-        CreateMap<ExpenseSummaryForBudget, ExpenseDto>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Description, opt => opt.Ignore());
+        CreateMap<ExpenseSummaryForBudget, ExpenseSummaryForBudgetDto>();
 
         // mapping for ExpenseSummaryForCategory to ExpenseDto
-        CreateMap<ExpenseSummaryForCategory, ExpenseDto>()
-            .ForMember(dest => dest.Description, opt => opt.Ignore());
+        CreateMap<ExpenseSummaryForCategory, ExpenseSummaryForCategoryDto>();
 
         // Partial mapping for FilteredExpenseDto
         // CreateMap<Expense, FilteredExpenseDto>()

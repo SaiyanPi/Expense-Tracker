@@ -16,7 +16,9 @@ public class ExportExpensesValidator : AbstractValidator<ExportExpensesQuery>
 
         RuleFor(x => x.Format)
             .NotEmpty().WithMessage("Format is required")
-            .Must(format => format.Equals("csv", StringComparison.OrdinalIgnoreCase) || format.Equals("xlsx", StringComparison.OrdinalIgnoreCase))
-            .WithMessage("Format must be either 'csv' or 'xlsx' or 'excel'.");
+            .Must(format => format.Equals("csv", StringComparison.OrdinalIgnoreCase) ||
+                format.Equals("xlsx", StringComparison.OrdinalIgnoreCase) ||
+                format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
+            .WithMessage("Format must be either 'csv' or 'xlsx' or 'pdf'.");
     }
 }

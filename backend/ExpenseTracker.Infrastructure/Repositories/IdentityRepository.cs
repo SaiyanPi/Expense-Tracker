@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
@@ -14,15 +15,18 @@ namespace ExpenseTracker.Infrastructure.Repositories;
 public class IdentityRepository : IIdentityRepository
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IMapper _mapper;
     private readonly IConfiguration _config;
 
     public IdentityRepository(
         UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
         IMapper mapper,
         IConfiguration config)
     {
         _userManager = userManager;
+        _roleManager = roleManager;
         _mapper = mapper;
         _config = config;
     }
@@ -121,36 +125,34 @@ public class IdentityRepository : IIdentityRepository
     {
         var key = Encoding.UTF8.GetBytes(_config["JwtConfig:Secret"]!);
 
-        // Fetch user from UserManager
+        // Fetch identity user from UserManager
         var appUser = await _userManager.FindByIdAsync(user.Id);
         if (appUser == null) 
             throw new Exception("User not found.");
 
-        // Build claims 
+        // Base claims(identity only)
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.FullName),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? "")
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
         };
 
-        // Add roles
+        // Get user roles
         var roles = await _userManager.GetRolesAsync(appUser);
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
         // Add role based claims
-        foreach (var role in roles)
+        foreach (var roleName in roles)
         {
-            switch (role)
+            var role = await _roleManager.FindByNameAsync(roleName);
+            if (role != null)
             {
-                case AppRoles.Admin:
-                    claims.Add(new Claim(AppClaimTypes.can_view_all_users, "true"));
-                    claims.Add(new Claim(AppClaimTypes.can_view_all_users_category, "true"));
-                    claims.Add(new Claim(AppClaimTypes.can_view_all_users_expense, "true"));
-                    break;
-                case "User":
-                    claims.Add(new Claim("CanViewOwnCategory", "true"));
-                    break;
+                var roleClaims = await _roleManager.GetClaimsAsync(role);
+                var permissionClaims = roleClaims
+                    .Where(c => c.Type == AppClaimTypes.Permission);
+
+                claims.AddRange(permissionClaims);
             }
         }
 
@@ -265,6 +267,8 @@ public class IdentityRepository : IIdentityRepository
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
+
+        //var decodedToken = WebUtility.UrlDecode(token);
 
         var result = await _userManager.ConfirmEmailAsync(appUser, token);
         return result.Succeeded;

@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
@@ -15,6 +16,7 @@ using ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummaryByE
 using ExpenseTracker.Application.Features.Expenses.Queries.GetExpenseById;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetTotalExpensesByEmail;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -31,6 +33,7 @@ public class ExpenseController : ControllerBase
     }
 
     // GET: api/expense
+    [Authorize(Policy = ExpensePermission.ViewAll)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
@@ -44,54 +47,55 @@ public class ExpenseController : ControllerBase
         return Ok(expenses);
     }
 
-    // GET: api/expense/email?email={email}
-    [HttpGet("email")]
+    // GET: api/expense/my
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpGet("my")]
     public async Task<IActionResult> GetExpensesByEmail(
-        [FromQuery] string email,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
         [FromQuery] string? sortBy = null,
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllExpensesByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllExpensesByEmailQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
         var expensesByEmail = await _mediator.Send(query, cancellationToken);
         return Ok(expensesByEmail);
     }
 
-    // GET: api/expense/budget-expenses?budgetId={budgetId}&email={email}
-    [HttpGet("budget-expenses")]
+    // GET: api/expense/budget-expenses/my?budgetId={budgetId}
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpGet("budget-expenses/my")]
     public async Task<IActionResult> GetExpensesForABudgetByEmail(
         [FromQuery] Guid budgetId,
-        [FromQuery] string email,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5, 
         [FromQuery] string? sortBy = null, 
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllExpensesForABudgetByEmailQuery(budgetId, email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllExpensesForABudgetByEmailQuery(budgetId, new PagedQuery(page, pageSize, sortBy, sortDesc));
         var expensesForBudget = await _mediator.Send(query, cancellationToken);
         return Ok(expensesForBudget);
     }
 
-    // GET: api/expense/category-expenses?categoryId={categoryId}&email={email}
-    [HttpGet("category-expenses")]
+    // GET: api/expense/category-expenses/my?categoryId={categoryId}
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpGet("category-expenses/my")]
     public async Task<IActionResult> GetExpensesForCategoryByEmail(
         [FromQuery] Guid categoryId,
-        [FromQuery] string email,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5, 
         [FromQuery] string? sortBy = null, 
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllExpensesForCategoryByEmailQuery(categoryId, email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllExpensesForCategoryByEmailQuery(categoryId, new PagedQuery(page, pageSize, sortBy, sortDesc));
         var expensesForCategory = await _mediator.Send(query, cancellationToken);
         return Ok(expensesForCategory);
     }
 
     // GET: api/expense/category-summary
+    [Authorize(Policy = ExpensePermission.ViewAll)]
     [HttpGet("category-summary")]
     public async Task<IActionResult> GetCategorySummary(
         [FromQuery] int page = 1,
@@ -105,22 +109,23 @@ public class ExpenseController : ControllerBase
         return Ok(categorySummary);
     }
 
-    // GET: api/expense/category-summary/email?email={email}
-    [HttpGet("category-summary/email")]
+    // GET: api/expense/category-summary/my
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpGet("category-summary/my")]
     public async Task<IActionResult> GetCategorySummaryByEmail(
-        [FromQuery] string email,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
         [FromQuery] string? sortBy = null,
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetCategorySummaryByEmailQuery(email, new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetCategorySummaryByEmailQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
         var categorySummaryByEmail = await _mediator.Send(query, cancellationToken);
         return Ok(categorySummaryByEmail);
     }
 
     // GET: api/expense/{id}
+    [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -130,6 +135,7 @@ public class ExpenseController : ControllerBase
     }
 
     // GET: api/expense/total
+    [Authorize(Policy = ExpensePermission.ViewAll)]
     [HttpGet("total")]
     public async Task<IActionResult> GetTotalExpense(CancellationToken cancellationToken = default)
     {
@@ -138,16 +144,18 @@ public class ExpenseController : ControllerBase
         return Ok(totalExpenses);
     }
 
-    // GET: api/expense/total-expense/email?email=email
-    [HttpGet("total-expense/email")]
-    public async Task<IActionResult> GetTotalExpenseByEmail(string email, CancellationToken cancellationToken = default)
+    // GET: api/expense/total-expense/my
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpGet("total-expense/my")]
+    public async Task<IActionResult> GetTotalExpenseByEmail(CancellationToken cancellationToken = default)
     {
-        var query = new GetTotalExpenseByEmailQuery(email);
+        var query = new GetTotalExpenseByEmailQuery();
         var totalExpensesByEmail = await _mediator.Send(query, cancellationToken);
         return Ok(totalExpensesByEmail);
     }
 
     // GET: api/expense/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
+    [Authorize(Policy = "Expense.Filter")]
     [HttpGet("filter")]
     public async Task<IActionResult> FilterExpenses(
         [FromQuery] DateTime? startDate,
@@ -178,6 +186,7 @@ public class ExpenseController : ControllerBase
     }
 
     // POST: api/expense
+    [Authorize(Policy = ExpensePermission.Create)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateExpenseDto dto, CancellationToken cancellationToken = default)
     {
@@ -190,6 +199,7 @@ public class ExpenseController : ControllerBase
     }
 
     // PUT: api/expense/{id}
+    [Authorize(Policy = ExpensePermission.Update)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateExpenseDto dto, CancellationToken cancellationToken = default)
     {
@@ -213,6 +223,7 @@ public class ExpenseController : ControllerBase
     }
 
     // DELETE: api/expense/{id}
+    [Authorize(Policy = ExpensePermission.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
@@ -221,16 +232,16 @@ public class ExpenseController : ControllerBase
         return Ok(new {Success = true, Message = "Expense deleted successfully" });    
     }
 
-    // GET: api/expense/export?userId={userId}&format={format}
+    // GET: api/expense/export?format={format}
+    [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("export")]
     public async Task<IActionResult> ExportExpenses(
-        [FromQuery] string userId,
         [FromQuery] DateTime startDate,
         [FromQuery] DateTime endDate,
         [FromQuery] string format,
         CancellationToken cancellationToken = default)
     {
-        var query = new ExportExpensesQuery(userId, startDate, endDate, format);
+        var query = new ExportExpensesQuery(startDate, endDate, format);
 
         var exportResult = await _mediator.Send(query, cancellationToken);
 

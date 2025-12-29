@@ -1,13 +1,14 @@
 namespace ExpenseTracker.Domain.Entities;
 public class Budget
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
-    public string Name { get; private set; }
-    public decimal Amount { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime EndDate { get; private set; }
-    public string? UserId { get; private set; }
-    public Guid? CategoryId { get; private set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; }
+    public decimal Amount { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public string? UserId { get; set; }
+    public Guid? CategoryId { get; set; }
+    public ICollection<Expense> Expenses { get; set; } = new List<Expense>(); 
     public bool IsActive => DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
 
     public Budget(string name,
@@ -26,7 +27,5 @@ public class Budget
         CategoryId = categoryId;
     }
 
-
-    public ICollection<Expense> Expenses { get; private set; } = new List<Expense>();  
 
 }
