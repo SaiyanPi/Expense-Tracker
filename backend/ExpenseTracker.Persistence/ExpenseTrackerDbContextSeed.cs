@@ -46,6 +46,9 @@ public class ExpenseTrackerDbContextSeed
 
             await AddPermissionAsync(roleManager, adminRole, UserManagementPermission.All);
 
+            await AddPermissionAsync(roleManager, adminRole, AuditLogPermission.View);
+
+
             // await AddPermissionAsync(roleManager, adminRole, ProfilePermission.View);
         }
 

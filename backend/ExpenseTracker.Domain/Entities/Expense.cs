@@ -1,8 +1,9 @@
+using ExpenseTracker.Domain.Common;
+
 namespace ExpenseTracker.Domain.Entities;
 
-public class Expense
+public class Expense : BaseSoftDeletableEntity
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
     public string Title { get; set; } = default!;
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }

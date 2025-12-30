@@ -118,14 +118,11 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(UserManagementPermission.All, policy =>
         policy.RequireClaim(AppClaimTypes.Permission, UserManagementPermission.All));
     
-    // // Profile policies
-    // options.AddPolicy(ProfilePermission.View, policy =>
-    //     policy.RequireClaim(AppClaimTypes.Permission, ProfilePermission.View));
-    // options.AddPolicy(ProfilePermission.Update, policy =>
-    //     policy.RequireClaim(AppClaimTypes.Permission, ProfilePermission.Update));
-    // options.AddPolicy(ProfilePermission.Delete, policy =>
-    //     policy.RequireClaim(AppClaimTypes.Permission, ProfilePermission.Delete));
-  
+    // AuditLog policy
+    options.AddPolicy(AuditLogPermission.View, policy =>
+        policy.RequireClaim(AppClaimTypes.Permission, AuditLogPermission.View));
+    
+   
 
     
 });

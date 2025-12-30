@@ -154,16 +154,47 @@ public class ExpenseController : ControllerBase
         return Ok(totalExpensesByEmail);
     }
 
+    // // GET: api/expense/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
+    // [Authorize(Policy = "Expense.Filter")]
+    // [HttpGet("filter")]
+    // public async Task<IActionResult> FilterExpenses(
+    //     [FromQuery] DateTime? startDate,
+    //     [FromQuery] DateTime? endDate,
+    //     [FromQuery] decimal? minAmount,
+    //     [FromQuery] decimal? maxAmount,
+    //     [FromQuery] Guid? categoryId,
+    //     [FromQuery] string? userId,
+
+    //     [FromQuery] int page = 1,
+    //     [FromQuery] int pageSize = 5,
+    //     [FromQuery] string? sortBy = null,
+    //     [FromQuery] bool sortDesc = false,
+    //     CancellationToken cancellationToken = default)
+    // {
+    //     var query = new FilterExpensesQuery(
+    //         startDate,
+    //         endDate,
+    //         minAmount,
+    //         maxAmount,
+    //         categoryId,
+    //         userId,
+
+    //         new PagedQuery(page, pageSize, sortBy, sortDesc));
+
+    //     var filteredExpenses = await _mediator.Send(query, cancellationToken);
+    //     return Ok(filteredExpenses);
+    // }
+
     // GET: api/expense/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
     [Authorize(Policy = "Expense.Filter")]
     [HttpGet("filter")]
     public async Task<IActionResult> FilterExpenses(
-        [FromQuery] DateTime? startDate,
-        [FromQuery] DateTime? endDate,
-        [FromQuery] decimal? minAmount,
-        [FromQuery] decimal? maxAmount,
-        [FromQuery] Guid? categoryId,
-        [FromQuery] string? userId,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] decimal? minAmount = null,
+        [FromQuery] decimal? maxAmount = null,
+        [FromQuery] Guid? categoryId = null,
+        [FromQuery] string? userId = null,
 
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
@@ -172,18 +203,13 @@ public class ExpenseController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var query = new FilterExpensesQuery(
-            startDate,
-            endDate,
-            minAmount,
-            maxAmount,
-            categoryId,
-            userId,
-
+            new ExpenseFilter(startDate, endDate, minAmount, maxAmount, categoryId, userId),
             new PagedQuery(page, pageSize, sortBy, sortDesc));
 
-        var filteredExpenses = await _mediator.Send(query, cancellationToken);
-        return Ok(filteredExpenses);
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
+
 
     // POST: api/expense
     [Authorize(Policy = ExpensePermission.Create)]

@@ -29,7 +29,7 @@ public class ExpenseRepository : IExpenseRepository
             .AsNoTracking()
             .AsQueryable();
         
-        var totalCount = await _dbContext.Expenses
+        var totalCount = await query
             .CountAsync(cancellationToken);
 
         // // dynamic sorting
@@ -43,6 +43,7 @@ public class ExpenseRepository : IExpenseRepository
 
         var expenses = await query
             .Include(e => e.Category) // to display the Category name
+            .Include(e => e.Budget) // to display the Category name
             .Skip(skip)
             .Take(take)
             .ToListAsync(cancellationToken);
@@ -70,6 +71,7 @@ public class ExpenseRepository : IExpenseRepository
 
         var expenses = await query
             .Include(e => e.Category)
+            .Include(e => e.Budget)
             .Skip(skip)
             .Take(take)
             .ToListAsync(cancellationToken);
@@ -251,7 +253,11 @@ public class ExpenseRepository : IExpenseRepository
 
     public async Task<Expense?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var expense = await _dbContext.Expenses.FindAsync(id);
+        var expense = await _dbContext.Expenses
+            . Include(e => e.Category)
+            . Include(e => e.Budget)
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
         return expense;
     }
 
@@ -268,68 +274,83 @@ public class ExpenseRepository : IExpenseRepository
         return total;
     }
 
-    public async Task<FilteredExpensesResult> GetFilterExpensesAsync(
-        DateTime? startDate,
-        DateTime? endDate,
-        decimal? minAmount,
-        decimal? maxAmount,
-        Guid? categoryId,
-        string? userId,
+    // public async Task<FilteredExpensesResult> GetFilteredExpensesAsync(
+    //     DateTime? startDate,
+    //     DateTime? endDate,
+    //     decimal? minAmount,
+    //     decimal? maxAmount,
+    //     Guid? categoryId,
+    //     string? userId,
 
-        int skip,
-        int take,
-        string? sortBy = null,
-        bool sortDesc = false,
-        CancellationToken cancellationToken = default)
-    {
-        var query = _dbContext.Expenses
-            .Include(e => e.Category)
-            .AsQueryable();
+    //     int skip,
+    //     int take,
+    //     string? sortBy = null,
+    //     bool sortDesc = false,
+    //     CancellationToken cancellationToken = default)
+    // {
+    //     var query = _dbContext.Expenses
+    //         .Include(e => e.Category)
+    //         .Include(e => e.Budget)
+    //         .AsQueryable();
 
-        query = query.Where(e => e. Date >= startDate && e.Date <= endDate);
+    //     query = query.Where(e => e. Date >= startDate && e.Date <= endDate);
 
-        if (minAmount.HasValue)
-        {
-            query = query.Where(e => e.Amount >= minAmount.Value);
-        }
+    //     if (minAmount.HasValue)
+    //     {
+    //         query = query.Where(e => e.Amount >= minAmount.Value);
+    //     }
 
-        if (maxAmount.HasValue)
-        {
-            query = query.Where(e => e.Amount <= maxAmount.Value);
-        }
+    //     if (maxAmount.HasValue)
+    //     {
+    //         query = query.Where(e => e.Amount <= maxAmount.Value);
+    //     }
 
-        if (categoryId.HasValue)
-        {
-            query = query.Where(e => e.CategoryId == categoryId.Value);
-        }
+    //     if (categoryId.HasValue)
+    //     {
+    //         query = query.Where(e => e.CategoryId == categoryId.Value);
+    //     }
 
-        if (!string.IsNullOrEmpty(userId))
-        {
-            query = query.Where(e => e.UserId == userId);
-        }
+    //     if (!string.IsNullOrEmpty(userId))
+    //     {
+    //         query = query.Where(e => e.UserId == userId);
+    //     }
 
-        var totalCount = await query.CountAsync(cancellationToken);
+    //     var totalCount = await query.CountAsync(cancellationToken);
         
-        // apply sorting after filtering query
-        query = query.ApplySorting(sortBy, sortDesc);
+    //     // apply sorting after filtering query
+    //     query = query.ApplySorting(sortBy, sortDesc);
 
-        var expenses = await query
-            .Skip(skip)
-            .Take(take)
-            .ToListAsync(cancellationToken);
+    //     var expenses = await query
+    //         .Skip(skip)
+    //         .Take(take)
+    //         .ToListAsync(cancellationToken);
 
-        return new FilteredExpensesResult
-        {
-            TotalAmount = expenses.Sum(e => e.Amount),
-            Expenses = expenses,
-            TotalCount = totalCount
-        };
+    //     return new FilteredExpensesResult
+    //     {
+    //         TotalAmount = expenses.Sum(e => e.Amount),
+    //         Expenses = expenses,
+    //         TotalCount = totalCount
+    //     };
+    // }
+
+    public IQueryable<Expense> GetExpensesQueryable()
+    {
+        return _dbContext.Expenses
+            .Include(e => e.Category)
+            .Include(e => e.Budget)
+            .AsNoTracking();
     }
 
-    public async Task AddAsync(Expense expense, CancellationToken cancellationToken = default)
+    public async Task<Expense> AddAsync(Expense expense, CancellationToken cancellationToken = default)
     {
         await _dbContext.Expenses.AddAsync(expense);
         await _dbContext.SaveChangesAsync();
+
+        // load category for category name
+        await _dbContext.Entry(expense).Reference(e => e.Category).LoadAsync(cancellationToken);
+        // load Budget for Budget name
+        await _dbContext.Entry(expense).Reference(e => e.Budget).LoadAsync(cancellationToken);
+        return expense;
     }
 
     public async Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default)
@@ -371,7 +392,6 @@ public class ExpenseRepository : IExpenseRepository
         return await _dbContext.Expenses
             .AnyAsync(e => e.Id == expenseId && e.UserId == userId, cancellationToken);
     }
-    
 
 }
 

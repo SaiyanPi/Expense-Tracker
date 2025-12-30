@@ -36,7 +36,8 @@ public class ExpenseMappingProfile : Profile
 
         // Entity -> Read DTO
         CreateMap<Expense, ExpenseDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+            .ForMember(dest => dest.BudgetName, opt => opt.MapFrom(src => src.Budget.Name));
 
         // category summary
         CreateMap<CategorySummary, CategorySummaryDto>();

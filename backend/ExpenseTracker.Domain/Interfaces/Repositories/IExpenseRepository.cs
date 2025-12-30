@@ -57,21 +57,23 @@ public interface IExpenseRepository
     Task<decimal> GetTotalExpenseAsync(CancellationToken cancellationToken = default);
     Task<decimal> GetTotalExpenseByEmailAsync(string userId, CancellationToken cancellationToken = default);
 
-    Task<FilteredExpensesResult> GetFilterExpensesAsync(
-        DateTime? startDate,
-        DateTime? endDate,
-        decimal? minAmount,
-        decimal? maxAmount,
-        Guid? categoryId,
-        string? userId,
+    // Task<FilteredExpensesResult> GetFilteredExpensesAsync(
+    //     DateTime? startDate,
+    //     DateTime? endDate,
+    //     decimal? minAmount,
+    //     decimal? maxAmount,
+    //     Guid? categoryId,
+    //     string? userId,
         
-        int skip,
-        int take,
-        string? sortBy = null,
-        bool sortDesc = false,
-        CancellationToken cancellationToken = default);
+    //     int skip,
+    //     int take,
+    //     string? sortBy = null,
+    //     bool sortDesc = false,
+    //     CancellationToken cancellationToken = default);
 
-    Task AddAsync(Expense expense, CancellationToken cancellationToken = default);
+    IQueryable<Expense> GetExpensesQueryable();
+
+    Task<Expense> AddAsync(Expense expense, CancellationToken cancellationToken = default);
     Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default);
     Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default);
 

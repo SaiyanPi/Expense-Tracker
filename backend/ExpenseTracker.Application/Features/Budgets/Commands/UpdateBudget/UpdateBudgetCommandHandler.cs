@@ -50,7 +50,7 @@ public class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCommand, U
             // prevent duplicate budgets within the user with same category
             var titleExists = await _budgetRepository.ExistByNameUserIdAndCategoryIdAsync(request.Name,
                 userId,
-                excludeBudgetId: null,
+                excludeBudgetId: request.Id,
                 categoryId,
                 cancellationToken);
             if (titleExists)

@@ -1,8 +1,9 @@
+using ExpenseTracker.Domain.Common;
+
 namespace ExpenseTracker.Domain.Entities;
 
-public class Category
-{
-    public Guid Id { get; private set; } = Guid.NewGuid();
+public class Category : BaseSoftDeletableEntity
+{    
     public string Name { get; set; } = default!;
     public string? UserId { get; set; }     // foreign key
     public ICollection<Expense> Expenses { get; private set; } = new List<Expense>();       // collectional navigation 
