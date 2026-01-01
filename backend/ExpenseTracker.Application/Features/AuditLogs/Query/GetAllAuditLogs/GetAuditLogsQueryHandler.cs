@@ -1,13 +1,13 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.AuditLog;
+using ExpenseTracker.Application.Features.AuditLogs.Query.GetAllAuditLogs;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExpenseTracker.Application.Features.AuditLogs.Query;
+namespace ExpenseTracker.Application.Features.AuditLogs.QueryGetAllAuditLogs;
 
 public class GetAuditLogsQueryHandler
     : IRequestHandler<GetAuditLogsQuery, PagedResult<AuditLogDto>>

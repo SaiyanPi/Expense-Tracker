@@ -1,6 +1,9 @@
 using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.Application.Common.Pagination;
-using ExpenseTracker.Application.Features.AuditLogs.Query;
+using ExpenseTracker.Application.Features.AuditLogs.Query.GetAllAuditLogs;
+using ExpenseTracker.Application.Features.AuditLogs.Query.GetAuditLogById;
+using ExpenseTracker.Application.Features.AuditLogs.Query.GetAuditTimelineByEntityNameAndEntityId;
+using ExpenseTracker.Application.Features.AuditLogs.Query.GetAuditTimelineByUserId;
 using ExpenseTracker.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
 
+[Authorize(Policy = AuditLogPermission.View)]
 [ApiController]
 [Route("api/[controller]")]
 public class AuditLogController : ControllerBase
@@ -21,7 +25,6 @@ public class AuditLogController : ControllerBase
 
     // GET: api/auditLog?page=1&pageSize=7&sortBy=Date&sortDesc=true
     //          &entityName=Expense&userId={userId}&action=1&from={date}&to={date}
-    [Authorize(Policy = AuditLogPermission.View)]
     [HttpGet]
     public async Task<IActionResult> GetAuditLogs(
         [FromQuery] string? entityName = null,
@@ -42,6 +45,53 @@ public class AuditLogController : ControllerBase
 
         var result = await _mediator.Send(query, cancellationToken);
 
+        return Ok(result);
+    }
+
+    // GET: api/auditLog/{id}
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetAuditLogById(Guid id, CancellationToken cancellationToken = default)
+    {
+        var query = new GetAuditLogByIdQuery(id);
+
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+    // GET: api/auditLog/timeline/timeline/{entityName}/{entityId}
+    [HttpGet("timeline/{entityName}/{entityId}")]
+    public async Task<IActionResult> GetAuditTimelineByEntityNameAndId(
+        string entityName,
+        string entityId,
+        
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAuditTimelineByEntityNameAndIdQuery(entityName, entityId, 
+            new PagedQuery(page, pageSize, sortBy, sortDesc));
+
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+    // GET: api/auditLog/timeline/{userId}
+    [HttpGet("timeline/{userId}")]
+    public async Task<IActionResult> GetAuditTimelineByUserId(
+        string userId,
+        
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAuditTimelineByUserIdQuery(userId, 
+            new PagedQuery(page, pageSize, sortBy, sortDesc));
+
+        var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
 

@@ -1,7 +1,10 @@
+using ExpenseTracker.Application.Common.Auditing.Masking;
+using ExpenseTracker.Application.Common.Context;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Common;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Persistence.Identity;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +13,17 @@ namespace ExpenseTracker.Persistence;
 public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
 {
     private readonly IUserAccessor? _userAccessor;
+    private readonly IRequestContext _requestContext;
+
     public ExpenseTrackerDbContext(
         DbContextOptions<ExpenseTrackerDbContext> options,
-        IUserAccessor? userAccessor = null)
+        IRequestContext requestContext,
+        IUserAccessor? userAccessor = null
+        )
     : base(options)
     {
         _userAccessor = userAccessor;
+        _requestContext = requestContext;
     }
 
     public DbSet<Expense> Expenses => Set<Expense>();
@@ -27,6 +35,9 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(modelBuilder);
 
+        // Apply entity configurations
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ExpenseTrackerDbContext).Assembly);
+
         // SELECT * FROM Entity WHERE IsDeleted = 0
         modelBuilder.Entity<Expense>()
             .HasQueryFilter(e => !e.IsDeleted);
@@ -37,15 +48,21 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Budget>()
             .HasQueryFilter(b => !b.IsDeleted);
 
-        // Apply entity configurations
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ExpenseTrackerDbContext).Assembly);
+        // creating indexes in AuditLog
+        modelBuilder.Entity<AuditLog>(entity =>
+        {
+            // Fast ordering + retention cleanup
+            entity.HasIndex(a => a.CreatedAt);
 
-        // --- GLOBAL FIX: disable cascade on delete for all FKs ---
-        // foreach (var relationship in modelBuilder.Model.GetEntityTypes()
-        //     .SelectMany(e => e.GetForeignKeys()))
-        // {
-        //     relationship.DeleteBehavior = DeleteBehavior.NoAction;
-        // }
+            // Admin filtering by entity
+            entity.HasIndex(a => new { a.EntityName, a.CreatedAt });
+
+            // User-based audit lookup
+            entity.HasIndex(a => new { a.UserId, a.CreatedAt });
+
+            // Activity timeline per entity
+            entity.HasIndex(a => new { a.EntityName, a.EntityId, a.CreatedAt });
+        });
     }
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -56,18 +73,29 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedAt = DateTime.UtcNow;
+                entry.Entity.CreatedAt = DateTime.UtcNow.ToLocalTime();
                 entry.Entity.CreatedBy = userId;
 
-                auditLogs.Add(new AuditLog
-                {
-                    EntityName = entry.Entity.GetType().Name,
-                    EntityId = entry.Entity.Id.ToString(),
-                    Action = AuditAction.Created,   // 1
-                    NewValues = SerializeScalars(entry.CurrentValues.ToObject()),
-                    UserId = userId,
-                    CreatedAt = DateTime.UtcNow
-                });
+                // auditLogs.Add(new AuditLog
+                // {
+                //     EntityName = entry.Entity.GetType().Name,
+                //     EntityId = entry.Entity.Id.ToString(),
+                //     Action = AuditAction.Created,   // 1
+                //     NewValues = SerializeScalars(entry.CurrentValues.ToObject()),
+                //     UserId = userId,
+                //     CreatedAt = DateTime.UtcNow
+                // });
+
+                auditLogs.Add(AuditLogFactory.Create(
+                    entityName: entry.Entity.GetType().Name,
+                    entityId: entry.Entity.Id.ToString(),
+                    action: AuditAction.Created,
+                    oldValues: null,
+                    newValues: SerializeScalars(entry.CurrentValues.ToObject()),
+                    userId: userId,
+                   
+                    requestContext: _requestContext
+                ));
             }
 
             if (entry.State == EntityState.Modified)
@@ -75,16 +103,17 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
                 entry.Entity.UpdatedAt = DateTime.UtcNow;
                 entry.Entity.UpdatedBy = userId;
 
-                auditLogs.Add(new AuditLog
-                {
-                    EntityName = entry.Entity.GetType().Name,
-                    EntityId = entry.Entity.Id.ToString(),
-                    Action = AuditAction.Updated,   // 2
-                    OldValues = SerializeScalars(entry.OriginalValues.ToObject()),
-                    NewValues = SerializeScalars(entry.CurrentValues.ToObject()),
-                    UserId = userId,
-                    CreatedAt = DateTime.UtcNow
-                });
+                auditLogs.Add(AuditLogFactory.Create(
+                    entityName: entry.Entity.GetType().Name,
+                    entityId: entry.Entity.Id.ToString(),
+                    action: AuditAction.Updated,
+                    oldValues: SerializeScalars(entry.OriginalValues.ToObject()),
+                    newValues: SerializeScalars(entry.CurrentValues.ToObject()),
+                    userId: userId,
+
+                    requestContext: _requestContext
+                ));
+
             }
 
             if (entry.State == EntityState.Deleted)
@@ -94,15 +123,16 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
                 entry.Entity.DeletedAt = DateTime.UtcNow;
                 entry.Entity.DeletedBy = userId;
 
-                auditLogs.Add(new AuditLog
-                {
-                    EntityName = entry.Entity.GetType().Name,
-                    EntityId = entry.Entity.Id.ToString(),
-                    Action = AuditAction.Deleted,   // 3
-                    OldValues = SerializeScalars(entry.OriginalValues.ToObject()),
-                    UserId = userId,
-                    CreatedAt = DateTime.UtcNow
-                });
+                auditLogs.Add(AuditLogFactory.Create(
+                    entityName: entry.Entity.GetType().Name,
+                    entityId: entry.Entity.Id.ToString(),
+                    action: AuditAction.Deleted,
+                    oldValues: SerializeScalars(entry.OriginalValues.ToObject()),
+                    newValues: null,
+                    userId: userId,
+
+                    requestContext: _requestContext
+                ));
             }
         }
 

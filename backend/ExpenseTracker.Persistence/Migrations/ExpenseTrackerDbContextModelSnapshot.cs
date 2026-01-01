@@ -31,15 +31,25 @@ namespace ExpenseTracker.Persistence.Migrations
                     b.Property<int>("Action")
                         .HasColumnType("int");
 
+                    b.Property<string>("ClientIp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CorrelationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("EntityId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("EntityName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("HttpMethod")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NewValues")
@@ -48,10 +58,24 @@ namespace ExpenseTracker.Persistence.Migrations
                     b.Property<string>("OldValues")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("RequestPath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("EntityName", "CreatedAt");
+
+                    b.HasIndex("UserId", "CreatedAt");
+
+                    b.HasIndex("EntityName", "EntityId", "CreatedAt");
 
                     b.ToTable("AuditLogs");
                 });

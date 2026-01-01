@@ -10,32 +10,52 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
 {
     private readonly IUserRepository _userRepository;
     private readonly IIdentityService _identityService;
+    private readonly IUserAccessor _userAccessor;
     private readonly IUserRoleService _userRoleService;
     public DeleteUserCommandHandler(
         IUserRepository userRepository,
         IIdentityService identityService,
+        IUserAccessor userAccessor,
         IUserRoleService userRoleService
         )
     {
         _userRepository = userRepository;
         _identityService = identityService;
+        _userAccessor = userAccessor;
         _userRoleService = userRoleService;
     }       
 
     public async Task<Unit> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
         // BUISNESS RULE:
-        // admin can only delete regular users, cannot delete other admins
+        // admin can only delete himself regular users, cannot delete other admins
+        // if the user id is provided delete the regular user but if the user is admin throw exception
+        // if id is not provided self delete
 
-        var isAdmin = await _userRoleService.IsAdminAsync(request.UserId);
-        if(isAdmin)
-        throw new ForbiddenException("You cannot delete another admin.");
+        var userId = _userAccessor.UserId;
+       
+        var targetUserId = request.UserId ?? userId; // if request.UserId is null, use userId
 
-        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
-        if (user == null)
-            throw new NotFoundException(nameof(User), request.UserId);
+        var user = await _userRepository.GetByIdAsync(targetUserId);
+        if(user is null)
+            throw new NotFoundException(nameof(User), targetUserId);
+        
+        // check roles
+        var currentUserIsAdmin = await _userRoleService.IsAdminAsync(userId);
+        var targetUserIsAdmin = await _userRoleService.IsAdminAsync(targetUserId);
+        
+        if (targetUserId != userId)
+        {
+            // Trying to delete someone else
+            if (!currentUserIsAdmin)
+                throw new UnauthorizedAccessException("You do not have permission to delete other users.");
 
-        await _identityService.DeleteAsync(user.Id, cancellationToken);
+            // Admin cannot delete another admin
+            if (targetUserIsAdmin)
+                throw new ForbiddenException("Admin cannot delete another admin.");
+        }
+    
+        await _identityService.DeleteAsync(targetUserId, cancellationToken);
         return Unit.Value;
     }
 }   

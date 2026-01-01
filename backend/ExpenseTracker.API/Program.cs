@@ -152,6 +152,9 @@ if (app.Environment.IsDevelopment())
 // Register exception middleware FIRST in pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+app.UseMiddleware<CorrelationIdMiddleware>();
+
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();   // comes BEFORE Authorization

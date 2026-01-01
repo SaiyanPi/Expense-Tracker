@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,9 @@ public class ExpenseTrackerDbContextFactory : IDesignTimeDbContextFactory<Expens
         var optionsBuilder = new DbContextOptionsBuilder<ExpenseTrackerDbContext>();
         optionsBuilder.UseSqlServer(connectionString);
 
-        return new ExpenseTrackerDbContext(optionsBuilder.Options);
+        return new ExpenseTrackerDbContext(
+            optionsBuilder.Options,
+            new SystemRequestContext(), 
+            userAccessor: null);
     }
 }

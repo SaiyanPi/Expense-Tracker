@@ -1,6 +1,8 @@
+using ExpenseTracker.Application.Common.Auditing.Retention;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Infrastructure.Repositories;
+using ExpenseTracker.Infrastructure.Services.BackgroundServices;
 using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.ExpenseExport;
 using ExpenseTracker.Infrastructure.Services.Identity;
@@ -30,13 +32,14 @@ public static class InfrastructureServiceRegistration
         // registering identity service
         services.AddScoped<IIdentityService, IdentityService>();
 
-        // registering JWT token service
-        // services.AddScoped<IJwtTokenService, JwtTokenService>();
-
         // SMTP config
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
         services.AddSingleton(resolver =>
             resolver.GetRequiredService<IOptions<SmtpSettings>>().Value);
+
+        //AuditLog Retention config
+        services.Configure<AuditLogRetentionOptions>(configuration.GetSection("AuditLogRetention"));
+        services.AddHostedService<AuditLogCleanupService>();
 
         // registering email service
         services.AddScoped<IEmailService, SmtpEmailService>();
@@ -44,7 +47,6 @@ public static class InfrastructureServiceRegistration
         // register sms sender service
         // services.AddScoped<ISmsSenderService, TwilioSmsSenderService>();
         services.AddHttpClient<ISmsSenderService, AndroidSmsGatewayService>();
-        
         services.AddScoped<IExpenseExportService, ExpenseExportService>();
         services.AddScoped<IUserRoleService, UserRoleService>();
 

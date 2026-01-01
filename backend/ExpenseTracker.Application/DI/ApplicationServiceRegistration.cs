@@ -1,5 +1,6 @@
 using System.Reflection;
 using ExpenseTracker.Application.Common.Behaviours;
+using ExpenseTracker.Application.Common.Context;
 using ExpenseTracker.Application.Common.Mappings;
 using FluentValidation;
 using MediatR;
@@ -36,6 +37,9 @@ public static class ApplicationServiceRegistration
         //  Register MediatR pipeline behavior for ExportExpensesValidator class
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
+        // Registering correlation + request metadata service
+        services.AddHttpContextAccessor();
+        services.AddScoped<IRequestContext, RequestContext>();
 
         return services;
     }
