@@ -278,4 +278,53 @@ public class BudgetRepository : IBudgetRepository
             b.CategoryId == catId,
             cancellationToken);
     }
+
+    // view and restore soft deleted expenses
+    public async Task<(IReadOnlyList<Budget> Budgets, int TotalCount)> GetAllDeletedBudgetsByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Budgets
+            .IgnoreQueryFilters()
+            .Where(e => e.IsDeleted && e.UserId == userId)
+            .AsNoTracking()
+            .AsQueryable();
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var softDeletedBudgets = await query
+            .Include(e => e.Expenses)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return (softDeletedBudgets, totalCount);
+    }
+
+    public async Task<Budget?> GetDeletedBudgetAsync(
+        Guid id, 
+        string userId, 
+        CancellationToken cancellationToken = default)
+    {
+        var softDeletedBudget = await _dbContext.Budgets
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted);
+        
+        return softDeletedBudget;
+    }
+
+    public async Task<bool> RestoreDeletedBudgetAsync(CancellationToken cancellationToken = default)
+    {
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
 }

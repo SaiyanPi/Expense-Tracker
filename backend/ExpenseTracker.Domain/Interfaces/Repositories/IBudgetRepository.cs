@@ -49,5 +49,17 @@ public interface IBudgetRepository
 
     Task<bool> UserOwnsBudgetAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default);
     Task<bool> ExistByNameUserIdAndCategoryIdAsync(string name, string userId, Guid? excludeBudgetId, Guid catId, CancellationToken cancellationToken = default);
-    //Task<bool> HasExpensesAsync(Guid budgetId, Cancel)
+    
+    
+    // view and restore softdeleted budgets
+    Task<(IReadOnlyList<Budget> Budgets, int TotalCount)> GetAllDeletedBudgetsByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+    Task<Budget?> GetDeletedBudgetAsync(Guid id, string userId, CancellationToken cancellationToken = default);
+    Task<bool> RestoreDeletedBudgetAsync(CancellationToken cancellationToken = default);
+
 }

@@ -12,6 +12,9 @@ using ExpenseTracker.Application.Features.Budgets.Queries.GetBudgetDetailWithExp
 using ExpenseTracker.Application.Common.Pagination;
 using Microsoft.AspNetCore.Authorization;
 using ExpenseTracker.Application.Common.Authorization.Permissions;
+using ExpenseTracker.Application.Features.Budgets.Queries.GetAllDeletedBudgetsByEmail;
+using ExpenseTracker.Application.Features.Budgets.Queries.GetDeletedBudgetById;
+using ExpenseTracker.Application.Features.Budgets.Commands.RestoreDeletedBudgetById;
 
 namespace ExpenseTracker.API.Controllers;   
 
@@ -66,9 +69,9 @@ public class BudgetController : ControllerBase
         return Ok(budget);
     }
 
-    // GET: api/budget/budget-detail-with-expenses?budgetId={budgetId}
+    // GET: api/budget/budget-detail-with-budgets?budgetId={budgetId}
     [Authorize(Policy = BudgetPermission.View)]
-    [HttpGet("budget-detail-with-expenses")]
+    [HttpGet("budget-detail-with-budgets")]
     public async Task<IActionResult> GetBudgetDetailWithExpensesByEmail(
         [FromQuery] Guid budgetId,
 
@@ -147,6 +150,54 @@ public class BudgetController : ControllerBase
         var command = new DeleteBudgetCommand(id);
         await _mediator.Send(command, cancellationToken);
         return Ok(new {Success = true, Message = "Budget deleted successfully" }); 
+    }
+
+    //----  VIEW AND RESTORE DELETED BUDGETS    -----
+
+    // GET: api/budget/deleted/my
+    [Authorize(Policy = BudgetPermission.View)]
+    [HttpGet("deleted/my")]
+    public async Task<IActionResult> GetAllDeletedBudgetsByEmail(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5, 
+        [FromQuery] string? sortBy = null, 
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllDeletedBudgetsByEmailQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var deletedBudgets = await _mediator.Send(query, cancellationToken);
+        return Ok(deletedBudgets);
+    }
+
+    // GET: api/budget/deleted/my/{id}
+    [Authorize(Policy = BudgetPermission.View)]
+    [HttpGet("deleted/my/{id:guid}")]
+    public async Task<IActionResult> GetDeletedBudgetById(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetDeletedBudgetByIdQuery(id);
+        var deletedBudget = await _mediator.Send(query, cancellationToken);
+        return Ok(deletedBudget);
+    }
+
+    // GET: api/budget/deleted/restore/{id}
+    [Authorize(Policy = BudgetPermission.View)]
+    [HttpPost("deleted/restore/{id:guid}")]
+    public async Task<IActionResult> RestoreDeletedBudgetById(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new RestoreDeletedBudgetByIdCommand(id);
+        try
+        {
+            await _mediator.Send(query, cancellationToken);
+            return Ok(new { message = "Budget restored successfully" });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Failed to restore budget" });
+        }
     }
 
 }

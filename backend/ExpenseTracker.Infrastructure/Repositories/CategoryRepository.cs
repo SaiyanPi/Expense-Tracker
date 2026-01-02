@@ -89,6 +89,54 @@ public class CategoryRepository : ICategoryRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    // view and restore soft deleted categories
+    public async Task<(IReadOnlyList<Category> Categories, int TotalCount)> GetAllDeletedCategoriesByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Categories
+            .IgnoreQueryFilters()
+            .Where(e => e.IsDeleted && e.UserId == userId)
+            .AsNoTracking()
+            .AsQueryable();
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var softDeletedCaegorys = await query
+            .Include(e => e.Expenses)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return (softDeletedCaegorys, totalCount);
+    }
+
+    public async Task<Category?> GetDeletedCategoryAsync(
+        Guid id, 
+        string userId, 
+        CancellationToken cancellationToken = default)
+    {
+        var softDeletedCategory = await _dbContext.Categories
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted);
+        
+        return softDeletedCategory;
+    }
+
+    public async Task<bool> RestoreDeletedCategoryAsync(CancellationToken cancellationToken = default)
+    {
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
     // Additional method to check for existing name for validation in service in handlers
   
 

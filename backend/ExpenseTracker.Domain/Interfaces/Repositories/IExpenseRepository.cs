@@ -83,6 +83,16 @@ public interface IExpenseRepository
         DateTime endDate, 
         CancellationToken cancellationToken = default);
 
+    // view and restore softdeleted expenses
+    Task<(IReadOnlyList<Expense> Expenses, int TotalCount)> GetAllDeletedExpensesByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+    Task<Expense?> GetDeletedExpenseAsync(Guid id, string userId, CancellationToken cancellationToken = default);
+    Task<bool> RestoreDeletedExpenseAsync(CancellationToken cancellationToken = default);
 
     // Additional method to check for existing title for validation in service in Application layer
     Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default);

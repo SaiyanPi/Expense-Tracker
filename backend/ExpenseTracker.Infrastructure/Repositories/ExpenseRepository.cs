@@ -381,6 +381,55 @@ public class ExpenseRepository : IExpenseRepository
         return expenses;
     }
 
+    // view and restore soft deleted expenses
+    public async Task<(IReadOnlyList<Expense> Expenses, int TotalCount)> GetAllDeletedExpensesByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Expenses
+            .IgnoreQueryFilters()
+            .Where(e => e.IsDeleted && e.UserId == userId)
+            .AsNoTracking()
+            .AsQueryable();
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var softDeletedExpenses = await query
+            .Include(e => e.Category)
+            .Include(e => e.Budget)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return (softDeletedExpenses, totalCount);
+    }
+
+    public async Task<Expense?> GetDeletedExpenseAsync(
+        Guid id, 
+        string userId, 
+        CancellationToken cancellationToken = default)
+    {
+        var softDeletedExpense = await _dbContext.Expenses
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted);
+        
+        return softDeletedExpense;
+    }
+
+    public async Task<bool> RestoreDeletedExpenseAsync(CancellationToken cancellationToken = default)
+    {
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
     // Additional method to check for existing title for validation in service in Application layer
     public async Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default)
     {

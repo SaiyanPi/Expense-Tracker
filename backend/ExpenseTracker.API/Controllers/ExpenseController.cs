@@ -3,16 +3,19 @@ using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
 using ExpenseTracker.Application.Features.Expenses.Commands.DeleteExpense;
+using ExpenseTracker.Application.Features.Expenses.Commands.RestoreDeletedExpenseById;
 using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
 using ExpenseTracker.Application.Features.Expenses.GetTotalExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.ExportExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetAllDeletedExpensesByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpenses;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesForABudgetByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesForCategoryByEmail;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummary;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetCategorySummaryByEmail;
+using ExpenseTracker.Application.Features.Expenses.Queries.GetDeletedExpenseById;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetExpenseById;
 using ExpenseTracker.Application.Features.Expenses.Queries.GetTotalExpensesByEmail;
 using MediatR;
@@ -277,5 +280,54 @@ public class ExpenseController : ControllerBase
             exportResult.Content,
             exportResult.ContentType,
             exportResult.FileName);
+    }
+
+
+//----  VIEW AND RESTORE DELETED EXPENSES    -----
+
+    // GET: api/expense/deleted/my
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpGet("deleted/my")]
+    public async Task<IActionResult> GetAllDeletedExpensesByEmail(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5, 
+        [FromQuery] string? sortBy = null, 
+        [FromQuery] bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllDeletedExpensesByEmailQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var deletedExpenses = await _mediator.Send(query, cancellationToken);
+        return Ok(deletedExpenses);
+    }
+
+    // GET: api/expense/deleted/my/{id}
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpGet("deleted/my/{id:guid}")]
+    public async Task<IActionResult> GetDeletedExpenseById(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetDeletedExpenseByIdQuery(id);
+        var deletedExpense = await _mediator.Send(query, cancellationToken);
+        return Ok(deletedExpense);
+    }
+
+    // GET: api/expense/deleted/restore/{id}
+    [Authorize(Policy = ExpensePermission.View)]
+    [HttpPost("deleted/restore/{id:guid}")]
+    public async Task<IActionResult> RestoreDeletedExpenseById(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new RestoreDeletedExpenseByIdCommand(id);
+        try
+        {
+            await _mediator.Send(query, cancellationToken);
+            return Ok(new { message = "Expense restored successfully" });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Failed to restore expense" });
+        }
     }
 }
