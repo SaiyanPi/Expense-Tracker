@@ -13,20 +13,23 @@ namespace ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
 public class FilterExpenseQueryHandler : IRequestHandler<FilterExpensesQuery, FilteredExpensesResultDto>
 {
     private readonly IExpenseRepository _expenseRepository;
-    private readonly IUserRepository _userRepopsitory;
+    private readonly ICategoryRepository _categoryRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUserAccessor _userAccessor;
     private readonly IUserRoleService _userRoleService;
     private readonly IMapper _mapper;
 
     public FilterExpenseQueryHandler(
         IExpenseRepository expenseRepository,
+        ICategoryRepository categoryRepository,
         IUserRepository userRepository,
         IUserAccessor userAccessor,
         IUserRoleService userRoleService,
         IMapper mapper)
     {
         _expenseRepository = expenseRepository;
-        _userRepopsitory = userRepository;
+        _categoryRepository = categoryRepository;
+        _userRepository = userRepository;
         _userAccessor = userAccessor;
         _userRoleService = userRoleService;
         _mapper = mapper;
@@ -80,18 +83,29 @@ public class FilterExpenseQueryHandler : IRequestHandler<FilterExpensesQuery, Fi
         // };
 
 
-        if (request.Filter.UserId != null)
-        {
-            var userExist = await _userRepopsitory.GetByIdAsync(request.Filter.UserId, cancellationToken);
-            if(userExist is null)
-                throw new NotFoundException(nameof(User), request.Filter.UserId);
-        }
 
         var userId = _userAccessor.UserId;
         var isAdmin = await _userRoleService.IsAdminAsync(userId);
         
         var effectiveUserId = isAdmin ? request.Filter.UserId : userId;
 
+        // Validate only if admin provided a userId
+        if (isAdmin && !string.IsNullOrWhiteSpace(effectiveUserId))
+        {
+            var user = await _userRepository.GetByIdAsync(effectiveUserId);
+            if (user is null)
+                throw new NotFoundException(nameof(User), effectiveUserId);
+        }
+
+        if (request.Filter.CategoryId.HasValue)
+        {
+            var category = await _categoryRepository.GetByIdAsync(request.Filter.CategoryId.Value);
+            if(category is null)
+                throw new NotFoundException(nameof(Category), request.Filter.CategoryId.Value);
+        }
+        
+
+        // build query
         var filter = request.Filter;
         var page = request.Paging;
 

@@ -262,15 +262,21 @@ public class ExpenseController : ControllerBase
     }
 
     // GET: api/expense/export?format={format}
-    [Authorize(Policy = ExpensePermission.View)]
+    [Authorize(Policy = "Expense.Filter")]
     [HttpGet("export")]
     public async Task<IActionResult> ExportExpenses(
-        [FromQuery] DateTime startDate,
-        [FromQuery] DateTime endDate,
         [FromQuery] string format,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] decimal? minAmount = null,
+        [FromQuery] decimal? maxAmount = null,
+        [FromQuery] Guid? categoryId = null,
+        [FromQuery] string? userId = null,
         CancellationToken cancellationToken = default)
     {
-        var query = new ExportExpensesQuery(startDate, endDate, format);
+        var query = new ExportExpensesQuery(
+            format,
+            new ExpenseFilter(startDate, endDate, minAmount, maxAmount, categoryId, userId));
 
         var exportResult = await _mediator.Send(query, cancellationToken);
 

@@ -77,12 +77,6 @@ public interface IExpenseRepository
     Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default);
     Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Expense>> GetExpensesForExportAsync(
-        string userId,
-        DateTime startDate, 
-        DateTime endDate, 
-        CancellationToken cancellationToken = default);
-
     // view and restore softdeleted expenses
     Task<(IReadOnlyList<Expense> Expenses, int TotalCount)> GetAllDeletedExpensesByEmailAsync(
         string userId,

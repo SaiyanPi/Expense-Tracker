@@ -2,6 +2,7 @@ using ExpenseTracker.Application.Common.Auditing.Retention;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Infrastructure.Repositories;
+using ExpenseTracker.Infrastructure.Services.AuditLogsExport;
 using ExpenseTracker.Infrastructure.Services.BackgroundServices;
 using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.ExpenseExport;
@@ -47,7 +48,12 @@ public static class InfrastructureServiceRegistration
         // register sms sender service
         // services.AddScoped<ISmsSenderService, TwilioSmsSenderService>();
         services.AddHttpClient<ISmsSenderService, AndroidSmsGatewayService>();
+
+        // register export service
         services.AddScoped<IExpenseExportService, ExpenseExportService>();
+        services.AddScoped<IAuditLogsExportService, AuditLogsExportService>();
+
+        // register user role(isAdmin) service
         services.AddScoped<IUserRoleService, UserRoleService>();
 
         // registering user accessor service

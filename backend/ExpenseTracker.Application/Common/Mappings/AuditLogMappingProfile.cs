@@ -9,6 +9,8 @@ public class AuditLogMappingProfile : Profile
     public AuditLogMappingProfile()
     {
         CreateMap<AuditLog, AuditLogDto>();
+        
+        CreateMap<AuditLog, AuditLogsExportDto>();
     }
     
 }
