@@ -7,7 +7,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 
 
 
-## Features
+## 🚀 Features
 
 ### Core Features
 - Expense management (CRUD)
@@ -49,7 +49,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 
 
 
-## Validation & Error Handling
+## 🔦 Validation & Error Handling
 
 - FluentValidation for:
   - Commands
@@ -60,7 +60,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 
 
 
-## Technologies Used
+## 📁 Technologies Used
 - ASP.NET Core Web API
 - Entity Framework Core
 - MediatR
@@ -71,5 +71,32 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - CQRS Pattern
 
 
-## Project Intent & Honesty Note
+## ⚙️ Getting Started
+
+### Prerequisites
+- .NET SDK (latest LTS)
+- SQL Server
+- Visual Studio / VS Code
+
+### Setup
+```
+git clone <repository-url>
+cd ExpenseTracker
+dotnet restore
+dotnet build
+```
+
+### Database
+- Update appsettings.json with your connection string
+- Apply migrations:
+```
+  dotnet ef database update
+```
+### Run the API
+```
+dotnet run --project ExpenseTracker.API
+```
+
+
+## 📌 Project Intent & Honesty Note
 - Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
