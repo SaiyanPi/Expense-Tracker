@@ -5,7 +5,7 @@ This project is designed as a learning-focused but real-world–oriented backend
 
 The goal of this project is not just CRUD functionality, but to deeply understand enterprise-grade API design, including auditing, soft deletion, filtering, validation, and authorization patterns.
 
-
+<hr>
 
 ## 🚀 Features
 
@@ -47,7 +47,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - User context abstraction
 - Secure user access enforcement
 
-
+<hr>
 
 ## 🔦 Validation & Error Handling
 
@@ -58,7 +58,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Centralized exception handling
 - Clear validation and domain error messages
 
-
+<hr>
 
 ## 📁 Technologies Used
 - ASP.NET Core Web API
@@ -70,6 +70,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Clean Architecture
 - CQRS Pattern
 
+<hr>
 
 ## ⚙️ Getting Started
 
@@ -97,6 +98,7 @@ dotnet build
 dotnet run --project ExpenseTracker.API
 ```
 
+<hr>
 
 ## 📌 Project Intent & Honesty Note
 - Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
