@@ -23,17 +23,16 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 
 ### Auditing & Data Safety
 
-#### Automatic audit logging
-- Entity name
-- Entity ID
-- Action (Created, Updated, Deleted)
-- User ID
-- Timestamp
-- Correlation ID
-- 
-#### Soft delete
-- Deleted data is never removed from the database
-- Global query filters applied automatically
+  #### Automatic audit logging
+  - Entity name
+  - Entity ID
+  - Action (Created, Updated, Deleted)
+  - User ID
+  - Timestamp
+  - Correlation ID
+  #### Soft delete
+  - Deleted data is never removed from the database
+  - Global query filters applied automatically
 
 ### Filtering & Querying
 - Date range filtering
