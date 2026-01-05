@@ -21,6 +21,14 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - FluentValidation
 - DTO-based request/response models
 
+### Authentication and Security
+- JWT-based authentication
+- policy based authorization
+- Email confirmation for new users
+- Phone OTP verification
+- User context abstraction
+- Secure user access enforcement
+
 ### Auditing & Data Safety
 - Automatic audit logging
   - Entity name
@@ -29,22 +37,28 @@ The goal of this project is not just CRUD functionality, but to deeply understan
   - User ID
   - Timestamp
   - Correlation ID
-- Soft delete
-  - Deleted data is never removed from the database
-  - Global query filters applied automatically
+  - Soft delete
+- Deleted data is never removed from the database
+- Restore deleted entities
+- User's timeline and Entity's timeline tracking
+- Audit logs retention: automatically cleaned after 90 days
+- Global query filters applied automatically
 
+### Data Export
+- Export expenses and audit logs in CSV/Excel/pdf format
+  
 ### Filtering & Querying
-- Date range filtering
-- Min/Max amount filtering
-- Category-based filtering
-- User-based filtering
-- Sorting and pagination support
-
-### Security
-- JWT-based authentication
-- Role-based authorization
-- User context abstraction
-- Secure user access enforcement
+- Expenses filtering
+  - Date range filtering
+  - Min/Max amount filtering
+  - Category-based filtering
+  - User-based filtering
+  - Sorting and pagination support
+- Auditlogs filtering
+  - Date range filtering
+  - Entity-based filtering
+  - User-based filtering
+  - Action-based filtering
 
 <hr>
 
@@ -61,7 +75,6 @@ ExpenseTracker
 <hr>
 
 ## 🔦 Validation & Error Handling
-
 - FluentValidation for:
   - Commands
   - Queries
@@ -72,7 +85,8 @@ ExpenseTracker
 <hr>
 
 ## 📁 Technologies Used
-- ASP.NET Core Web API
+- .NET 8.0
+- ASP.NET Core
 - Entity Framework Core
 - MediatR
 - FluentValidation
@@ -80,6 +94,8 @@ ExpenseTracker
 - SQL Server
 - Clean Architecture
 - CQRS Pattern
+- smtp4dev
+- SMSGateway
 
 <hr>
 
