@@ -133,4 +133,4 @@ dotnet run --project ExpenseTracker.API
 - Focused on backend engineering concepts
 - Not a tutorial copy
 - Not production-ready
-Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
+- Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
