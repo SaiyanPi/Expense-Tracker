@@ -62,7 +62,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 
 <hr>
 
-## Solution Structure
+## 🧩 Solution Structure
 ```
 ExpenseTracker
 ├── ExpenseTracker.API            # Controllers, Middleware
