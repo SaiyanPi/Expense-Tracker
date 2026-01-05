@@ -22,15 +22,14 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - DTO-based request/response models
 
 ### Auditing & Data Safety
-
-  #### Automatic audit logging
+- Automatic audit logging
   - Entity name
   - Entity ID
   - Action (Created, Updated, Deleted)
   - User ID
   - Timestamp
   - Correlation ID
-  #### Soft delete
+- Soft delete
   - Deleted data is never removed from the database
   - Global query filters applied automatically
 
@@ -46,6 +45,18 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Role-based authorization
 - User context abstraction
 - Secure user access enforcement
+
+<hr>
+
+## Solution Structure
+```
+ExpenseTracker
+├── ExpenseTracker.API            # Controllers, Middleware
+├── ExpenseTracker.Application    # CQRS, Validators, DTOs, Exceptions, Service Interface, Cross-cutting concerns
+├── ExpenseTracker.Domain         # Entities, Enums, Base Models, Repository Interface
+├── ExpenseTracker.Persistence    # EF Core, DbContext, Identity
+└── ExpenseTracker.Infrastructure # Services, Repositories
+```
 
 <hr>
 
@@ -101,4 +112,9 @@ dotnet run --project ExpenseTracker.API
 <hr>
 
 ## 📌 Project Intent & Honesty Note
-- Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
+- Built manually (not scaffold-only)
+- Incrementally designed
+- Focused on backend engineering concepts
+- Not a tutorial copy
+- Not production-ready
+Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
