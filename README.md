@@ -116,11 +116,20 @@ dotnet build
 
 ### Database
 - Update appsettings.json with your connection string
+- navigate to solution directory
+```
+  cd backend
+```
 - Apply migrations:
 ```
   dotnet ef database update
 ```
 ### Run the API
+first navigate to solution directory
+```
+  cd backend
+```
+and then run the solution
 ```
 dotnet run --project ExpenseTracker.API
 ```
