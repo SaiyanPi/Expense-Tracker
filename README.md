@@ -6,18 +6,6 @@ This project is designed as a learning-focused but real-world–oriented backend
 The goal of this project is not just CRUD functionality, but to deeply understand enterprise-grade API design, including auditing, soft deletion, filtering, validation, and authorization patterns.
 
 
-## Architecture
-
-This project follows Clean Architecture principles with strict separation of concerns.
-
-ExpenseTracker
-│
-├── ExpenseTracker.API           → Presentation layer (Controllers, Middleware)
-├── ExpenseTracker.Application   → Application logic (CQRS, Validators, DTOs)
-├── ExpenseTracker.Domain        → Core domain (Entities, Enums, Base classes)
-├── ExpenseTracker.Persistence  → Data access (EF Core, DbContext, Repositories)
-└── ExpenseTracker.Infrastructure→ Cross-cutting concerns (Auth, Services)
-
 ## Features
 
 ### Core Features
