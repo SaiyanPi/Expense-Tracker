@@ -6,6 +6,7 @@ This project is designed as a learning-focused but real-world–oriented backend
 The goal of this project is not just CRUD functionality, but to deeply understand enterprise-grade API design, including auditing, soft deletion, filtering, validation, and authorization patterns.
 
 
+
 ## Features
 
 ### Core Features
@@ -48,6 +49,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Secure user access enforcement
 
 
+
 ## Validation & Error Handling
 
 - FluentValidation for:
@@ -56,6 +58,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
   - Filter objects
 - Centralized exception handling
 - Clear validation and domain error messages
+
 
 
 ## Technologies Used
@@ -67,3 +70,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - SQL Server
 - Clean Architecture
 - CQRS Pattern
+
+
+## Project Intent & Honesty Note
+- Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
