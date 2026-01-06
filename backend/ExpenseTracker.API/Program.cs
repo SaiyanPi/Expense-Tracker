@@ -13,6 +13,7 @@ using FluentValidation;
 using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.Application.Common.Authorization;
 using QuestPDF.Infrastructure;
+using ExpenseTracker.Infrastructure.Services.Notification;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +62,26 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtSettings["Secret"] ?? throw new InvalidOperationException("JWT Secret is missing from configuration."))
         )
+    };
+
+    // KEY piece for SignalR: SignalR sends the token via query string, not the authorization header
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // If the request is for SignalR and token is in the query string
+            var accessToken = context.Request.Query["access_token"];
+
+            // If the request is for the hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs/notifications"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -120,13 +141,28 @@ builder.Services.AddAuthorization(options =>
     
     // AuditLog policy
     options.AddPolicy(AuditLogPermission.View, policy =>
-        policy.RequireClaim(AppClaimTypes.Permission, AuditLogPermission.View));
-    
-   
-
-    
+        policy.RequireClaim(AppClaimTypes.Permission, AuditLogPermission.View)); 
 });
 
+// Add SignalR
+builder.Services.AddSignalR()
+    .AddHubOptions<NotificationHub>(options =>
+    {
+        options.EnableDetailedErrors = true;
+    });
+
+// CORS config
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .WithOrigins("http://localhost:4200"); // frontend URL
+    });
+});
 
 var app = builder.Build();
 
@@ -157,11 +193,15 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseCors("FrontendPolicy");
+
 app.UseAuthentication();   // comes BEFORE Authorization
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>(NotificationHub.HubUrl);    // map the SignalRhub to a URL
 
 app.Run();
 

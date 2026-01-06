@@ -427,7 +427,14 @@ public class ExpenseRepository : IExpenseRepository
             .AnyAsync(e => e.Id == expenseId && e.UserId == userId, cancellationToken);
     }
 
+    public async Task<decimal> GetTotalExpensesUnderABudgetAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Expenses
+            .Where(e => e.BudgetId == budgetId & e.UserId == userId)
+            .SumAsync(e => e.Amount);
+    }
 }
+
 
 
 // Tip: AsQueryable() is actually meant for in-memory collection. Here in repository, we are starting

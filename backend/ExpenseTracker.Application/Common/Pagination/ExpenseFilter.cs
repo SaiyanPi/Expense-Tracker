@@ -1,5 +1,3 @@
-using ExpenseTracker.Domain.Common;
-
 namespace ExpenseTracker.Application.Common.Pagination;
 
 public record ExpenseFilter(

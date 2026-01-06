@@ -1,4 +1,5 @@
 using ExpenseTracker.Application.Common.Auditing.Retention;
+using ExpenseTracker.Application.Common.Interfaces;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Infrastructure.Repositories;
@@ -7,6 +8,7 @@ using ExpenseTracker.Infrastructure.Services.BackgroundServices;
 using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.ExpenseExport;
 using ExpenseTracker.Infrastructure.Services.Identity;
+using ExpenseTracker.Infrastructure.Services.Notification;
 using ExpenseTracker.Infrastructure.Services.SMS;
 using ExpenseTracker.Infrastructure.Services.UserAccessor;
 using ExpenseTracker.Infrastructure.Services.UserRole;
@@ -59,6 +61,9 @@ public static class InfrastructureServiceRegistration
         // registering user accessor service
         services.AddHttpContextAccessor();
         services.AddScoped<IUserAccessor, UserAccessor>();
+
+        // register SignalR notification service
+        services.AddScoped<INotificationService, SignalRService>();
 
         return services;
     }

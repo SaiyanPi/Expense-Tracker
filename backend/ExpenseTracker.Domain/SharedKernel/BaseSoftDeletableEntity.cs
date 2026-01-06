@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Domain.Common;
+namespace ExpenseTracker.Domain.SharedKernel;
 
 public abstract class BaseSoftDeletableEntity : BaseAuditableEntity
 {

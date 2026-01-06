@@ -1,10 +1,9 @@
 using ExpenseTracker.Application.Common.Auditing.Masking;
 using ExpenseTracker.Application.Common.Context;
 using ExpenseTracker.Application.Common.Interfaces.Services;
-using ExpenseTracker.Domain.Common;
 using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Domain.SharedKernel;
 using ExpenseTracker.Persistence.Identity;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,4 +1,4 @@
-using ExpenseTracker.Domain.Common;
+using ExpenseTracker.Domain.SharedKernel;
 
 namespace ExpenseTracker.Application.DTOs.AuditLog;
 

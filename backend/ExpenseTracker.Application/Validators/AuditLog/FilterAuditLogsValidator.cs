@@ -1,5 +1,5 @@
 using ExpenseTracker.Application.Features.AuditLogs.Query.GetAllAuditLogs;
-using ExpenseTracker.Domain.Common;
+using ExpenseTracker.Domain.SharedKernel;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.AuditLog;

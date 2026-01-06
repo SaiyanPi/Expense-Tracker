@@ -5,7 +5,7 @@ using ExpenseTracker.Application.Features.AuditLogs.Query.GetAllAuditLogs;
 using ExpenseTracker.Application.Features.AuditLogs.Query.GetAuditLogById;
 using ExpenseTracker.Application.Features.AuditLogs.Query.GetAuditTimelineByEntityNameAndEntityId;
 using ExpenseTracker.Application.Features.AuditLogs.Query.GetAuditTimelineByUserId;
-using ExpenseTracker.Domain.Common;
+using ExpenseTracker.Domain.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -128,22 +128,21 @@ public class BudgetRepository : IBudgetRepository
                 UserId = e.UserId
             })
             .AsQueryable();
-        
+        // Calculate value
+        var totalSpent = query.Sum(expenses => expenses.Amount);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         // apply sorting
         query = query.ApplySorting(sortBy, sortDesc);
 
-        // 2. load related expenses
+        // load related expenses
         var expenses = await query
             .Skip(skip)
             .Take(take)
             .ToListAsync(cancellationToken);
         
-        // 3. Calculate value
-        var totalSpent = expenses.Sum(expenses => expenses.Amount);
-        
-        // 4. Build and return domain model
+        // Build and return domain model
         return new BudgetDetailWithExpensesSummary
         {
             Id = budget.Id,

@@ -69,9 +69,9 @@ public class BudgetController : ControllerBase
         return Ok(budget);
     }
 
-    // GET: api/budget/budget-detail-with-budgets?budgetId={budgetId}
+    // GET: api/budget/budget-detail-with-expenses?budgetId={budgetId}
     [Authorize(Policy = BudgetPermission.View)]
-    [HttpGet("budget-detail-with-budgets")]
+    [HttpGet("budget-detail-with-expenses")]
     public async Task<IActionResult> GetBudgetDetailWithExpensesByEmail(
         [FromQuery] Guid budgetId,
 

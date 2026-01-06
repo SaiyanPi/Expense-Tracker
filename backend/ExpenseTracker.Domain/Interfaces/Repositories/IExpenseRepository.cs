@@ -91,7 +91,7 @@ public interface IExpenseRepository
     // Additional method to check for existing title for validation in service in Application layer
     Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default);
     Task<bool> UserOwnsExpenseAsync(Guid expenseId, string userId, CancellationToken cancellationToken = default);
-
+    Task<decimal> GetTotalExpensesUnderABudgetAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default);
 }
 
 

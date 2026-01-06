@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Interfaces;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Entities;
@@ -15,18 +16,21 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
     private readonly IBudgetRepository _budgetRepository;
     private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
+    private readonly INotificationService _notificationService;
 
     public CreateExpenseCommandHandler(IExpenseRepository expenseRepository,
         ICategoryRepository categoryRepository,
         IBudgetRepository budgetRepository,
         IUserAccessor userAccessor,
-        IMapper mapper)
+        IMapper mapper,
+        INotificationService notificationService)
     {
         _expenseRepository = expenseRepository;
         _categoryRepository = categoryRepository;
         _budgetRepository = budgetRepository;
         _userAccessor = userAccessor;
         _mapper = mapper;
+        _notificationService = notificationService; 
     }
 
     public async Task<ExpenseDto> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
@@ -60,14 +64,31 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
                 throw new ConflictException($"You don't have the Budget with id '{budgetId}'.");
 
             // check the budget isActive 
-            var budget = await _budgetRepository.GetBudgetStatusByIdAsync(budgetId, cancellationToken);
-            if (!budget)
+            var isActive = await _budgetRepository.GetBudgetStatusByIdAsync(budgetId, cancellationToken);
+            if (!isActive)
                 throw new NotFoundException("You cannot create an expense for an inactive/expired budget.");
+            
+            var budget = await _budgetRepository.GetByIdAsync(budgetId, cancellationToken);
+
+            var totalSpent = await _expenseRepository
+                .GetTotalExpensesUnderABudgetAsync(budget!.Id, userId, cancellationToken);
+            if(totalSpent > budget.Amount)
+            {
+                await _notificationService.BudgetExceededAsync(
+                    budget.Id,
+                    budget.Name,
+                    totalSpent,
+                    budget.Amount,
+                    userId,
+                    cancellationToken);
+            }
         }
       
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
         expense.UserId = userId;
         await _expenseRepository.AddAsync(expense, cancellationToken);
+
+        
         return _mapper.Map<ExpenseDto>(expense);
     }
 }

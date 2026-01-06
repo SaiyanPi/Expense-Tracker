@@ -1,6 +1,6 @@
 using ExpenseTracker.Application.Features.AuditLogs.Query.ExportAuditLogs;
-using ExpenseTracker.Application.Features.Expenses.Queries.ExportExpenses;
-using ExpenseTracker.Domain.Common;
+
+using ExpenseTracker.Domain.SharedKernel;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.Expense;

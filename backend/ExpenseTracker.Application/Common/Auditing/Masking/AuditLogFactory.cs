@@ -1,7 +1,7 @@
 using ExpenseTracker.Application.Common.Auditing;
 using ExpenseTracker.Application.Common.Context;
-using ExpenseTracker.Domain.Common;
 using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Domain.SharedKernel;
 
 namespace ExpenseTracker.Application.Common.Auditing.Masking;
 public static class AuditLogFactory
