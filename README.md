@@ -64,7 +64,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 
 ## 🧩 Solution Structure
 ```
-ExpenseTracker
+backend
 ├── ExpenseTracker.API            # Controllers, Middleware
 ├── ExpenseTracker.Application    # CQRS, Validators, DTOs, Exceptions, Service Interface, Cross-cutting concerns
 ├── ExpenseTracker.Domain         # Entities, Enums, Base Models, Repository Interface
