@@ -14,6 +14,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Category and budget support
 - User-based expense ownership
 - Advanced filtering and pagination
+- Budget notification once the threshold percentage exceedes
 
 ### Architecture & Design
 - Clean Architecture
@@ -93,6 +94,7 @@ backend
 - JWT Authentication
 - SQL Server
 - Clean Architecture
+- SignalR
 - CQRS Pattern
 - smtp4dev
 - SMSGateway
