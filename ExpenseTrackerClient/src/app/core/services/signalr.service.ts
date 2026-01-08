@@ -5,8 +5,8 @@ import { BehaviorSubject } from 'rxjs';
 export interface BudgetNotification {
   budgetId: string;
   budgetName: string;
-  totalSpent: number;
-  budgetAmount: number;
+  percentageUsed: number;
+  remainingAmount: number;
   exceededAt: string;
 }
 
@@ -17,7 +17,7 @@ export class SignalRService {
   private hubConnection!: HubConnection;
   public budgetExceeded$ = new BehaviorSubject<BudgetNotification | null>(null);
 
-  private apiUrl = 'https://localhost:7106/hubs/notifications'; 
+  private apiUrl = 'https://localhost:7106/hubs/notifications';
 
   public startConnection(token: string) {
     this.hubConnection = new HubConnectionBuilder()

@@ -3,7 +3,7 @@
     class="toast"
     *ngFor="let toast of toasts$ | async"
     [class.success]="toast.type === 'success'"
-    [class.error]="toast.type === 'error'"
+    [class.error]="toast.type === 'warning'"
     [class.info]="toast.type === 'info'"
     (click)="removeToast(toast.id)"
   >

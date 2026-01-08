@@ -72,13 +72,19 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
 
             var totalSpent = await _expenseRepository
                 .GetTotalExpensesUnderABudgetAsync(budget!.Id, userId, cancellationToken);
-            if(totalSpent > budget.Amount)
+            
+            var remainingAmount = budget.Amount-totalSpent;
+            // calculate spent ratio
+            var thresholdPercentage = 50m;
+            var percentageUsed = (totalSpent / budget.Amount) * 100m;
+            var roundedPercentage = Math.Floor(percentageUsed);
+            if(roundedPercentage > thresholdPercentage)
             {
                 await _notificationService.BudgetExceededAsync(
                     budget.Id,
                     budget.Name,
-                    totalSpent,
-                    budget.Amount,
+                    percentageUsed,
+                    remainingAmount,
                     userId,
                     cancellationToken);
             }

@@ -23,8 +23,8 @@ export class AppLayoutComponent {
     this.signalRService.budgetExceeded$.subscribe(notification => {
       if (notification) {
         this.toastService.show(
-          `Budget "${notification.budgetName}" exceeded (${notification.totalSpent}/${notification.budgetAmount})`,
-          'error'
+          `You've used ${notification.percentageUsed}% of your "${notification.budgetName}" budget.\n Remaining Amount = ${notification.remainingAmount}`,
+          'warning'
         );
       }
     });

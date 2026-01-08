@@ -15,8 +15,10 @@ public class SignalRService : INotificationService
     public async Task BudgetExceededAsync(
         Guid budgetId,
         string budgetName,
-        decimal totalSpent,
-        decimal budgetAmount,
+        // decimal totalSpent,
+        // decimal budgetAmount,
+        decimal percentageUsed,
+        decimal remainingAmount,
         string userId,
         CancellationToken cancellationToken = default)
     {
@@ -27,8 +29,10 @@ public class SignalRService : INotificationService
             {
                 budgetId,
                 budgetName,
-                totalSpent,
-                budgetAmount,
+                // totalSpent,
+                // budgetAmount,
+                percentageUsed,
+                remainingAmount,
                 exceededAt = DateTime.UtcNow
             }, cancellationToken);
     }
