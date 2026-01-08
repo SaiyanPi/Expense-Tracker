@@ -14,6 +14,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Category and budget support
 - User-based expense ownership
 - Advanced filtering and pagination
+- Budget notification once the threshold percentage exceedes
 
 ### Architecture & Design
 - Clean Architecture
@@ -64,7 +65,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 
 ## 🧩 Solution Structure
 ```
-ExpenseTracker
+backend
 ├── ExpenseTracker.API            # Controllers, Middleware
 ├── ExpenseTracker.Application    # CQRS, Validators, DTOs, Exceptions, Service Interface, Cross-cutting concerns
 ├── ExpenseTracker.Domain         # Entities, Enums, Base Models, Repository Interface
@@ -93,6 +94,7 @@ ExpenseTracker
 - JWT Authentication
 - SQL Server
 - Clean Architecture
+- SignalR
 - CQRS Pattern
 - smtp4dev
 - SMSGateway
