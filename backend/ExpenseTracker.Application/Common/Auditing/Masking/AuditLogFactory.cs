@@ -7,8 +7,8 @@ namespace ExpenseTracker.Application.Common.Auditing.Masking;
 public static class AuditLogFactory
 {
     public static AuditLog Create(
-        string entityName,
-        string entityId,
+        EntityType entityName,
+        Guid entityId,
         AuditAction action,
         string? oldValues,
         string? newValues,

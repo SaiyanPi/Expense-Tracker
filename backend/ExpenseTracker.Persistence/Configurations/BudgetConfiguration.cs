@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ExpenseTracker.Persistence.Configurations;
 
-public class BudgetMappingConfiguration : IEntityTypeConfiguration<Budget>
+public class BudgetConfiguration : IEntityTypeConfiguration<Budget>
 {
     public void Configure(EntityTypeBuilder<Budget> builder)    
     {

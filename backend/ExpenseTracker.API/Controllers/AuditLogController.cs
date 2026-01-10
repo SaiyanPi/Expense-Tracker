@@ -25,12 +25,11 @@ public class AuditLogController : ControllerBase
     }
 
     // GET: api/auditLog?page=1&pageSize=7&sortBy=Date&sortDesc=true
-    //          &entityName=Expense&userId={userId}&action=1&from={date}&to={date}
+    //          &entityName={enum or string}&userId={userId}&action={enum or string}&from={date}&to={date}
     [HttpGet]
     public async Task<IActionResult> GetAuditLogs(
         [FromQuery] string? entityName = null,
         [FromQuery] string? userId = null,
-        // [FromQuery] AuditAction? action = null,
         [FromQuery] string? action = null,
         [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null,
@@ -41,17 +40,9 @@ public class AuditLogController : ControllerBase
         [FromQuery] bool sortDesc = false,
         CancellationToken cancellationToken = default)
     {
-        // using the action as string for displaying user friendly fluent validation error message
-        AuditAction? parsedAction = null;
-        if (!string.IsNullOrWhiteSpace(action))
-        {
-            if (Enum.TryParse<AuditAction>(action, out var a))
-                parsedAction = a;
-        }
-        //----------------------------------------------
 
         var query = new GetAuditLogsQuery(
-            new AuditLogFilter(entityName, userId, parsedAction, startDate, endDate),
+            new AuditLogFilter(entityName, userId, action, startDate, endDate),
             new PagedQuery(page, pageSize, sortBy, sortDesc));
 
         var result = await _mediator.Send(query, cancellationToken);
@@ -69,12 +60,11 @@ public class AuditLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/auditLog/timeline/timeline/{entityName}/{entityId}
-    [HttpGet("timeline/{entityName}/{entityId}")]
+    // GET: api/auditLog/timeline/entity/timeline/{enum or string}/{entityId}
+    [HttpGet("timeline/entity/{entityName}/{entityId}")]
     public async Task<IActionResult> GetAuditTimelineByEntityNameAndId(
         string entityName,
-        string entityId,
-        
+        Guid entityId, 
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 5,
         [FromQuery] string? sortBy = null,
@@ -106,28 +96,21 @@ public class AuditLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/auditLog/export?format=entityName={entityName}&userId={userId}&action=1&from={date}&to={date}
+    // GET: api/auditLog/export?format=entityName={enum or string}&userId={userId}&action={enum or string}
+    // &from={date}&to={date}
     [HttpGet("export")]
     public async Task<IActionResult> ExportAuditLogs(
         [FromQuery] string format,
         [FromQuery] string? entityName = null,
         [FromQuery] string? userId = null,
-        // [FromQuery] AuditAction? action = null,
         [FromQuery] string? action = null,
         [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null,
         CancellationToken cancellationToken = default)
     {
-        AuditAction? parsedAction = null;
-        if (!string.IsNullOrWhiteSpace(action))
-        {
-            if (Enum.TryParse<AuditAction>(action, out var a))
-                parsedAction = a;
-        }
-
         var query = new ExportAuditLogsQuery(
             format,
-            new AuditLogFilter(entityName, userId, parsedAction, startDate, endDate));
+            new AuditLogFilter(entityName, userId, action, startDate, endDate));
 
         var exportResult = await _mediator.Send(query, cancellationToken);
 

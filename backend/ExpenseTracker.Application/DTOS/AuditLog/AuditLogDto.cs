@@ -6,8 +6,8 @@ public class AuditLogDto
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public string EntityName { get; set; } = default!;
-    public string EntityId { get; set; } = default!;
+    public EntityType EntityName { get; set; } = default!;
+    public Guid EntityId { get; set; }
 
     public AuditAction Action { get; set; }
 

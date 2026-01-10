@@ -9,33 +9,50 @@ public class ExportAuditLogsValidator : AbstractValidator<ExportAuditLogsQuery>
 {
     public ExportAuditLogsValidator()
     {
+        // userId VALIDATION IS DONE IN THE HANDLER SIDE-----
+        
         RuleFor(x => x)
             .Must(x => !x.Filter.StartDate.HasValue || !x.Filter.EndDate.HasValue || 
                 x.Filter.StartDate <= x.Filter.EndDate)
             .WithMessage("StartDate must be less than or equal to EndDate. Date Format(YYYY-MM-DD)");
 
-        RuleFor(x => x.Filter.Action)
-            .Must(action => !action.HasValue || Enum.IsDefined(typeof(AuditAction), action.Value))
+        RuleFor(x => x.Filter.EntityName)
+            .Must(value =>
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    return true;
+
+                // Try parse (case-insensitive)
+                if (!Enum.TryParse<EntityType>(value, ignoreCase: true, out var parsed))
+                    return false;
+
+                // Reject undefined numeric values
+                return Enum.IsDefined(typeof(EntityType), parsed);
+            })
             .WithMessage(x =>
             {
-                var mappings = string.Join(", ", Enum.GetValues(typeof(AuditAction))
-                    .Cast<AuditAction>()
+                var mappings = string.Join(", ", Enum.GetValues<EntityType>()
+                    .Select(e => $"{(int)e} for {e}"));
+                return $"Invalid entity. Valid values: {mappings}.";
+            });
+
+        RuleFor(x => x.Filter.Action)
+            .Must(value =>
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    return true;
+
+                if (!Enum.TryParse<AuditAction>(value, true, out var parsed))
+                    return false;
+
+                return Enum.IsDefined(typeof(AuditAction), parsed);
+            })
+            .WithMessage(x =>
+            {
+                var mappings = string.Join(", ", Enum.GetValues<AuditAction>()
                     .Select(e => $"{(int)e} for {e}"));
                 return $"Invalid action. Valid values: {mappings}.";
             });
-        
-        // EntityName validation
-        var allowedEntities = new[]
-        {
-            nameof(Category),
-            nameof(Budget),
-            nameof(Expense)
-        };
-
-        RuleFor(x => x.Filter.EntityName)
-            .Must(e => string.IsNullOrWhiteSpace(e) || allowedEntities.Contains(e, StringComparer.OrdinalIgnoreCase))
-            .WithMessage(x =>
-                $"Invalid entity. Entity can be either: {string.Join(", ", allowedEntities)}. Leave empty to include all entities.");
 
         RuleFor(x => x.Format)
             .NotEmpty().WithMessage("Format is required")

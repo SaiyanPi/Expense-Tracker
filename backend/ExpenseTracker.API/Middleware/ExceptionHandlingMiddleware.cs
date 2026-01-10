@@ -1,8 +1,10 @@
 using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
 using Azure;
 using ExpenseTracker.API.Models;
 using ExpenseTracker.Application.Common.Exceptions;
+using Serilog.Context;
 
 namespace ExpenseTracker.API.Middleware;
 
@@ -32,6 +34,13 @@ public class ExceptionHandlingMiddleware
     // for logging purposes
     private void LogException(HttpContext context, Exception ex)
     {
+        // using CorrelationId from source of truth(CorrelationIdMiddleware) instead of TraceIdentifier
+        var correlationId = context.Items[CorrelationIdMiddleware.HeaderName]?.ToString()
+            ?? context.TraceIdentifier;
+        
+        // enrich logs with userId
+        var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         var logLevel = ex switch
         {
             ValidationException => LogLevel.Warning,
@@ -42,11 +51,15 @@ public class ExceptionHandlingMiddleware
             _ => LogLevel.Error
         };
 
-        _logger.Log(logLevel, ex,
-            "Exception while processing {Method} {Path}. TraceId: {TraceId}",
-            context.Request.Method,
-            context.Request.Path,
-            context.TraceIdentifier);
+        // Push into Serilog context
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        using (LogContext.PushProperty("UserId", userId))
+        {
+            _logger.Log(logLevel, ex,
+                "Exception while processing {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
+        }
     }
 
 
@@ -100,7 +113,11 @@ public class ExceptionHandlingMiddleware
         
         response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
-        context.Response.Headers["Trace-Id"] = context.TraceIdentifier;
+        //context.Response.Headers["Trace-Id"] = context.TraceIdentifier;
+        var correlationId = context.Items[CorrelationIdMiddleware.HeaderName]?.ToString()
+            ?? context.TraceIdentifier;
+        response.CorrelationId = correlationId;
+        context.Response.Headers["X-Correlation-ID"] = correlationId;
 
         var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {

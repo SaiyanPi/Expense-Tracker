@@ -1,5 +1,7 @@
+using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.AuditLog;
+using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -10,16 +12,24 @@ public sealed class GetAuditTimelineByUserIdQueryHandler
     : IRequestHandler<GetAuditTimelineByUserIdQuery, PagedResult<AuditTimelineItemDto>>
 {
     private readonly IAuditLogRepository _auditLogRepository;
+    private readonly IUserRepository _userRepository;
 
-    public GetAuditTimelineByUserIdQueryHandler(IAuditLogRepository auditLogRepository)
+    public GetAuditTimelineByUserIdQueryHandler(
+        IAuditLogRepository auditLogRepository,
+        IUserRepository userRepository)
     {
         _auditLogRepository = auditLogRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<PagedResult<AuditTimelineItemDto>> Handle(
         GetAuditTimelineByUserIdQuery request,
         CancellationToken cancellationToken)
     {
+        var userExist = await _userRepository.GetByIdAsync(request.UserId);
+        if(userExist is null)
+            throw new NotFoundException(nameof(User), request.UserId);
+            
         var paging = request.Paging;
 
         var baseQuery = _auditLogRepository.GetAuditTimelineQueryable()

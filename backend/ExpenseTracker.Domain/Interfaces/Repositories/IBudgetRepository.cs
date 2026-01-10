@@ -61,5 +61,4 @@ public interface IBudgetRepository
         CancellationToken cancellationToken = default);
     Task<Budget?> GetDeletedBudgetAsync(Guid id, string userId, CancellationToken cancellationToken = default);
     Task<bool> RestoreDeletedBudgetAsync(CancellationToken cancellationToken = default);
-
 }

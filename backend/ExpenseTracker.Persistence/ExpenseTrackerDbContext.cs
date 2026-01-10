@@ -47,21 +47,21 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Budget>()
             .HasQueryFilter(b => !b.IsDeleted);
 
-        // creating indexes in AuditLog
-        modelBuilder.Entity<AuditLog>(entity =>
-        {
-            // Fast ordering + retention cleanup
-            entity.HasIndex(a => a.CreatedAt);
+        // // creating indexes in AuditLog
+        // modelBuilder.Entity<AuditLog>(entity =>
+        // {
+        //     // Fast ordering + retention cleanup
+        //     entity.HasIndex(a => a.CreatedAt);
 
-            // Admin filtering by entity
-            entity.HasIndex(a => new { a.EntityName, a.CreatedAt });
+        //     // Admin filtering by entity
+        //     entity.HasIndex(a => new { a.EntityName, a.CreatedAt });
 
-            // User-based audit lookup
-            entity.HasIndex(a => new { a.UserId, a.CreatedAt });
+        //     // User-based audit lookup
+        //     entity.HasIndex(a => new { a.UserId, a.CreatedAt });
 
-            // Activity timeline per entity
-            entity.HasIndex(a => new { a.EntityName, a.EntityId, a.CreatedAt });
-        });
+        //     // Activity timeline per entity
+        //     entity.HasIndex(a => new { a.EntityName, a.EntityId, a.CreatedAt });
+        // });
     }
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -86,8 +86,14 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
                 // });
 
                 auditLogs.Add(AuditLogFactory.Create(
-                    entityName: entry.Entity.GetType().Name,
-                    entityId: entry.Entity.Id.ToString(),
+                    entityName: entry.Entity switch
+                    {
+                        Category => EntityType.Category,
+                        Budget   => EntityType.Budget,
+                        Expense  => EntityType.Expense,
+                        _        => throw new InvalidOperationException("Unknown entity type")
+                    },
+                    entityId: entry.Entity.Id,
                     action: AuditAction.Created,
                     oldValues: null,
                     newValues: SerializeScalars(entry.CurrentValues.ToObject()),
@@ -103,8 +109,14 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
                 entry.Entity.UpdatedBy = userId;
 
                 auditLogs.Add(AuditLogFactory.Create(
-                    entityName: entry.Entity.GetType().Name,
-                    entityId: entry.Entity.Id.ToString(),
+                    entityName: entry.Entity switch
+                    {
+                        Category => EntityType.Category,
+                        Budget   => EntityType.Budget,
+                        Expense  => EntityType.Expense,
+                        _        => throw new InvalidOperationException("Unknown entity type")
+                    },
+                    entityId: entry.Entity.Id,
                     action: AuditAction.Updated,
                     oldValues: SerializeScalars(entry.OriginalValues.ToObject()),
                     newValues: SerializeScalars(entry.CurrentValues.ToObject()),
@@ -123,8 +135,14 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
                 entry.Entity.DeletedBy = userId;
 
                 auditLogs.Add(AuditLogFactory.Create(
-                    entityName: entry.Entity.GetType().Name,
-                    entityId: entry.Entity.Id.ToString(),
+                    entityName: entry.Entity switch
+                    {
+                        Category => EntityType.Category,
+                        Budget   => EntityType.Budget,
+                        Expense  => EntityType.Expense,
+                        _        => throw new InvalidOperationException("Unknown entity type")
+                    },
+                    entityId: entry.Entity.Id,
                     action: AuditAction.Deleted,
                     oldValues: SerializeScalars(entry.OriginalValues.ToObject()),
                     newValues: null,

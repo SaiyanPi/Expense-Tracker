@@ -6,6 +6,7 @@ using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
 
@@ -17,13 +18,16 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
     private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
     private readonly INotificationService _notificationService;
+    private readonly ILogger<CreateExpenseCommandHandler> _logger;
+
 
     public CreateExpenseCommandHandler(IExpenseRepository expenseRepository,
         ICategoryRepository categoryRepository,
         IBudgetRepository budgetRepository,
         IUserAccessor userAccessor,
         IMapper mapper,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        ILogger<CreateExpenseCommandHandler> logger)
     {
         _expenseRepository = expenseRepository;
         _categoryRepository = categoryRepository;
@@ -31,15 +35,24 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         _userAccessor = userAccessor;
         _mapper = mapper;
         _notificationService = notificationService; 
+        _logger = logger;
     }
 
     public async Task<ExpenseDto> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
     {
+        var userId = _userAccessor.UserId;
+
+        _logger.LogInformation(
+            "Creating expense for UserId {UserId} with Amount {Amount} and CategoryId {CategoryId}",
+            userId,
+            request.CreateExpenseDto.Amount,
+            request.CreateExpenseDto.CategoryId
+        );
+
         // BUISNESS RULE:
         // Admins cannot create expenses
         // Duplicate titles allowed
         
-        var userId = _userAccessor.UserId;
 
         if (!string.IsNullOrWhiteSpace(request.CreateExpenseDto.UserId))
         {
@@ -80,6 +93,13 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
             var roundedPercentage = Math.Floor(percentageUsed);
             if(roundedPercentage > thresholdPercentage)
             {
+                _logger.LogWarning(
+                    "Budget threshold exceeded for BudgetId {BudgetId}. Used {PercentageUsed}%, Remaining {RemainingAmount}",
+                    budget.Id,
+                    roundedPercentage,
+                    remainingAmount
+                );
+
                 await _notificationService.BudgetExceededAsync(
                     budget.Id,
                     budget.Name,
@@ -94,7 +114,13 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         expense.UserId = userId;
         await _expenseRepository.AddAsync(expense, cancellationToken);
 
-        
+        _logger.LogInformation(
+            "Expense created successfully. ExpenseId {ExpenseId}, UserId {UserId}, Amount {Amount}",
+            expense.Id,
+            userId,
+            expense.Amount
+        );
+
         return _mapper.Map<ExpenseDto>(expense);
     }
 }

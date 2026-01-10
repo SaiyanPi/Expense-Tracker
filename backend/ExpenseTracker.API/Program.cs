@@ -14,9 +14,34 @@ using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.Application.Common.Authorization;
 using QuestPDF.Infrastructure;
 using ExpenseTracker.Infrastructure.Services.Notification;
+using Serilog;
 
+// config Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
 
+    // Reduce framework noise
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithProcessId()
+    .Enrich.WithThreadId()
+    .WriteTo.Console(
+        outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level:u3}] " +
+            "[CorrId={CorrelationId}] " +
+            "[UserId={UserId}] " +
+            "{Message:lj}{NewLine}{Exception}"
+    )
+    .CreateLogger();
+    
 var builder = WebApplication.CreateBuilder(args);
+
+// config Serilog
+builder.Host.UseSerilog();
 
 // qualifying for community license (required for pdf export)
 QuestPDF.Settings.License = LicenseType.Community;
@@ -28,7 +53,11 @@ builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Add controllers / minimal APIs
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>  // serialize/deserialize as numbers and preserve names for better error reporting
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 // Modern FluentValidation registration
 builder.Services.AddFluentValidationAutoValidation();
@@ -190,6 +219,10 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 
+// app.UseMiddleware<RequestLogContextMiddleware>();
+
+// app.UseMiddleware<RequestTimingMiddleware>();
+
 
 app.UseHttpsRedirection();
 
@@ -198,6 +231,10 @@ app.UseCors("FrontendPolicy");
 app.UseAuthentication();   // comes BEFORE Authorization
 
 app.UseAuthorization();
+
+app.UseMiddleware<RequestLogContextMiddleware>();   // after auth: UserId available for the logs
+
+app.UseMiddleware<RequestTimingMiddleware>();
 
 app.MapControllers();
 

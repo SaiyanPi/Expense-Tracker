@@ -2,12 +2,12 @@ using ExpenseTracker.Domain.SharedKernel;
 
 namespace ExpenseTracker.Domain.Entities;
 
-public class AuditLog
+public class AuditLog : BaseEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
 
-    public string EntityName { get; set; } = default!;
-    public string EntityId { get; set; } = default!;
+
+    public EntityType EntityName { get; set; }
+    public Guid EntityId { get; set; } = default!;
 
     public AuditAction Action { get; set; }
 
