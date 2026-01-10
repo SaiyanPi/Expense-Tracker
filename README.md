@@ -10,17 +10,18 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 ## 🚀 Features
 
 ### Core Features
-- Expense management (CRUD)
+- Expense management (CRUD and many more)
 - Category and budget support
 - User-based expense ownership
 - Advanced filtering and pagination
-- Budget notification once the threshold percentage exceedes
+- Real-time budget threshold notifications when limits are exceeded
 
 ### Architecture & Design
 - Clean Architecture
 - CQRS with MediatR
 - FluentValidation
 - DTO-based request/response models
+- Middleware-driven cross-cutting concerns
 
 ### Authentication and Security
 - JWT-based authentication
@@ -28,8 +29,20 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Email confirmation for new users
 - Phone OTP verification
 - User context abstraction
-- Secure user access enforcement
+- Secure user-scoped data access enforcement
 
+### Observability & Diagnostics
+- Correlation ID–based request tracking across:
+  - Logs
+  - API responses
+  - Audit logs
+- Structured logging with enriched context:
+  - Correlation ID
+  - User ID
+- Request timing and slow-request detection
+- Centralized exception handling with consistent error contracts
+- Client-visible trace and correlation identifiers for easier debugging
+  
 ### Auditing & Data Safety
 - Automatic audit logging
   - Entity name
@@ -38,15 +51,18 @@ The goal of this project is not just CRUD functionality, but to deeply understan
   - User ID
   - Timestamp
   - Correlation ID
-  - Soft delete
-- Deleted data is never removed from the database
+- Soft delete implementation
 - Restore deleted entities
-- User's timeline and Entity's timeline tracking
-- Audit logs retention: automatically cleaned after 90 days
+- User timeline and Entity timeline tracking
+- Audit logs retention policy
+-   automatically cleaned after 90 days
 - Global query filters applied automatically
 
 ### Data Export
-- Export expenses and audit logs in CSV/Excel/pdf format
+- Export expenses and audit logs in
+  - CSV
+  - Excel
+  - PDF format
   
 ### Filtering & Querying
 - Expenses filtering
@@ -55,11 +71,11 @@ The goal of this project is not just CRUD functionality, but to deeply understan
   - Category-based filtering
   - User-based filtering
   - Sorting and pagination support
-- Auditlogs filtering
-  - Date range filtering
-  - Entity-based filtering
-  - User-based filtering
-  - Action-based filtering
+- Audit log filtering
+  - Date range
+  - Entity-based
+  - User-based
+  - Action-based
 
 <hr>
 
@@ -70,7 +86,7 @@ backend
 ├── ExpenseTracker.Application    # CQRS, Validators, DTOs, Exceptions, Service Interface, Cross-cutting concerns
 ├── ExpenseTracker.Domain         # Entities, Enums, Base Models, Repository Interface
 ├── ExpenseTracker.Persistence    # EF Core, DbContext, Identity
-└── ExpenseTracker.Infrastructure # Services, Repositories
+└── ExpenseTracker.Infrastructure # Services, Repositories, External integrations
 ```
 
 <hr>
@@ -80,9 +96,10 @@ backend
   - Commands
   - Queries
   - Filter objects
-- Centralized exception handling
-- Clear validation and domain error messages
-
+- Centralized global exception handling
+- Consistent and structured error responses
+- Validation, domain, and infrastructure exceptions handled separately
+  
 <hr>
 
 ## 📁 Technologies Used
@@ -98,6 +115,7 @@ backend
 - CQRS Pattern
 - smtp4dev
 - SMSGateway
+- Serilog (structured logging)
 
 <hr>
 
@@ -118,20 +136,20 @@ dotnet build
 
 ### Database
 - Update appsettings.json with your connection string
-- navigate to solution directory
+- Navigate to solution directory>
 ```
   cd backend
 ```
 - Apply migrations:
 ```
-  dotnet ef database update
+  dotnet ef database update --project ExpenseTracker.Persistence --startup-project ExpenseTracker.API
 ```
 ### Run the API
-first navigate to solution directory
+- Navigate to solution directory:
 ```
   cd backend
 ```
-and then run the solution
+- Run the solution:
 ```
 dotnet run --project ExpenseTracker.API
 ```
