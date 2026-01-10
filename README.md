@@ -102,7 +102,7 @@ backend
   
 <hr>
 
-## 📁 Technologies Used
+## 🗄️ Tech Stack
 - .NET 8.0
 - ASP.NET Core
 - Entity Framework Core
