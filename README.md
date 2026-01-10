@@ -1,9 +1,8 @@
 # Expense Tracker API
 
-A Clean Architecture–based Expense Tracker backend API built with ASP.NET Core.
-This project is designed as a learning-focused but real-world–oriented backend system, emphasizing proper architecture, maintainability, and backend best practices.
+This is an ongoing project, designed as a learning-focused yet real-world–oriented backend system, with continuous improvements aimed at proper architecture, maintainability, observability, and backend best practices.
 
-The goal of this project is not just CRUD functionality, but to deeply understand enterprise-grade API design, including auditing, soft deletion, filtering, validation, and authorization patterns.
+The goal of this project is not just CRUD functionality, but to deeply understand enterprise-grade API design, including auditing, soft deletion, filtering, validation, and authorization patterns and other production-inspired backend concerns.
 
 <hr>
 
