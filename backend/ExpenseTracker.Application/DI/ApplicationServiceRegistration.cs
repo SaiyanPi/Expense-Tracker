@@ -2,6 +2,7 @@ using System.Reflection;
 using ExpenseTracker.Application.Common.Behaviours;
 using ExpenseTracker.Application.Common.Context;
 using ExpenseTracker.Application.Common.Mappings;
+using ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics.Generic;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,6 +42,12 @@ public static class ApplicationServiceRegistration
         services.AddHttpContextAccessor();
         services.AddScoped<IRequestContext, RequestContext>();
 
+        // registering MediatR pipeline behavior for business latency
+        services.AddTransient(
+            typeof(IPipelineBehavior<,>),
+            typeof(BusinessMetricBehavior<,>)
+        );
+        
         return services;
     }
 }

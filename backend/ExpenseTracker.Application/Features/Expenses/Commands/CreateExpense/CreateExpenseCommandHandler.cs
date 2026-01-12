@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces;
 using ExpenseTracker.Application.Common.Interfaces.Services;
+using ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics;
 using ExpenseTracker.Application.DTOs.Expense;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
@@ -43,10 +45,11 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         var userId = _userAccessor.UserId;
 
         _logger.LogInformation(
-            "Creating expense for UserId {UserId} with Amount {Amount} and CategoryId {CategoryId}",
+            "Creating expense for UserId {UserId} with Amount {Amount}, CategoryId {CategoryId}, and BudgetId {BudgetId}",
             userId,
             request.CreateExpenseDto.Amount,
-            request.CreateExpenseDto.CategoryId
+            request.CreateExpenseDto.CategoryId,
+            request.CreateExpenseDto.BudgetId
         );
 
         // BUISNESS RULE:
@@ -93,6 +96,9 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
             var roundedPercentage = Math.Floor(percentageUsed);
             if(roundedPercentage > thresholdPercentage)
             {
+                // hook the business metric
+                ExpenseMetrics.BudgetThresholdExceeded();
+
                 _logger.LogWarning(
                     "Budget threshold exceeded for BudgetId {BudgetId}. Used {PercentageUsed}%, Remaining {RemainingAmount}",
                     budget.Id,
@@ -113,6 +119,9 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
         expense.UserId = userId;
         await _expenseRepository.AddAsync(expense, cancellationToken);
+
+        // hook the business metric
+        ExpenseMetrics.ExpenseCreated();
 
         _logger.LogInformation(
             "Expense created successfully. ExpenseId {ExpenseId}, UserId {UserId}, Amount {Amount}",

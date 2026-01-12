@@ -2,8 +2,10 @@ using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using Azure;
+using ClosedXML;
 using ExpenseTracker.API.Models;
 using ExpenseTracker.Application.Common.Exceptions;
+using ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics.Generic;
 using Serilog.Context;
 
 namespace ExpenseTracker.API.Middleware;
@@ -27,6 +29,12 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
+            // Hook the failure and exception metric
+            var method = context.Request.Method;
+            var path = context.Request.Path; 
+            var operation = $"{method} {path}"; // or extract a more business-specific operation
+            BusinessFailureMetric.RecordFailure(operation, ex.GetType().Name);
+
             await HandleExceptionAsync(context, ex);
         }
     }

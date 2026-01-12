@@ -15,6 +15,7 @@ using ExpenseTracker.Application.Common.Authorization;
 using QuestPDF.Infrastructure;
 using ExpenseTracker.Infrastructure.Services.Notification;
 using Serilog;
+using OpenTelemetry.Metrics;
 
 // config Serilog
 Log.Logger = new LoggerConfiguration()
@@ -193,6 +194,22 @@ builder.Services.AddCors(options =>
     });
 });
 
+// OpenTelemetry config
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation() // tracks HTTP requests
+            .AddMeter("ExpenseTracker.Application");    // custom business metrics
+            // Optional console exporter for dev/debug
+            #if DEBUG
+                    metrics.AddConsoleExporter();
+            #endif
+
+        // Prometheus exporter for dashboards
+        metrics.AddPrometheusExporter();  // exposes /metrics endpoint
+    });
+
 var app = builder.Build();
 
 // Run the seeder
@@ -239,6 +256,9 @@ app.UseMiddleware<RequestTimingMiddleware>();
 app.MapControllers();
 
 app.MapHub<NotificationHub>(NotificationHub.HubUrl);    // map the SignalRhub to a URL
+
+app.UseOpenTelemetryPrometheusScrapingEndpoint(); // default: /metrics
+
 
 app.Run();
 
