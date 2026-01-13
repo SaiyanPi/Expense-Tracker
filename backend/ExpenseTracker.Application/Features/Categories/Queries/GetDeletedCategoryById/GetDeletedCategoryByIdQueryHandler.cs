@@ -4,6 +4,7 @@ using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
+using static ExpenseTracker.Application.Common.Observability.Metrics.MetricsConstants;
 
 namespace ExpenseTracker.Application.Features.Categories.Queries.GetDeletedCategoryById;
 
@@ -29,7 +30,7 @@ public class GetDeletedCategoryByIdQueryHandler : IRequestHandler<GetDeletedCate
 
         var category = await _categoryRepository.GetDeletedCategoryAsync(request.Id, userId, cancellationToken);
         if (category == null)
-            throw new NotFoundException(nameof(CategoryDto), request.Id);
+            throw new NotFoundException(nameof(Category), request.Id);
 
         return _mapper.Map<CategoryDto>(category);
     }

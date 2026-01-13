@@ -18,7 +18,8 @@ public static class BusinessSuccessMetric
     {
         BusinessOperationSuccessCounter.Add(
             1,
-            new KeyValuePair<string, object?>("operation", operationName)
+            new KeyValuePair<string, object?>("operation", operationName),
+            new KeyValuePair<string, object?>("status", "success")
         );
     }
 }

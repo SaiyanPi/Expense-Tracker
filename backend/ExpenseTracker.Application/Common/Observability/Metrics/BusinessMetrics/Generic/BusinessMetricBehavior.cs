@@ -16,7 +16,7 @@ public sealed class BusinessMetricBehavior<TRequest, TResponse>
         CancellationToken cancellationToken)
     {
         // Not a business operation where we don't want to measure success and latency metric → do nothing
-        if (request is not ITrackBusinessLatency tracked)
+        if (request is not ITrackBusinessLatencyAndSuccess tracked)
         {
             return await next();
         }
@@ -52,3 +52,7 @@ public sealed class BusinessMetricBehavior<TRequest, TResponse>
 }
 // now we don't even have to add try-catch block in the handler to hook the business latency metric, it is done
 // automatically measured in all handlers
+
+// Note that we used this class also for business success metric, this means if we mark handler with
+// ITrackBusinessLatency to measure business latency, business success metric will also be measured
+// automatically. THIS IS NOT A PROBLEM btw

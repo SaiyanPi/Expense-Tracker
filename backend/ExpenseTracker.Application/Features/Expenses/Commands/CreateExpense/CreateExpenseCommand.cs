@@ -5,7 +5,7 @@ using MediatR;
 namespace ExpenseTracker.Application.Features.Expenses.Commands.CreateExpense;
 
 public record CreateExpenseCommand(CreateExpenseDto CreateExpenseDto) 
-    : IRequest<ExpenseDto>, ITrackBusinessLatency
+    : IRequest<ExpenseDto>, ITrackBusinessLatencyAndSuccess
 {
     public string OperationName => BusinessOperationNames.CreateExpense;
 }

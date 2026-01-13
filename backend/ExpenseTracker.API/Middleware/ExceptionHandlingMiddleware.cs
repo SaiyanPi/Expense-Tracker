@@ -31,8 +31,14 @@ public class ExceptionHandlingMiddleware
         {
             // Hook the failure and exception metric
             var method = context.Request.Method;
-            var path = context.Request.Path; 
-            var operation = $"{method} {path}"; // or extract a more business-specific operation
+            var endpoint = context.GetEndpoint();
+            var route = endpoint switch
+            {
+                RouteEndpoint routeEndpoint => routeEndpoint.RoutePattern.RawText,
+                _ => context.Request.Path.Value
+            };
+            var operation = $"{method} {route}"; // or extract a more business-specific operation
+            
             BusinessFailureMetric.RecordFailure(operation, ex.GetType().Name);
 
             await HandleExceptionAsync(context, ex);
@@ -51,11 +57,25 @@ public class ExceptionHandlingMiddleware
 
         var logLevel = ex switch
         {
-            ValidationException => LogLevel.Warning,
+            // Expected business / validation failures
+            FluentValidation.ValidationException => LogLevel.Information,
+            ValidationException => LogLevel.Information,
+            BadRequestException => LogLevel.Information,
+            ConflictException => LogLevel.Information,
             NotFoundException => LogLevel.Information,
+            DomainException => LogLevel.Information,
+            IdentityOperationException => LogLevel.Information,
+            Application.Common.Exceptions.InvalidOperationException => LogLevel.Information,
+
+            // Security-relevant
             UnauthorizedException => LogLevel.Warning,
             ForbiddenException => LogLevel.Warning,
-            ConflictException => LogLevel.Warning,
+            InvalidCredentialsException => LogLevel.Warning,
+
+            // Infrastructure / system failure
+            EmailSendingException => LogLevel.Error,
+
+            // Unknown = bug
             _ => LogLevel.Error
         };
 

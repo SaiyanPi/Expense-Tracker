@@ -1,6 +1,6 @@
 namespace ExpenseTracker.Application.Common.Observability.Metrics;
 
-public interface ITrackBusinessLatency
+public interface ITrackBusinessLatencyAndSuccess
 {
     string OperationName { get; }
 }

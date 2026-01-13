@@ -55,7 +55,6 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         // BUISNESS RULE:
         // Admins cannot create expenses
         // Duplicate titles allowed
-        
 
         if (!string.IsNullOrWhiteSpace(request.CreateExpenseDto.UserId))
         {

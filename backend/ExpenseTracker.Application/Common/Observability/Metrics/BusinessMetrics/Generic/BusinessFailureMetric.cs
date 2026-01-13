@@ -19,6 +19,7 @@ public static class BusinessFailureMetric
         OperationFailures.Add(
             1,
             new KeyValuePair<string, object?>("operation", operation),
+            new KeyValuePair<string, object?>("status", "failure"),
             new KeyValuePair<string, object?>("failure_type", failureType)
         );
     }

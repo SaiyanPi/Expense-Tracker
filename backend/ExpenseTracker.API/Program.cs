@@ -199,7 +199,7 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
     {
         metrics
-            .AddAspNetCoreInstrumentation() // tracks HTTP requests
+            //.AddAspNetCoreInstrumentation() // tracks HTTP requests
             .AddMeter("ExpenseTracker.Application");    // custom business metrics
             // Optional console exporter for dev/debug
             #if DEBUG

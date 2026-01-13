@@ -1,4 +1,5 @@
 using ExpenseTracker.Application.Common.Context;
+using Serilog.Context;
 
 namespace ExpenseTracker.API.Middleware;
 
@@ -25,6 +26,10 @@ public class CorrelationIdMiddleware
         // Set response header safely
         context.Response.Headers[HeaderName] = correlationId;
 
-        await _next(context);
+        // await _next(context);
+        using (LogContext.PushProperty("CorrelationId", correlationId))
+        {
+            await _next(context);
+        }
     }
 }
