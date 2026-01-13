@@ -55,6 +55,7 @@ This project treats observability as a first-class concern, with clear separatio
   - Error for unexpected or system-level faults
   
 #### Metrics(OpenTelemetry)
+Metrics are intentionally low-cardinality and aggregate-focused, designed for dashboards and alerting rather than per-request tracing.
 - OpenTelemetry-based metrics instrumentation
 - Clear distinction between system metrics and business metrics
 - System Metrics:
@@ -66,7 +67,6 @@ This project treats observability as a first-class concern, with clear separatio
   - Business operation success counters
   - Business operation failure counters (recorded centrally in exception middleware)
   - Domain-specific metrics
-  Metrics are intentionally low-cardinality and aggregate-focused, designed for dashboards and alerting rather than per-request tracing.
 
 #### Error Handling & Diagnostics
 - Centralized global exception handling middleware
