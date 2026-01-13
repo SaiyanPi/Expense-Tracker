@@ -21,6 +21,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - FluentValidation
 - DTO-based request/response models
 - Middleware-driven cross-cutting concerns
+- Clear separation of application, domain, and infrastructure concerns
 
 ### Authentication and Security
 - JWT-based authentication
@@ -31,17 +32,49 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Secure user-scoped data access enforcement
 
 ### Observability & Diagnostics
+This project treats observability as a first-class concern, with clear separation between logging, metrics, and audit trails.
+
+#### Request Tracing & Correlation
 - Correlation ID–based request tracking across:
-  - Logs
+  - Application Logs
   - API responses
   - Audit logs
-- Structured logging with enriched context:
+- Correlation ID propagated via middleware and exposed to clients
+- Enables full request lifecycle tracing across layers
+
+#### Structured Logging
+- Structured logging using Serilog
+- Logs enriched with:
   - Correlation ID
   - User ID
-- Request timing and slow-request detection
-- Centralized exception handling with consistent error contracts
-- Client-visible trace and correlation identifiers for easier debugging
+  - Request metadata
+- Context-aware logging inside handlers, middleware, and infrastructure services
+- Proper log level usage:
+  - Information for business flow
+  - Warning for expected failures
+  - Error for unexpected or system-level faults
   
+#### Metrics(OpenTelemetry)
+- OpenTelemetry-based metrics instrumentation
+- Clear distinction between system metrics and business metrics
+- System Metrics:
+  - HTTP request duration
+  - Active requests and server health signals
+  - Infrastructure-level observability
+- Business Metrics:
+  - Business operation latency (opt-in per use case)
+  - Business operation success counters
+  - Business operation failure counters (recorded centrally in exception middleware)
+  - Domain-specific metrics
+  Metrics are intentionally low-cardinality and aggregate-focused, designed for dashboards and alerting rather than per-request tracing.
+
+#### Error Handling & Diagnostics
+- Centralized global exception handling middleware
+- Consistent error response contracts
+- Domain, validation, and infrastructure exceptions handled explicitly
+- Client-visible correlation identifiers for easier debugging and support
+
+
 ### Auditing & Data Safety
 - Automatic audit logging
   - Entity name
@@ -82,7 +115,7 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 ```
 backend
 ├── ExpenseTracker.API            # Controllers, Middleware
-├── ExpenseTracker.Application    # CQRS, Validators, DTOs, Exceptions, Service Interface, Cross-cutting concerns
+├── ExpenseTracker.Application    # CQRS, Validators, DTOs, Exceptions, Observability, Service Interface, Cross-cutting concerns
 ├── ExpenseTracker.Domain         # Entities, Enums, Base Models, Repository Interface
 ├── ExpenseTracker.Persistence    # EF Core, DbContext, Identity
 └── ExpenseTracker.Infrastructure # Services, Repositories, External integrations
@@ -95,9 +128,9 @@ backend
   - Commands
   - Queries
   - Filter objects
-- Centralized global exception handling
+- Centralized exception handling
 - Consistent and structured error responses
-- Validation, domain, and infrastructure exceptions handled separately
+- Clear separation between validation, domain, and infrastructure errors
   
 <hr>
 
@@ -112,9 +145,11 @@ backend
 - Clean Architecture
 - SignalR
 - CQRS Pattern
+- Serilog (structured logging)
+- OpenTelemetry (metrics & observability)
 - smtp4dev
 - SMSGateway
-- Serilog (structured logging)
+
 
 <hr>
 
