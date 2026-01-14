@@ -1,6 +1,7 @@
 using ExpenseTracker.Persistence.DI;
 using ExpenseTracker.Application.DI;
 using ExpenseTracker.Infrastructure.DI;
+using ExpenseTracker.Infrastructure.HealthCheck;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -16,10 +17,13 @@ using QuestPDF.Infrastructure;
 using ExpenseTracker.Infrastructure.Services.Notification;
 using Serilog;
 using OpenTelemetry.Metrics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
 
 // config Serilog
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
+    .MinimumLevel.Information()             
 
     // Reduce framework noise
     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
@@ -199,7 +203,7 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
     {
         metrics
-            //.AddAspNetCoreInstrumentation() // tracks HTTP requests
+            .AddAspNetCoreInstrumentation() // tracks HTTP requests
             .AddMeter("ExpenseTracker.Application");    // custom business metrics
             // Optional console exporter for dev/debug
             #if DEBUG
@@ -209,6 +213,15 @@ builder.Services.AddOpenTelemetry()
         // Prometheus exporter for dashboards
         metrics.AddPrometheusExporter();  // exposes /metrics endpoint
     });
+
+// Add HealthChecks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ExpenseTrackerDbContext>(
+        name: "database",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "ready" }) //readiness tag
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" }) // simple liveness check
+    .AddCheck<SmtpHealthCheck>("smtp", failureStatus: HealthStatus.Degraded, tags: new[] { "ready" }); // smtp email server check
 
 var app = builder.Build();
 
@@ -259,7 +272,18 @@ app.MapHub<NotificationHub>(NotificationHub.HubUrl);    // map the SignalRhub to
 
 app.UseOpenTelemetryPrometheusScrapingEndpoint(); // default: /metrics
 
+// Map HealthCheck endpoints
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live"), // liveness checks only
+    ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
+});
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"), // readiness checks only
+    ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
+});
+
 
 app.Run();
-
-

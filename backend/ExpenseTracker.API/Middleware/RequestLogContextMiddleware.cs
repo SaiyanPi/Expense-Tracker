@@ -17,8 +17,6 @@ public class RequestLogContextMiddleware
         // read from source of truth(CurrelationIdMiddleware)
         var correlationId = context.Items[CorrelationIdMiddleware.HeaderName]?.ToString();
 
-        context.Response.Headers["X-Correlation-ID"] = correlationId;
-
         var userId = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         // Push into Serilog context

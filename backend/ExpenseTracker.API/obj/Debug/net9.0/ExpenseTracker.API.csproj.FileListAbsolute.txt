@@ -1,0 +1,8 @@
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\ExpenseTracker.API.csproj.AssemblyReference.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\ExpenseTracker.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\ExpenseTracker.API.AssemblyInfoInputs.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\ExpenseTracker.API.AssemblyInfo.cs
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\ExpenseTracker.API.csproj.CoreCompileInputs.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\ExpenseTracker.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.API\obj\Debug\net9.0\ExpenseTracker.API.MvcApplicationPartsAssemblyInfo.cache

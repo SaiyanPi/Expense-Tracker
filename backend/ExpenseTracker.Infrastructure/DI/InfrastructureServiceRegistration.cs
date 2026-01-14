@@ -3,6 +3,7 @@ using ExpenseTracker.Application.Common.Interfaces;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Infrastructure.Repositories;
+using ExpenseTracker.Infrastructure.Services;
 using ExpenseTracker.Infrastructure.Services.AuditLogsExport;
 using ExpenseTracker.Infrastructure.Services.BackgroundServices;
 using ExpenseTracker.Infrastructure.Services.Email;
@@ -66,7 +67,9 @@ public static class InfrastructureServiceRegistration
         // register SignalR notification service
         services.AddScoped<INotificationService, SignalRService>();
 
+        // register audit logger for security events
+        services.AddScoped<IAuditLogger, AuditLogger>();
+
         return services;
     }
 }
-
