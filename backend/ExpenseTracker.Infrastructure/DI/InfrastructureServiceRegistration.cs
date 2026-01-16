@@ -10,6 +10,8 @@ using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.ExpenseExport;
 using ExpenseTracker.Infrastructure.Services.Identity;
 using ExpenseTracker.Infrastructure.Services.Notification;
+using ExpenseTracker.Infrastructure.Services.SecurityEventLogger;
+using ExpenseTracker.Infrastructure.Services.SecurityEventLogsExport;
 using ExpenseTracker.Infrastructure.Services.SMS;
 using ExpenseTracker.Infrastructure.Services.UserAccessor;
 using ExpenseTracker.Infrastructure.Services.UserRole;
@@ -33,6 +35,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IDashboardRepository, DashBoardRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IEntityResolverRepository, EntityResolverRepository>();
+        services.AddScoped<ISecurityEventLogRepository, SecurityEventLogRepository>();
 
         // registering identity service
         services.AddScoped<IIdentityService, IdentityService>();
@@ -56,6 +59,7 @@ public static class InfrastructureServiceRegistration
         // register export service
         services.AddScoped<IExpenseExportService, ExpenseExportService>();
         services.AddScoped<IAuditLogsExportService, AuditLogsExportService>();
+        services.AddScoped<ISecurityEventLogsExportService, SecurityEventLogsExportService>();
 
         // register user role(isAdmin) service
         services.AddScoped<IUserRoleService, UserRoleService>();
@@ -68,7 +72,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<INotificationService, SignalRService>();
 
         // register audit logger for security events
-        services.AddScoped<IAuditLogger, AuditLogger>();
+        services.AddScoped<ISecurityEventLogger, SecurityEventLogger>();
 
         return services;
     }

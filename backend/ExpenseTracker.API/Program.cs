@@ -19,6 +19,11 @@ using Serilog;
 using OpenTelemetry.Metrics;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using System.Security.Claims;
+using ExpenseTracker.Application.Common.Security;
+using ExpenseTracker.Application.Common.Interfaces.Services;
+using ExpenseTracker.Domain.Entities;
+using ExpenseTracker.Domain.SharedKernel;
 
 
 // config Serilog
@@ -98,9 +103,9 @@ builder.Services.AddAuthentication(options =>
         )
     };
 
-    // KEY piece for SignalR: SignalR sends the token via query string, not the authorization header
     options.Events = new JwtBearerEvents
     {
+        // KEY piece for SignalR: SignalR sends the token via query string, not the authorization header
         OnMessageReceived = context =>
         {
             // If the request is for SignalR and token is in the query string
@@ -115,8 +120,55 @@ builder.Services.AddAuthentication(options =>
             }
 
             return Task.CompletedTask;
+        },
+
+        // For 403 access denied logging, we already handled via authorization failure logging middleware
+        // Now we handle 401 Unauthorized logging
+        // OnChallenge is triggered any time authentication fails, before hitting the endpoint.
+        // This captures missing token, invalid token, expired token.
+        OnChallenge = async context =>
+        {
+            var httpContext = context.HttpContext;
+
+            // Extract claims if any (may be null)
+            var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userEmail = httpContext.User.FindFirst(ClaimTypes.Email)?.Value;
+
+            var endpoint = SecurityEventContext.GetEndpoint(httpContext);
+            var ip = SecurityEventContext.GetIp(httpContext);
+            var userAgent = SecurityEventContext.GetUserAgent(httpContext);
+            var correlationId = SecurityEventContext.GetCorrelationId(httpContext);
+
+            // Fire-and-forget logging
+            try
+            {
+                using var scope = httpContext.RequestServices.CreateScope();
+                var securityLogger = scope.ServiceProvider.GetRequiredService<ISecurityEventLogger>();
+
+                await securityLogger.LogSecurityEventAsync(new SecurityEventLog
+                {
+                    EventType = SecurityEventTypes.UnauthorizedAccess,
+                    UserId = userId,
+                    UserEmail = userEmail,
+                    Outcome = SecurityEventOutcome.Failed,
+                    Endpoint = endpoint,
+                    IpAddress = ip,
+                    UserAgent = userAgent,
+                    CorrelationId = correlationId,
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+            catch
+            {
+                // swallow exceptions — must not block the request
+            }
+
+            // IMPORTANT: continue the normal 401 response
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.HandleResponse(); // prevents default challenge handling
         }
     };
+
 });
 
 // add authorization policies
@@ -259,6 +311,8 @@ app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
 
 app.UseAuthentication();   // comes BEFORE Authorization
+
+app.UseMiddleware<AuthorizationFailureLoggingMiddleware>();
 
 app.UseAuthorization();
 

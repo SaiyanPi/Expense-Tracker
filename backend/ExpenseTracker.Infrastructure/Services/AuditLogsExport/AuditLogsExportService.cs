@@ -14,14 +14,14 @@ public class AuditLogsExportService : IAuditLogsExportService
     public byte[] ExportToCsv(IReadOnlyList<AuditLogsExportDto> auditLogs)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("CreatedAt, EntityName, EntityId, Action, OldValues, NewValues, UserId, CorrelationId, HttpMethod, RequestPathBaseCookieBuilder, ClientCertificateOption, UserAgent");
+        sb.AppendLine("CreatedAt, EntityName, EntityId, Action, OldValues, NewValues, UserId, CorrelationId, HttpMethod, RequestPath, ClientIp, UserAgent");
 
         foreach (var a in auditLogs)
         {
             sb.AppendLine(
                 $"{a.CreatedAt:yyyy-MM-dd}," +
-                $"{Escape(a.EntityName)}," +
-                $"{Escape(a.EntityId)}," +
+                $"{Escape(a.EntityName.ToString())}," +
+                $"{Escape(a.EntityId.ToString())}," +
                 $"{Escape(a.Action.ToString())}," +
                 $"{Escape(a.OldValues ?? string.Empty)}," +
                 $"{Escape(a.NewValues ?? string.Empty)}," +
@@ -77,8 +77,8 @@ public class AuditLogsExportService : IAuditLogsExportService
             var a = auditLogs[i];
 
             ws.Cell(row, 1).Value = a.CreatedAt;
-            ws.Cell(row, 2).Value = a.EntityName;
-            ws.Cell(row, 3).Value = a.EntityId;
+            ws.Cell(row, 2).Value = a.EntityName.ToString();
+            ws.Cell(row, 3).Value = a.EntityId.ToString();
             ws.Cell(row, 4).Value = a.Action.ToString();
             ws.Cell(row, 5).Value = a.OldValues;
             ws.Cell(row, 6).Value = a.NewValues;

@@ -86,26 +86,39 @@ public class IdentityService : IIdentityService
 
     public async Task<AuthResultDto> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default)
     {
+        var result = new AuthResultDto(); // start as success = false
+
         var domainUser = await _userRepository.GetByEmailAsync(dto.Email);
         if (domainUser is null)
-            throw new UnauthorizedException("Invalid credentials.");
+        {
+            result.Errors = new[] { "Invalid credentials." };
+            return result;
+        }
 
         var valid = await _identityRepository.CheckPasswordAsync(dto.Email, dto.Password, cancellationToken);
         if (!valid)
-            throw new InvalidCredentialsException("Wrong password.");
-
+        {
+            result.Errors = new[] { "Invalid credentials." };
+            return result;
+        }
+        
         var accessToken = await _identityRepository.GenerateJwtTokenAsync(domainUser);
         var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(domainUser);
 
         // store refresh token
         await _identityRepository.StoreRefreshTokenAsync(domainUser.Id, refreshToken, cancellationToken);
 
-        return new AuthResultDto
-        {
-            Success = true,
-            Token = accessToken,
-            RefreshToken = refreshToken
-        };
+        // return new AuthResultDto
+        // {
+        //     Success = true,
+        //     Token = accessToken,
+        //     RefreshToken = refreshToken
+        // };
+        result.Success = true;
+        result.Token = accessToken;
+        result.RefreshToken = refreshToken;
+
+        return result;
     }
 
     public async Task UpdateAsync(string userId, UpdateUserDto dto, CancellationToken cancellationToken = default)

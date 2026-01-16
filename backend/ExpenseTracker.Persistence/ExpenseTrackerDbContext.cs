@@ -29,6 +29,7 @@ public class ExpenseTrackerDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Budget> Budgets => Set<Budget>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<SecurityEventLog> SecurityEventLogs => Set<SecurityEventLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -4,8 +4,8 @@ namespace ExpenseTracker.Application.DTOs.AuditLog;
 
 public class AuditLogsExportDto
 {
-    public string EntityName { get; set; } = default!;
-    public string EntityId { get; set; } = default!;
+    public EntityType EntityName { get; set; } = default!;
+    public Guid EntityId { get; set; } = default!;
 
     public AuditAction Action { get; set; }
 
