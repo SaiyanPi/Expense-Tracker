@@ -126,7 +126,10 @@ Metrics are intentionally low-cardinality and aggregate-focused, designed for da
  - Validation exceptions
  - Infrastructure exceptions
 - Client-visible correlation identifiers for easier debugging and support
-
+### Health Monitoring
+- Application health checks exposed via standard health endpoints
+- Used for basic liveness and readiness signaling
+- Designed to support containerized or orchestrated deployments
 <hr>
 
 ## 📃 Auditing & Data Safety
