@@ -1,11 +1,28 @@
 # Expense Tracker API
 
-This is an ongoing project, designed as a learning-focused yet real-world–oriented backend system, with continuous improvements aimed at proper architecture, maintainability, observability, and backend best practices.
+A production-inspired, enterprise-grade backend system built with a strong focus on architecture, security, observability, and maintainability.
 
-The goal of this project is not just CRUD functionality, but to deeply understand enterprise-grade API design, including auditing, soft deletion, filtering, validation, and authorization patterns and other production-inspired backend concerns.
+This project goes far beyond basic CRUD operations. It is intentionally designed to explore and apply real-world backend engineering concerns such as auditing, security event tracking, soft deletion, filtering, validation, policy-based authorization, and operational observability.
+
+While not intended for production deployment, the system is engineered with production patterns and discipline, serving both as a deep learning platform and a realistic backend reference.
 
 <hr>
+ 
+## 🧠 Engineering Intent & Portfolio Positioning
+This project is intentionally designed as a production-inspired backend system rather than a simple demo or tutorial application.
 
+The primary focus is on:
+- Architectural clarity
+- Security-first thinking
+- Observability and diagnostics
+- Maintainability and long-term evolution
+Rather than optimizing for feature quantity, this codebase prioritizes how and why systems are built, mirroring real-world backend decision-making.
+
+This repository serves as:
+- A backend engineering portfolio project
+- A reference implementation for Clean Architecture–based APIs
+- A learning-driven system built with production discipline
+- 
 ## 🚀 Features
 
 ### Core Features
@@ -21,7 +38,34 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - FluentValidation
 - DTO-based request/response models
 - Middleware-driven cross-cutting concerns
-- Clear separation of application, domain, and infrastructure concerns
+- Clear separation of application, domain, infrastructure concerns, and API layer
+
+### Key Engineering Decisions
+#### Clean Architecture + CQRS
+- Chosen to enforce:
+  - Clear dependency direction
+  - Testability
+  - Long-term maintainability
+- CQRS used selectively to avoid unnecessary complexity
+- 
+#### Explicit Security Telemetry
+- Security events are modeled as first-class domain concepts
+- Security logs are separated from:
+  - Application logs
+  - Audit logs
+- Enables forensic analysis and security auditing
+
+#### Observability as a Core Concern
+- Logging, metrics, and audit trails are intentionally separated
+- Avoided high-cardinality metrics to ensure dashboard usability
+- Business metrics are treated differently from infrastructure metrics
+
+#### Middleware-Driven Cross-Cutting Concerns
+- Correlation IDs
+- Security event logging
+- Global exception handling
+- Centralized policy enforcement
+This approach reduces duplication and enforces consistency across the system.
 
 ### Authentication and Security
 - JWT-based authentication
@@ -30,6 +74,29 @@ The goal of this project is not just CRUD functionality, but to deeply understan
 - Phone OTP verification
 - User context abstraction
 - Secure user-scoped data access enforcement
+
+### Security Event Logging
+Security is treated as a first-class concern with explicit security telemetry, not just application logs.
+#### Tracked Security Events
+The system records security-related activities using structured, queryable security event logs:
+```
+public enum SecurityEventTypes
+{
+    LoginSuccess = 1,
+    LoginFailed = 2,
+    TokenIssued = 3,
+    Logout = 4,
+    AccessDenied = 5,        // 403 Forbidden
+    UnauthorizedAccess = 6  // 401 Unauthorized
+}
+```
+#### Each security event captures:
+- Event type
+- User ID (nullable where applicable)
+- User email
+- Timestamp
+- Correlation ID
+- Request context metadata
 
 ### Observability & Diagnostics
 This project treats observability as a first-class concern, with clear separation between logging, metrics, and audit trails.
@@ -91,7 +158,7 @@ Metrics are intentionally low-cardinality and aggregate-focused, designed for da
 - Global query filters applied automatically
 
 ### Data Export
-- Export expenses and audit logs in
+- Export expenses, audit logs, and security event logs in
   - CSV
   - Excel
   - PDF format
@@ -189,11 +256,12 @@ dotnet run --project ExpenseTracker.API
 ```
 
 <hr>
-
-## 📌 Project Intent & Honesty Note
-- Built manually (not scaffold-only)
+## 📌 Project Intent & Positioning
+- Designed with production-grade backend patterns
 - Incrementally designed
 - Focused on backend engineering concepts
-- Not a tutorial copy
-- Not production-ready
-- Some ideas were inspired by industry patterns and learning resources, but all architecture decisions, implementations, and extensions were written and adapted manually to deepen understanding of real-world backend systems.
+- Not production-ready by design
+- Serves as:
+  - A learning-driven engineering project
+  - A reference architecture for real-world backend systems
+  - A demonstration of backend maturity beyond CRUD
