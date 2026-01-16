@@ -274,6 +274,5 @@ dotnet run --project ExpenseTracker.API
 - Focused on backend engineering concepts
 - Not production-ready by design
 - Serves as:
-  - A learning-driven engineering project
   - A reference architecture for real-world backend systems
   - A demonstration of backend maturity beyond CRUD
