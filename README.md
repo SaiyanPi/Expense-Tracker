@@ -66,8 +66,8 @@ public enum SecurityEventTypes
     LoginFailed = 2,
     TokenIssued = 3,
     Logout = 4,
-    AccessDenied = 5,        // 403 Forbidden
-    UnauthorizedAccess = 6  // 401 Unauthorized
+    AccessDenied = 5,       
+    UnauthorizedAccess = 6  
 }
 ```
 #### Each security event captures:
