@@ -93,6 +93,9 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
+        var correlationId = context.Items[CorrelationIdMiddleware.HeaderName]?.ToString()
+            ?? context.TraceIdentifier;
+
         if (ex is AggregateException aggEx)
             ex = aggEx.Flatten().InnerExceptions.FirstOrDefault() ?? ex;
         // Log all exceptions (optional: could skip known handled ones)
@@ -124,7 +127,8 @@ public class ExceptionHandlingMiddleware
             Message = statusCode == HttpStatusCode.InternalServerError
                 ? "An unexpected error occurred. Please try again later."
                 : ex.Message,
-            TraceId = context.TraceIdentifier
+            TraceId = correlationId,
+            CorrelationId = correlationId
         };
        
 
@@ -142,10 +146,8 @@ public class ExceptionHandlingMiddleware
         response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
         //context.Response.Headers["Trace-Id"] = context.TraceIdentifier;
-        var correlationId = context.Items[CorrelationIdMiddleware.HeaderName]?.ToString()
-            ?? context.TraceIdentifier;
+        //context.Response.Headers["X-Correlation-ID"] = correlationId; // header is already set once in correlationId middleware
         response.CorrelationId = correlationId;
-        context.Response.Headers["X-Correlation-ID"] = correlationId;
 
         var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {

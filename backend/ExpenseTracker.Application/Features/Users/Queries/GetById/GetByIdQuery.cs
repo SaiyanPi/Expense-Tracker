@@ -5,7 +5,8 @@ namespace ExpenseTracker.Application.Features.Users.Queries.GetById;
 
 public record GetByIdQuery : IRequest<UserDto>
 {
-    // Optional: if null, handler will decide based on admin or not
+    // This is used by user mgmt controller and profile controller. For user mgmt, userId will be provided and 
+    // for profile controller, it will be null
     public string? UserId { get; set; }
 
 }

@@ -11,42 +11,27 @@ public class GetByIdQueryHandler : IRequestHandler<GetByIdQuery, UserDto>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserAccessor _userAccessor;
-    private readonly IUserRoleService _userRoleService;
     private readonly IMapper _mapper;
 
     public GetByIdQueryHandler(
         IUserRepository userRepository,
         IUserAccessor userAccessor,
-        IUserRoleService userRoleService,
         IMapper mapper)
     {
         _userRepository = userRepository;
         _userAccessor = userAccessor;
-        _userRoleService = userRoleService;
         _mapper = mapper;
     }
 
     public async Task<UserDto> Handle(GetByIdQuery request, CancellationToken cancellationToken)
     {
         // BUISNESS RULE:
-        // if the user is admin and id is not provided in the query, redirect to admin's profile
-        // if the user is admin and id is provided in the query, redirect to id's profile
-        // if the user is regular user redirect to his profile
+        // if the userId is provided in the request, redirect to that user
+        // if the suerId is not provided in the request, rdirect to the current user(userId from token)
 
-        var userId = _userAccessor.UserId;
-
-        var isAdmin = await _userRoleService.IsAdminAsync(userId);
-        string targetUserId;
-
-        if (isAdmin)
-        {
-            targetUserId = string.IsNullOrEmpty(request.UserId) ? userId : request.UserId!;
-        }
-        else
-        {
-            targetUserId = userId;
-        }
-
+       // Determine target user: use requested UserId if provided, otherwise use current user's ID
+        var targetUserId = string.IsNullOrEmpty(request.UserId) ? _userAccessor.UserId : request.UserId;
+        
         var user = await _userRepository.GetByIdAsync(targetUserId, cancellationToken);
         if (user == null)
             throw new NotFoundException(nameof(UserDto), targetUserId);

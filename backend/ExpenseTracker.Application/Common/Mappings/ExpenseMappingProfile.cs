@@ -56,7 +56,7 @@ public class ExpenseMappingProfile : Profile
         CreateMap<Expense, ExpenseExportDto>()
             .ForMember(dest => dest.Budget, opt => opt.MapFrom(src => src.Budget != null ? src.Budget.Name : null))
             .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name));
-           
+        
     }
     
 }

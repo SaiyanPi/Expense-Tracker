@@ -2,7 +2,7 @@ using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.DTOs.AuditLog;
-using ExpenseTracker.Application.DTOS.Expense;
+using ExpenseTracker.Application.DTOS.FileExport;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Domain.SharedKernel;

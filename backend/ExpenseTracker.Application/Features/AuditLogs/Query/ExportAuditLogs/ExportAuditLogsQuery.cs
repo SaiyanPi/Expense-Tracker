@@ -1,5 +1,6 @@
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOS.Expense;
+using ExpenseTracker.Application.DTOS.FileExport;
 using MediatR;
 
 namespace ExpenseTracker.Application.Features.AuditLogs.Query.ExportAuditLogs;

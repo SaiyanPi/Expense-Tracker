@@ -9,7 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseTracker.API.Controllers;
+namespace ExpenseTracker.API.Controllers.V1;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -23,13 +23,12 @@ public class ProfileController : ControllerBase
         _mediator = mediator;
     }
 
-    // GET: api/profile/{id} OR GET: api/profile
-    [HttpGet("{id?}")]
+    // GET: api/profile
+    [HttpGet]
     public async Task<IActionResult> Profile(
-        string? id,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetByIdQuery{ UserId = id };
+        var query = new GetByIdQuery();
         var user = await _mediator.Send(query, cancellationToken);
         return Ok(user);
     }
@@ -51,17 +50,15 @@ public class ProfileController : ControllerBase
         await _mediator.Send(command, cancellationToken);
         return Ok(new {Success = true, Message = "Updated successfully" });
     }
-
-
-    // DELETE: api/profile/{id} OR GET: api/profile
-    [HttpPost("{id?}")]
+    
+    // DELETE: api/profile
+    [HttpDelete]
     public async Task<IActionResult> DeleteProfile(
-        string? id,
         CancellationToken cancellationToken = default)
     {
-        var command = new DeleteProfileCommand{ UserId = id };
+        var command = new DeleteProfileCommand();
         await _mediator.Send(command, cancellationToken);
-        return Ok(new {Success = true, Message = "Profile has been deleted successfully." });    
+        return Ok(new {Success = true, Message = "Your Profile has been deleted successfully." });    
     }
 
 }

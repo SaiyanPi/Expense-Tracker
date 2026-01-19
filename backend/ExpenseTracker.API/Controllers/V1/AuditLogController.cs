@@ -10,7 +10,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseTracker.API.Controllers;
+namespace ExpenseTracker.API.Controllers.V1;
 
 [Authorize(Policy = AuditLogPermission.View)]
 [ApiController]

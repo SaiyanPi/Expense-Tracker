@@ -1,3 +1,6 @@
+using AutoMapper;
+using ExpenseTracker.API.Contracts.V1.Category;
+using ExpenseTracker.API.Contracts.V1.Common.Pagination;
 using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Category;
@@ -14,83 +17,119 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CategoryTracker.API.Controllers;
+namespace ExpenseTracker.API.Controllers.V1;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class CategoryController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
 
-    public CategoryController(IMediator mediator)
+    public CategoryController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
+        _mapper = mapper;
     }
 
 
-    // GET: api/Category
+    // GET: api/v1/Category
     [Authorize(Policy = CategoryPermission.ViewAll)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 5,
-        [FromQuery] string? sortBy = null,
-        [FromQuery] bool sortDesc = false,
+        [FromQuery] PagedResultRequestV1 pagedResultRequest,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllCategoriesQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllCategoriesQuery(new PagedQuery(
+            pagedResultRequest.page,
+            pagedResultRequest.pageSize,
+            pagedResultRequest.sortBy,
+            pagedResultRequest.sortDesc));
         var categories = await _mediator.Send(query, cancellationToken);
-        return Ok(categories);
+
+        var response = new PagedResultResponseV1<CategoryResponseV1>
+        {
+            Items = _mapper.Map<List<CategoryResponseV1>>(categories.Items),
+
+            TotalCount = categories.TotalCount,
+            Page = categories.Page,
+            PageSize = categories.PageSize,
+            TotalPages = categories.TotalPages,
+            HasNext = categories.HasNext,
+            HasPrevious = categories.HasPrevious
+        };
+        return Ok(response);
     }
 
-    // GET: api/Category/my
+    // GET: api/v1/Category/my
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("my")]
     public async Task<IActionResult> GetAllByEmail(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 5,
-        [FromQuery] string? sortBy = null,
-        [FromQuery] bool sortDesc = false,
+        [FromQuery] PagedResultRequestV1 pagedResultRequest,    
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllCategoriesByEmailQuery( new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllCategoriesByEmailQuery( new PagedQuery(
+            pagedResultRequest.page,
+            pagedResultRequest.pageSize,
+            pagedResultRequest.sortBy,
+            pagedResultRequest.sortDesc));
         var categories = await _mediator.Send(query, cancellationToken);
-        return Ok(categories);
+        
+        var response = new PagedResultResponseV1<CategoryResponseV1>
+        {
+            Items = _mapper.Map<List<CategoryResponseV1>>(categories.Items),
+
+            TotalCount = categories.TotalCount,
+            Page = categories.Page,
+            PageSize = categories.PageSize,
+            TotalPages = categories.TotalPages,
+            HasNext = categories.HasNext,
+            HasPrevious = categories.HasPrevious
+        };
+        return Ok(response);
     }
 
-    // GET: api/Category/{id}
+    // GET: api/v1/Category/{id}
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
     {
         var query = new GetCategoryByIdQuery(id);
         var category = await _mediator.Send(query, cancellationToken);
-        return Ok(category);
+
+        var response = _mapper.Map<CategoryResponseV1>(category);
+        return Ok(response);
     }
 
-    // POST: api/Category
+    // POST: api/v1/Category
     [Authorize(Policy = CategoryPermission.Create)]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Create([FromBody] CreateCategoryRequestV1 createRequest, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var command = new CreateCategoryCommand(dto);
+        var mappedCreateRequest = _mapper.Map<CreateCategoryDto>(createRequest);
+
+        var command = new CreateCategoryCommand(mappedCreateRequest);
+
         var newCategory = await _mediator.Send(command, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = newCategory.Id }, newCategory);
+
+        var mappedNewCategory = _mapper.Map<CategoryResponseV1>(newCategory);
+        return CreatedAtAction(nameof(GetById), new { id = mappedNewCategory.Id }, mappedNewCategory);
     }
     
-    // PUT: api/Category/{id}
+    // PUT: api/v1/Category/{id}
     [Authorize(Policy = CategoryPermission.Update)]
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryDto dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryRequestV1 updateRequest, CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var command = new UpdateCategoryCommand(
-            dto.Name
+            updateRequest.Name
         )
         {
             Id = id
@@ -99,7 +138,7 @@ public class CategoryController : ControllerBase
         return Ok(new {Success = true, Message = "Expense Category updated successfully" }); 
     }
 
-    // DELETE: api/Category/{id}
+    // DELETE: api/v1/Category/{id}
     [Authorize(Policy = CategoryPermission.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
@@ -112,22 +151,35 @@ public class CategoryController : ControllerBase
 
 //----  VIEW AND RESTORE DELETED CATEGORIES    -----
 
-    // GET: api/category/deleted/my
+    // GET: api/v1/category/deleted/my
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("deleted/my")]
     public async Task<IActionResult> GetAllDeletedCategoriesByEmail(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 5, 
-        [FromQuery] string? sortBy = null, 
-        [FromQuery] bool sortDesc = false,
+        [FromQuery] PagedResultRequestV1 pagedResultRequest,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllDeletedCategoriesByEmailQuery(new PagedQuery(page, pageSize, sortBy, sortDesc));
+        var query = new GetAllDeletedCategoriesByEmailQuery(new PagedQuery(
+            pagedResultRequest.page,
+            pagedResultRequest.pageSize,
+            pagedResultRequest.sortBy,
+            pagedResultRequest.sortDesc));
         var deletedCategories = await _mediator.Send(query, cancellationToken);
-        return Ok(deletedCategories);
+        
+        var response = new PagedResultResponseV1<CategoryResponseV1>
+        {
+            Items = _mapper.Map<List<CategoryResponseV1>>(deletedCategories.Items),
+
+            TotalCount = deletedCategories.TotalCount,
+            Page = deletedCategories.Page,
+            PageSize = deletedCategories.PageSize,
+            TotalPages = deletedCategories.TotalPages,
+            HasNext = deletedCategories.HasNext,
+            HasPrevious = deletedCategories.HasPrevious
+        };  
+        return Ok(response);
     }
 
-    // GET: api/category/deleted/my/{id}
+    // GET: api/v1/category/deleted/my/{id}
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("deleted/my/{id:guid}")]
     public async Task<IActionResult> GetDeletedExpenseById(
@@ -136,10 +188,12 @@ public class CategoryController : ControllerBase
     {
         var query = new GetDeletedCategoryByIdQuery(id);
         var deletedCategory = await _mediator.Send(query, cancellationToken);
-        return Ok(deletedCategory);
+
+        var response = _mapper.Map<CategoryResponseV1>(deletedCategory);
+        return Ok(response);
     }
 
-    // GET: api/category/deleted/restore/{id}
+    // GET: api/v1/category/deleted/restore/{id}
     [Authorize(Policy = CategoryPermission.View)]
     [HttpPost("deleted/restore/{id:guid}")]
     public async Task<IActionResult> RestoreDeletedCategoryById(
@@ -150,11 +204,11 @@ public class CategoryController : ControllerBase
         try
         {
             await _mediator.Send(query, cancellationToken);
-            return Ok(new { message = "Category restored successfully" });
+            return Ok(new { Success = true, Message = "Category restored successfully" });
         }
         catch (Exception)
         {
-            return BadRequest(new { message = "Failed to restore category" });
+            return BadRequest(new { Success = false, Message = "Failed to restore category" });
         }
     }
 

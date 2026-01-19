@@ -24,6 +24,13 @@ using ExpenseTracker.Application.Common.Security;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.SharedKernel;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.OpenApi;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using ExpenseTracker.API.Swagger;
+using Microsoft.Extensions.Options;
 
 
 // config Serilog
@@ -62,6 +69,9 @@ builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// register API layer Mapping Profiles
+builder.Services.AddAutoMapper(typeof(Program));
+
 // Add controllers / minimal APIs
 builder.Services.AddControllers()
     .AddJsonOptions(options =>  // serialize/deserialize as numbers and preserve names for better error reporting
@@ -79,7 +89,6 @@ builder.Services.AddValidatorsFromAssembly(typeof(ExpenseTracker.Application.Ass
 
 builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 // Configure JWT authentication 
 builder.Services.AddAuthentication(options =>
@@ -230,14 +239,14 @@ builder.Services.AddAuthorization(options =>
         policy.RequireClaim(AppClaimTypes.Permission, AuditLogPermission.View)); 
 });
 
-// Add SignalR
+// Add SignalR -------------------
 builder.Services.AddSignalR()
     .AddHubOptions<NotificationHub>(options =>
     {
         options.EnableDetailedErrors = true;
     });
 
-// CORS config
+// CORS config ------------------
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
@@ -250,7 +259,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// OpenTelemetry config
+// OpenTelemetry config ------------------
 builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
     {
@@ -266,7 +275,7 @@ builder.Services.AddOpenTelemetry()
         metrics.AddPrometheusExporter();  // exposes /metrics endpoint
     });
 
-// Add HealthChecks
+// Add HealthChecks -----------------
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ExpenseTrackerDbContext>(
         name: "database",
@@ -275,7 +284,31 @@ builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy(), tags: new[] { "live" }) // simple liveness check
     .AddCheck<SmtpHealthCheck>("smtp", failureStatus: HealthStatus.Degraded, tags: new[] { "ready" }); // smtp email server check
 
+// config API versioning -----------------
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);   // default version if client does NOT specify one
+    options.AssumeDefaultVersionWhenUnspecified = true; // If client does not specify version, use default
+    options.ReportApiVersions = true;     // Adds headers like: api-supported-versions: 1.0
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();    // Tell ASP.NET how to read the version
+});
+
+// config API versioning explorer (for Swagger) -----------------
+builder.Services.AddVersionedApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";  // e.g., v1, v2
+    options.SubstituteApiVersionInUrl = true;  // replaces {version} in route
+});
+
+// Register the Swagger options configurator -----------------
+// Swagger
+builder.Services.AddSwaggerGen();
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+
+
+
 var app = builder.Build();
+
 
 // Run the seeder
 using (var scope = app.Services.CreateScope())
@@ -289,13 +322,27 @@ using (var scope = app.Services.CreateScope())
     await ExpenseTrackerDbContextSeed.SeedAsync(context, userManager, roleManager);
 }
 
-// Configure the HTTP request pipeline.
+
+// swagger config
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
+    app.UseSwaggerUI(options =>
+    {
+        var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint(
+                $"/swagger/{description.GroupName}/swagger.json",
+                description.GroupName.ToUpperInvariant()
+            );
+        }
+
+        options.DisplayRequestDuration();
+    });
+}
 // Register exception middleware FIRST in pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

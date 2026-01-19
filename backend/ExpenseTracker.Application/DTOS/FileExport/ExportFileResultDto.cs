@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Application.DTOS.Expense;
+namespace ExpenseTracker.Application.DTOS.FileExport;
 
 public class ExportFileResultDto
 {

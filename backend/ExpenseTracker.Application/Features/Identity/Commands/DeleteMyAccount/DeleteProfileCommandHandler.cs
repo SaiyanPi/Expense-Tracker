@@ -30,18 +30,19 @@ public record DeleteProfileCommandHandler : IRequestHandler<DeleteProfileCommand
 
         var userId = _userAccessor.UserId;
 
-        var isAdmin = await _userRoleService.IsAdminAsync(userId);
-        string targetUserId;
+        // var isAdmin = await _userRoleService.IsAdminAsync(userId);
+        // string targetUserId;
 
-        if (isAdmin)
-        {
-            targetUserId = string.IsNullOrEmpty(request.UserId) ? userId : request.UserId!;
-        }
-        else
-        {
-            targetUserId = userId;
-        }
-        await _identityService.DeleteAsync(targetUserId, cancellationToken);
+        // if (isAdmin)
+        // {
+        //     targetUserId = string.IsNullOrEmpty(request.UserId) ? userId : request.UserId!;
+        // }
+        // else
+        // {
+        //     targetUserId = userId;
+        // }
+        // await _identityService.DeleteAsync(targetUserId, cancellationToken);
+        await _identityService.DeleteAsync(userId, cancellationToken);
         return Unit.Value;
     }
 }   
