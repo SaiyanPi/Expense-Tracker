@@ -44,6 +44,15 @@ This repository serves as:
   
  <hr>
 
+## 🔁 API Versioning
+The API is designed to support safe, long-term evolution using explicit versioning.
+- URL-based API versioning (`/api/v1`, `/api/v2`)
+- Versioned request/response contracts
+- Version-specific controllers to prevent breaking changes
+- Version-aware Swagger documentation for clear API discovery
+
+<hr>
+
  ## 🔐 Authentication & Access Control
 - JWT-based authentication
 - Policy-based authorization
@@ -169,6 +178,7 @@ Metrics are intentionally low-cardinality and aggregate-focused, designed for da
 - CQRS with MediatR
 - FluentValidation
 - DTO-based request/response models
+- Explicit API versioning and contract evolution
 - Middleware-driven cross-cutting concerns
 - Clear separation of:
  - Domain
