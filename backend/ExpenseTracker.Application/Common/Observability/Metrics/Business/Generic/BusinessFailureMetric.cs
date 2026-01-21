@@ -1,6 +1,6 @@
 using System.Diagnostics.Metrics;
 
-namespace ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics.Generic;
+namespace ExpenseTracker.Application.Common.Observability.Metrics.Business.Generic;
 
 public static class BusinessFailureMetric
 {
@@ -12,9 +12,7 @@ public static class BusinessFailureMetric
             description: "Number of failed business operations"
         );
 
-    public static void RecordFailure(
-        string operation,
-        string failureType)
+    public static void RecordFailure(string operation, string failureType)
     {
         OperationFailures.Add(
             1,

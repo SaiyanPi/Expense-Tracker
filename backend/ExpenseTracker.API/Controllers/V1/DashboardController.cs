@@ -4,9 +4,11 @@ using ExpenseTracker.Application.Features.Dashboard.Query;
 using Microsoft.AspNetCore.Authorization;
 using ExpenseTracker.Application.Common.Authorization.Permissions;
 using ExpenseTracker.API.Contracts.V1.Dashboard;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExpenseTracker.API.Controllers.V1;
 
+[EnableRateLimiting("Heavy")]
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]

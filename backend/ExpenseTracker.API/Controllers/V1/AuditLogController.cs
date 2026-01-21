@@ -9,6 +9,7 @@ using ExpenseTracker.Domain.SharedKernel;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExpenseTracker.API.Controllers.V1;
 
@@ -98,6 +99,7 @@ public class AuditLogController : ControllerBase
 
     // GET: api/auditLog/export?format=entityName={enum or string}&userId={userId}&action={enum or string}
     // &from={date}&to={date}
+    [EnableRateLimiting("Heavy")] // overrides Global
     [HttpGet("export")]
     public async Task<IActionResult> ExportAuditLogs(
         [FromQuery] string format,

@@ -19,6 +19,7 @@ using AutoMapper;
 using ExpenseTracker.API.Contracts.V1.Common.Pagination;
 using ExpenseTracker.API.Contracts.V1.Budget;
 using ExpenseTracker.API.Contracts.V1.Expense;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExpenseTracker.API.Controllers.V1;
 

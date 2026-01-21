@@ -1,6 +1,6 @@
 using System.Diagnostics.Metrics;
 
-namespace ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics.Generic;
+namespace ExpenseTracker.Application.Common.Observability.Metrics.Business.Generic;
 
 public static class BusinessLatencyMetric
 {

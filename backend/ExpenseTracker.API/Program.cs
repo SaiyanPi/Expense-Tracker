@@ -31,6 +31,11 @@ using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using ExpenseTracker.API.Swagger;
 using Microsoft.Extensions.Options;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
+using ExpenseTracker.API.Security;
+using System.Text.Json.Serialization;
+using ExpenseTracker.Application.Common.Observability.Metrics.Cache;
 
 
 // config Serilog
@@ -72,11 +77,17 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 // register API layer Mapping Profiles
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Custom Authorization failure handler to log 403 forbidden events
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationFailureResultHandler>();
+
+// Add in-memory caching
+builder.Services.AddMemoryCache();
+
 // Add controllers / minimal APIs
 builder.Services.AddControllers()
     .AddJsonOptions(options =>  // serialize/deserialize as numbers and preserve names for better error reporting
     {
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
 // Modern FluentValidation registration
@@ -131,7 +142,7 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         },
 
-        // For 403 access denied logging, we already handled via authorization failure logging middleware
+        // For 403 access denied logging, we already handled via authorization failure result handler
         // Now we handle 401 Unauthorized logging
         // OnChallenge is triggered any time authentication fails, before hitting the endpoint.
         // This captures missing token, invalid token, expired token.
@@ -152,7 +163,7 @@ builder.Services.AddAuthentication(options =>
             try
             {
                 using var scope = httpContext.RequestServices.CreateScope();
-                var securityLogger = scope.ServiceProvider.GetRequiredService<ISecurityEventLogger>();
+                var securityLogger = scope.ServiceProvider.GetRequiredService<ISecurityEventLoggerService>();
 
                 await securityLogger.LogSecurityEventAsync(new SecurityEventLog
                 {
@@ -179,6 +190,7 @@ builder.Services.AddAuthentication(options =>
     };
 
 });
+
 
 // add authorization policies
 builder.Services.AddAuthorization(options =>
@@ -266,14 +278,17 @@ builder.Services.AddOpenTelemetry()
         metrics
             .AddAspNetCoreInstrumentation() // tracks HTTP requests
             .AddMeter("ExpenseTracker.Application");    // custom business metrics
-            // Optional console exporter for dev/debug
-            #if DEBUG
-                    metrics.AddConsoleExporter();
-            #endif
+            // // Optional console exporter for dev/debug
+            // #if DEBUG
+            //         metrics.AddConsoleExporter();
+            // #endif
 
         // Prometheus exporter for dashboards
         metrics.AddPrometheusExporter();  // exposes /metrics endpoint
     });
+
+// Register custom cache metrics
+CacheMetricsSetup.RegisterCacheMetrics();
 
 // Add HealthChecks -----------------
 builder.Services.AddHealthChecks()
@@ -305,6 +320,91 @@ builder.Services.AddVersionedApiExplorer(options =>
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
+// config rate limiting -----------------
+builder.Services.AddRateLimiter(options =>
+{
+    // logging for rejected requests
+    options.OnRejected = async (context, token) =>
+    {
+        var httpContext = context.HttpContext;
+
+        // Get correlationId from your middleware (source of truth)
+        var correlationId =
+            httpContext.Items[CorrelationIdMiddleware.HeaderName]?.ToString()
+            ?? httpContext.TraceIdentifier;
+
+        // Add to response header
+        // httpContext.Response.Headers["X-Correlation-ID"] = correlationId;
+
+        // log the rejection
+        var logger = httpContext.RequestServices
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("RateLimiting");
+
+        logger.LogWarning(
+            "Request was rate limited. Path={Path}, CorrelationId={CorrelationId}",
+            httpContext.Request.Path,
+            correlationId);
+
+        // Let framework produce default 429 body
+        await Task.CompletedTask;
+    };
+
+    // Global default policy
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var key =
+            context.User.Identity?.Name ??
+            context.Connection.RemoteIpAddress?.ToString() ??
+            "anonymous";
+
+        return RateLimitPartition.GetTokenBucketLimiter(
+            key,
+            _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = 100,
+                TokensPerPeriod = 100,
+                ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+
+
+    // Auth endpoints 
+    options.AddPolicy("Auth", context =>
+    {
+        var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ipAddress,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+            });
+    });
+
+    // Heavy endpoints (dashboard/export)
+    options.AddPolicy("Heavy", context =>
+    {
+        var userId = context.User.Identity?.Name ?? "anonymous";
+
+        return RateLimitPartition.GetTokenBucketLimiter(
+            partitionKey: userId,
+            factory: _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = 10,
+                TokensPerPeriod = 10,
+                ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            });
+    });
+
+});
 
 
 var app = builder.Build();
@@ -352,20 +452,24 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 
 // app.UseMiddleware<RequestTimingMiddleware>();
 
+// app.UseRateLimiter(); // -> this will fail for controllers using api versioning
 
 app.UseHttpsRedirection();
 
 app.UseCors("FrontendPolicy");
 
-app.UseAuthentication();   // comes BEFORE Authorization
+app.UseAuthentication();  
 
-app.UseMiddleware<AuthorizationFailureLoggingMiddleware>();
+// app.UseMiddleware<AuthorizationFailureLoggingMiddleware>();
 
 app.UseAuthorization();
 
 app.UseMiddleware<RequestLogContextMiddleware>();   // after auth: UserId available for the logs
 
 app.UseMiddleware<RequestTimingMiddleware>();
+
+// Rate limiting AFTER routing and endpoint metadata is available
+app.UseRateLimiter();
 
 app.MapControllers();
 

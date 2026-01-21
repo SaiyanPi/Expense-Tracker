@@ -1,7 +1,7 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
-using ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics;
+using ExpenseTracker.Application.Common.Observability.Metrics.Business.DomainSpecific;
 using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;

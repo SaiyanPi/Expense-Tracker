@@ -11,13 +11,13 @@ public class LogoutUserCommandHandler : IRequestHandler<LogoutUserCommand, Unit>
 {
     private readonly IIdentityService _identityService;
     private readonly IUserAccessor _userAccessor;
-    private readonly ISecurityEventLogger _securityEventLogger;
+    private readonly ISecurityEventLoggerService _securityEventLogger;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public LogoutUserCommandHandler(
         IIdentityService identityService,
         IUserAccessor userAccessor,
-        ISecurityEventLogger securityEventLogger,
+        ISecurityEventLoggerService securityEventLogger,
         IHttpContextAccessor httpContextAccessor)
     {
         _identityService = identityService;

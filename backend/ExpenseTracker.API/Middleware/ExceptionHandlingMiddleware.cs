@@ -5,7 +5,7 @@ using Azure;
 using ClosedXML;
 using ExpenseTracker.API.Models;
 using ExpenseTracker.Application.Common.Exceptions;
-using ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics.Generic;
+using ExpenseTracker.Application.Common.Observability.Metrics.Business.Generic;
 using Serilog.Context;
 
 namespace ExpenseTracker.API.Middleware;

@@ -1,6 +1,6 @@
-using ExpenseTracker.Application.Common.Auditing.Retention;
 using ExpenseTracker.Application.Common.Interfaces;
 using ExpenseTracker.Application.Common.Interfaces.Services;
+using ExpenseTracker.Application.Common.Retention;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Infrastructure.Repositories;
 using ExpenseTracker.Infrastructure.Services;
@@ -46,8 +46,9 @@ public static class InfrastructureServiceRegistration
             resolver.GetRequiredService<IOptions<SmtpSettings>>().Value);
 
         //AuditLog Retention config
-        services.Configure<AuditLogRetentionOptions>(configuration.GetSection("AuditLogRetention"));
+        services.Configure<LogRetentionOptions>(configuration.GetSection("AuditLogRetention"));
         services.AddHostedService<AuditLogCleanupService>();
+        services.AddHostedService<SecurityEventLogCleanupService>();
 
         // registering email service
         services.AddScoped<IEmailService, SmtpEmailService>();
@@ -72,7 +73,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<INotificationService, SignalRService>();
 
         // register audit logger for security events
-        services.AddScoped<ISecurityEventLogger, SecurityEventLogger>();
+        services.AddScoped<ISecurityEventLoggerService, SecurityEventLoggerService>();
 
         return services;
     }

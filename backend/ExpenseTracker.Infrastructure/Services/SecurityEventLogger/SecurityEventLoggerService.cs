@@ -1,15 +1,18 @@
 using ExpenseTracker.Application.Common.Interfaces.Services;
+using ExpenseTracker.Application.Common.Observability.Metrics.Security;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Persistence;
 using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Infrastructure.Services.SecurityEventLogger;
 
-public class SecurityEventLogger : ISecurityEventLogger
+public class SecurityEventLoggerService : ISecurityEventLoggerService
 {
     private readonly ExpenseTrackerDbContext _dbContext;
-    private readonly ILogger<SecurityEventLogger> _logger;
-    public SecurityEventLogger(ExpenseTrackerDbContext dbContext, ILogger<SecurityEventLogger> logger)
+    private readonly ILogger<SecurityEventLoggerService> _logger;
+    public SecurityEventLoggerService(
+        ExpenseTrackerDbContext dbContext,
+        ILogger<SecurityEventLoggerService> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
@@ -21,6 +24,7 @@ public class SecurityEventLogger : ISecurityEventLogger
         {
             _dbContext.SecurityEventLogs.Add(securityEvent);
             await _dbContext.SaveChangesAsync();
+            SecurityEventMetric.RecordEvent(securityEvent.EventType, securityEvent.Outcome.ToString());
         }
         catch(Exception exception)
         {

@@ -16,9 +16,11 @@ using ExpenseTracker.Application.Features.Identity.Commands.SendPhoneConfirmatio
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExpenseTracker.API.Controllers.V1;
 
+[EnableRateLimiting("Auth")]
 [ApiController]
 [Route("api/[controller]")]
 // FOR AUTHENTICATION FLOW

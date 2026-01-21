@@ -2,7 +2,7 @@ using System.Reflection;
 using ExpenseTracker.Application.Common.Behaviours;
 using ExpenseTracker.Application.Common.Context;
 using ExpenseTracker.Application.Common.Mappings;
-using ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics.Generic;
+using ExpenseTracker.Application.Common.Observability.Metrics.Business.Generic;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;

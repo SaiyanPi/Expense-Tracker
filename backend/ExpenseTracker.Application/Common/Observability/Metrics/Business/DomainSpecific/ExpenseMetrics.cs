@@ -1,6 +1,6 @@
 using System.Diagnostics.Metrics;
 
-namespace ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics;
+namespace ExpenseTracker.Application.Common.Observability.Metrics.Business.DomainSpecific;
 
 public static class ExpenseMetrics
 {

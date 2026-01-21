@@ -3,7 +3,7 @@ using System.Diagnostics.Metrics;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using MediatR;
 
-namespace ExpenseTracker.Application.Common.Observability.Metrics.BusinessMetrics.Generic;
+namespace ExpenseTracker.Application.Common.Observability.Metrics.Business.Generic;
 
 public sealed class BusinessMetricBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>

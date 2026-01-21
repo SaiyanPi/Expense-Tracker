@@ -25,6 +25,7 @@ using ExpenseTracker.Application.Features.Expenses.Queries.GetTotalExpensesByEma
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ExpenseTracker.API.Controllers.V1;
 
@@ -352,6 +353,7 @@ public class ExpenseController : ControllerBase
     }
 
     // GET: api/v1/expense/export?format={format}
+    [EnableRateLimiting("Heavy")] // overrides Global
     [Authorize(Policy = "Expense.Filter")]
     [HttpGet("export")]
     public async Task<IActionResult> ExportExpenses(

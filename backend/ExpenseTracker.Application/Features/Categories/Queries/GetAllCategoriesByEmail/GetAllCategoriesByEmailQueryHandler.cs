@@ -33,7 +33,7 @@ public class GetAllCategoriesByEmailQueryHandler : IRequestHandler<GetAllCategor
         CancellationToken cancellationToken)
     {        
         // BUISNESS RULE:
-        // Only users can vie their own categories
+        // Only users can view their own categories
         
         var userId = _userAccessor.UserId;
 

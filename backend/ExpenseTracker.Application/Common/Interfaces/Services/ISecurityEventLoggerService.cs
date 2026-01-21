@@ -2,7 +2,7 @@ using ExpenseTracker.Domain.Entities;
 
 namespace ExpenseTracker.Application.Common.Interfaces.Services;
 
-public interface ISecurityEventLogger
+public interface ISecurityEventLoggerService
 {
     Task LogSecurityEventAsync(SecurityEventLog securityEvent);
 }

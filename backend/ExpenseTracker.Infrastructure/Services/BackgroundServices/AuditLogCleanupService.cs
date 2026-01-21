@@ -1,4 +1,4 @@
-using ExpenseTracker.Application.Common.Auditing.Retention;
+using ExpenseTracker.Application.Common.Retention;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,11 +9,11 @@ namespace ExpenseTracker.Infrastructure.Services.BackgroundServices;
 public class AuditLogCleanupService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly AuditLogRetentionOptions _retentionOptions;
+    private readonly LogRetentionOptions _retentionOptions;
 
     public AuditLogCleanupService(
         IServiceScopeFactory serviceScopeFactory,
-        IOptions<AuditLogRetentionOptions> retentionOptions)
+        IOptions<LogRetentionOptions> retentionOptions)
     {
         _scopeFactory = serviceScopeFactory;
         _retentionOptions = retentionOptions.Value;

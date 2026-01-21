@@ -13,11 +13,11 @@ namespace ExpenseTracker.Application.Features.Identity.Commands.Login;
 public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthResultDto>
 {
     private readonly IIdentityService _identityService;
-    private readonly ISecurityEventLogger _securityEventLogger;
+    private readonly ISecurityEventLoggerService _securityEventLogger;
     private readonly IHttpContextAccessor _httpContextAccessor;
     public LoginUserCommandHandler(
         IIdentityService identityService,
-        ISecurityEventLogger securityEventLogger,
+        ISecurityEventLoggerService securityEventLogger,
         IHttpContextAccessor httpContextAccessor)
     {
         _identityService = identityService;
