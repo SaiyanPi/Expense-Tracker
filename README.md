@@ -216,7 +216,7 @@ Metrics are intentionally low-cardinality and aggregate-focused, designed for da
 ## 🧩 Solution Structure
 ```
 backend
-├── ExpenseTracker.API            # Controllers, Middleware
+├── ExpenseTracker.API            # Controllers, Middleware, Contracts
 ├── ExpenseTracker.Application    # CQRS, Validators, DTOs, Exceptions, Observability, Service Interface, Cross-cutting concerns
 ├── ExpenseTracker.Domain         # Entities, Enums, Base Models, Repository Interface
 ├── ExpenseTracker.Persistence    # EF Core, DbContext, Identity
