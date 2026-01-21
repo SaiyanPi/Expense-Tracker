@@ -2,7 +2,7 @@
 
 A production-inspired, enterprise-grade backend system built with a strong focus on architecture, security, observability, and maintainability.
 
-This project goes far beyond basic CRUD operations. It is intentionally designed to explore and apply real-world backend engineering concerns such as auditing, security event tracking, soft deletion, filtering, validation, policy-based authorization, and operational observability.
+This project is intentionally designed to explore and apply real-world backend engineering concerns such as auditing, security event tracking, soft deletion, filtering, validation, policy-based authorization, and operational observability.
 
 While not intended for production deployment, the system is engineered with production patterns and discipline, serving both as a deep learning platform and a realistic backend reference.
 
@@ -16,8 +16,7 @@ The primary focus is on:
 - Security-first thinking
 - Observability and diagnostics
 - Maintainability and long-term evolution
-Rather than optimizing for feature quantity, this codebase prioritizes how and why systems are built, mirroring real-world backend decision-making.
-
+  
 This repository serves as:
 - A backend engineering portfolio project
 - A reference implementation for Clean Architecture–based APIs
@@ -45,7 +44,7 @@ This repository serves as:
  <hr>
 
 ## 🔁 API Versioning
-The API is designed to support safe, long-term evolution using explicit versioning.
+This API is designed to support safe, long-term evolution using explicit versioning.
 - URL-based API versioning (`/api/v1`, `/api/v2`)
 - Versioned request/response contracts
 - Version-specific controllers to prevent breaking changes
@@ -122,6 +121,9 @@ Metrics are intentionally low-cardinality and aggregate-focused, designed for da
 - HTTP request duration
 - Active requests
 - Infrastructure health signals
+- Rate limiting metrics
+- Cache metrics
+- Security event metric
 #### Business Metrics
 - Business operation latency (opt-in per use case)
 - Business operation success counters
@@ -204,12 +206,12 @@ Metrics are intentionally low-cardinality and aggregate-focused, designed for da
 - Logging, metrics, and audit trails are intentionally separated
 - Avoided high-cardinality metrics to ensure dashboard usability
 - Business metrics are treated differently from infrastructure metrics
+- Rate limiting, cache, and Security event metrics are included
 #### Middleware-Driven Cross-Cutting Concerns
 - Correlation IDs
 - Security event logging
 - Global exception handling
 - Centralized policy enforcement
-This approach reduces duplication and enforces consistency across the system.
 
 <hr>
 
@@ -240,6 +242,8 @@ backend
 - OpenTelemetry 
 - smtp4dev
 - SMSGateway integration
+- In-memory caching
+- Rate limiting
 
 
 <hr>
