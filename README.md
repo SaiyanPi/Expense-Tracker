@@ -34,8 +34,7 @@ This repository serves as:
 - Real-time budget threshold notifications when limits are exceeded
 - Soft delete and restore functionality
 - User and entity activity timelines
-- Data Export
-  - Export expenses, audit logs, and security event logs in:
+- Export expenses, audit logs, and security event logs data in:
    - CSV
    - Excel
    - PDF
