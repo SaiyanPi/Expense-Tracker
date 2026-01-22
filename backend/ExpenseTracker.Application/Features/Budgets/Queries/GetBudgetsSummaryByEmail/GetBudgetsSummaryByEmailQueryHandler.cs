@@ -36,7 +36,6 @@ public class GetBudgetsSummaryByEmailQueryHandler : IRequestHandler<GetBudgetsSu
 
         var query = request.Paging;
 
-
         var budgetSummaryByEmail = await _budgetRepository.GetBudgetsSummaryByEmailAsync(
             userId, 
 

@@ -3,6 +3,7 @@ using ExpenseTracker.Application.Common.Pagination;
 using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ExpenseTracker.Application.Features.Categories.Queries.GetAllCategories;
 
