@@ -32,18 +32,18 @@ namespace ExpenseTracker.API.Controllers.V1;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class ExpenseController : ControllerBase
+public class ExpensesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
 
-    public ExpenseController(IMediator mediator, IMapper mapper)
+    public ExpensesController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
         _mapper = mapper;
     }
 
-    // GET: api/v1/expense
+    // GET: api/v1/expenses
     [Authorize(Policy = ExpensePermission.ViewAll)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -71,7 +71,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/my
+    // GET: api/v1/expenses/my
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("my")]
     public async Task<IActionResult> GetExpensesByEmail(
@@ -99,7 +99,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/budget-expenses/my?budgetId={budgetId}
+    // GET: api/v1/expenses/budget-expenses/my?budgetId={budgetId}
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("budget-expenses/my")]
     public async Task<IActionResult> GetExpensesForABudgetByEmail(
@@ -128,7 +128,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/category-expenses/my?categoryId={categoryId}
+    // GET: api/v1/expenses/category-expenses/my?categoryId={categoryId}
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("category-expenses/my")]
     public async Task<IActionResult> GetExpensesForCategoryByEmail(
@@ -157,7 +157,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/category-summary
+    // GET: api/v1/expenses/category-summary
     [Authorize(Policy = ExpensePermission.ViewAll)]
     [HttpGet("category-summary")]
     public async Task<IActionResult> GetCategorySummary(
@@ -185,7 +185,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/category-summary/my
+    // GET: api/v1/expenses/category-summary/my
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("category-summary/my")]
     public async Task<IActionResult> GetCategorySummaryByEmail(
@@ -213,7 +213,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/{id}
+    // GET: api/v1/expenses/{id}
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
@@ -225,7 +225,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/total
+    // GET: api/v1/expenses/total
     [Authorize(Policy = ExpensePermission.ViewAll)]
     [HttpGet("total")]
     public async Task<IActionResult> GetTotalExpense(CancellationToken cancellationToken = default)
@@ -240,7 +240,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/total-expense/my
+    // GET: api/v1/expenses/total-expense/my
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("total-expense/my")]
     public async Task<IActionResult> GetTotalExpenseByEmail(CancellationToken cancellationToken = default)
@@ -255,7 +255,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
+    // GET: api/v1/expenses/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
     [Authorize(Policy = "Expense.Filter")]
     [HttpGet("filter")]
     public async Task<IActionResult> FilterExpenses(
@@ -300,7 +300,7 @@ public class ExpenseController : ControllerBase
     }
 
 
-    // POST: api/v1/expense
+    // POST: api/v1/expenses
     [Authorize(Policy = ExpensePermission.Create)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateExpenseRequestV1 createRequest, CancellationToken cancellationToken = default)
@@ -318,7 +318,7 @@ public class ExpenseController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = mappedNewExpense.Id }, mappedNewExpense);
     }
 
-    // PUT: api/v1/expense/{id}
+    // PUT: api/v1/expenses/{id}
     [Authorize(Policy = ExpensePermission.Update)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateExpenseRequestV1 updateRequest, CancellationToken cancellationToken = default)
@@ -342,7 +342,7 @@ public class ExpenseController : ControllerBase
         return Ok(new {Success = true, Message = "Expense updated successfully" }); 
     }
 
-    // DELETE: api/v1/expense/{id}
+    // DELETE: api/v1/expenses/{id}
     [Authorize(Policy = ExpensePermission.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
@@ -352,7 +352,7 @@ public class ExpenseController : ControllerBase
         return Ok(new {Success = true, Message = "Expense deleted successfully" });    
     }
 
-    // GET: api/v1/expense/export?format={format}
+    // GET: api/v1/expenses/export?format={format}
     [EnableRateLimiting("Heavy")] // overrides Global
     [Authorize(Policy = "Expense.Filter")]
     [HttpGet("export")]
@@ -382,7 +382,7 @@ public class ExpenseController : ControllerBase
 
 //----  VIEW AND RESTORE DELETED EXPENSES    -----
 
-    // GET: api/v1/expense/deleted/my
+    // GET: api/v1/expenses/deleted/my
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("deleted/my")]
     public async Task<IActionResult> GetAllDeletedExpensesByEmail(
@@ -410,7 +410,7 @@ public class ExpenseController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expense/deleted/my/{id}
+    // GET: api/v1/expenses/deleted/my/{id}
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("deleted/my/{id:guid}")]
     public async Task<IActionResult> GetDeletedExpenseById(
@@ -424,7 +424,7 @@ public class ExpenseController : ControllerBase
         return Ok(mappedDeletedExpense);
     }
 
-    // GET: api/v1/expense/deleted/restore/{id}
+    // GET: api/v1/expenses/deleted/restore/{id}
     [Authorize(Policy = ExpensePermission.View)]
     [HttpPost("deleted/restore/{id:guid}")]
     public async Task<IActionResult> RestoreDeletedExpenseById(

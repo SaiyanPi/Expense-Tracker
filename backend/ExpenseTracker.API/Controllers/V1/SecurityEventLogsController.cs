@@ -12,16 +12,16 @@ namespace ExpenseTracker.API.Controllers.V1;
 [Authorize(Policy = AuditLogPermission.View)]
 [ApiController]
 [Route("api/[controller]")]
-public class SecurityEventLogController : ControllerBase
+public class SecurityEventLogsController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public SecurityEventLogController(IMediator mediator)
+    public SecurityEventLogsController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    // GET: api/securityEventLog?page=1&pageSize=20&sortBy=Timestamp&sortDesc=true&
+    // GET: api/securityEventLogs?page=1&pageSize=20&sortBy=Timestamp&sortDesc=true&
     // userId=&userEmail=&outcome=&eventType=&startDate=&endDate=
     [HttpGet]
     public async Task<IActionResult> GetSecurityEventLogs(
@@ -48,7 +48,7 @@ public class SecurityEventLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/securityEventLog/{id}
+    // GET: api/securityEventLogs/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetSecurityEventLogById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -58,7 +58,7 @@ public class SecurityEventLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/securityEventLog/export?format=entityName={enum or string}&userId={userId}&action={enum or string}
+    // GET: api/securityEventLogs/export?format=entityName={enum or string}&userId={userId}&action={enum or string}
     // &from={date}&to={date}
     [HttpGet("export")]
     public async Task<IActionResult> ExportAuditLogs(

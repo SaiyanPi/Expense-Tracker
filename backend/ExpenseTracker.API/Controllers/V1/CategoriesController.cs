@@ -22,19 +22,19 @@ namespace ExpenseTracker.API.Controllers.V1;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class CategoryController : ControllerBase
+public class CategoriesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
 
-    public CategoryController(IMediator mediator, IMapper mapper)
+    public CategoriesController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
         _mapper = mapper;
     }
 
 
-    // GET: api/v1/Category
+    // GET: api/v1/Categories
     [Authorize(Policy = CategoryPermission.ViewAll)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -62,7 +62,7 @@ public class CategoryController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/Category/my
+    // GET: api/v1/Categories/my
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("my")]
     public async Task<IActionResult> GetAllByEmail(
@@ -90,7 +90,7 @@ public class CategoryController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/Category/{id}
+    // GET: api/v1/Categories/{id}
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken = default)
@@ -102,7 +102,7 @@ public class CategoryController : ControllerBase
         return Ok(response);
     }
 
-    // POST: api/v1/Category
+    // POST: api/v1/Categories
     [Authorize(Policy = CategoryPermission.Create)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCategoryRequestV1 createRequest, CancellationToken cancellationToken = default)
@@ -120,7 +120,7 @@ public class CategoryController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = mappedNewCategory.Id }, mappedNewCategory);
     }
     
-    // PUT: api/v1/Category/{id}
+    // PUT: api/v1/Categories/{id}
     [Authorize(Policy = CategoryPermission.Update)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryRequestV1 updateRequest, CancellationToken cancellationToken = default)
@@ -138,7 +138,7 @@ public class CategoryController : ControllerBase
         return Ok(new {Success = true, Message = "Expense Category updated successfully" }); 
     }
 
-    // DELETE: api/v1/Category/{id}
+    // DELETE: api/v1/Categories/{id}
     [Authorize(Policy = CategoryPermission.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
@@ -151,7 +151,7 @@ public class CategoryController : ControllerBase
 
 //----  VIEW AND RESTORE DELETED CATEGORIES    -----
 
-    // GET: api/v1/category/deleted/my
+    // GET: api/v1/categories/deleted/my
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("deleted/my")]
     public async Task<IActionResult> GetAllDeletedCategoriesByEmail(
@@ -179,7 +179,7 @@ public class CategoryController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/category/deleted/my/{id}
+    // GET: api/v1/categories/deleted/my/{id}
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("deleted/my/{id:guid}")]
     public async Task<IActionResult> GetDeletedExpenseById(
@@ -193,7 +193,7 @@ public class CategoryController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/category/deleted/restore/{id}
+    // GET: api/v1/categories/deleted/restore/{id}
     [Authorize(Policy = CategoryPermission.View)]
     [HttpPost("deleted/restore/{id:guid}")]
     public async Task<IActionResult> RestoreDeletedCategoryById(

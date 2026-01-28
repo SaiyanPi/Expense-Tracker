@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "KfH2JMch3uQ=",
+  "dgSpecHash": "yfAPyuV1oGc=",
   "success": true,
   "projectFilePath": "C:\\Users\\zlams\\source\\ExpenseTracker\\backend\\ExpenseTracker.Infrastructure\\ExpenseTracker.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -98,7 +98,10 @@
     "C:\\Users\\zlams\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
     "C:\\Users\\zlams\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "C:\\Users\\zlams\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512",
-    "C:\\Users\\zlams\\.nuget\\packages\\twilio\\7.13.8\\twilio.7.13.8.nupkg.sha512"
+    "C:\\Users\\zlams\\.nuget\\packages\\twilio\\7.13.8\\twilio.7.13.8.nupkg.sha512",
+    "C:\\Users\\zlams\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.23\\microsoft.netcore.app.ref.8.0.23.nupkg.sha512",
+    "C:\\Users\\zlams\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.23\\microsoft.windowsdesktop.app.ref.8.0.23.nupkg.sha512",
+    "C:\\Users\\zlams\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.23\\microsoft.aspnetcore.app.ref.8.0.23.nupkg.sha512"
   ],
   "logs": []
 }

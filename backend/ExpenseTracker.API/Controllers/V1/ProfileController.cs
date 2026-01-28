@@ -23,8 +23,8 @@ public class ProfileController : ControllerBase
         _mediator = mediator;
     }
 
-    // GET: api/profile
-    [HttpGet]
+    // GET: api/profile/my
+    [HttpGet("my")]
     public async Task<IActionResult> Profile(
         CancellationToken cancellationToken = default)
     {
@@ -34,8 +34,8 @@ public class ProfileController : ControllerBase
     }
 
 
-    // PUT: api/profile/update
-    [HttpPut("update")]
+    // PUT: api/profile/my/update
+    [HttpPut("my/update")]
     public async Task<IActionResult> UpdateProfile(
         [FromBody] UpdateUserDto dto,
         CancellationToken cancellationToken = default)
@@ -51,8 +51,8 @@ public class ProfileController : ControllerBase
         return Ok(new {Success = true, Message = "Updated successfully" });
     }
     
-    // DELETE: api/profile
-    [HttpDelete]
+    // DELETE: api/profile/my
+    [HttpDelete("my")]
     public async Task<IActionResult> DeleteProfile(
         CancellationToken cancellationToken = default)
     {

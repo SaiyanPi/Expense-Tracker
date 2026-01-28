@@ -26,18 +26,18 @@ namespace ExpenseTracker.API.Controllers.V1;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class BudgetController : ControllerBase
+public class BudgetsController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IMapper _mapper;
 
-    public BudgetController(IMediator mediator, IMapper mapper)
+    public BudgetsController(IMediator mediator, IMapper mapper)
     {
         _mediator = mediator;
         _mapper = mapper;
     }
 
-    // GET: api/v1/Budget
+    // GET: api/v1/Budgets
     [Authorize(Policy = BudgetPermission.ViewAll)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -65,7 +65,7 @@ public class BudgetController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/Budget/my
+    // GET: api/v1/Budgets/my
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("my")]
     public async Task<IActionResult> GetAllBudgetsByEmail(
@@ -93,7 +93,7 @@ public class BudgetController : ControllerBase
         return Ok(response);
     }
     
-    // GET: api/v1/Budget/{id}
+    // GET: api/v1/Budgets/{id}
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetBudgetById(Guid id, CancellationToken cancellationToken = default)
@@ -105,7 +105,7 @@ public class BudgetController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/budget/budget-detail-with-expenses?budgetId={budgetId}
+    // GET: api/v1/Budgets/budget-detail-with-expenses?budgetId={budgetId}
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("budget-detail-with-expenses")]
     public async Task<IActionResult> GetBudgetDetailWithExpensesByEmail(
@@ -148,7 +148,7 @@ public class BudgetController : ControllerBase
     }
 
 
-    // GET: api/v1/budget/budget-summary/email?email={email}
+    // GET: api/v1/Budgets/budget-summary/email?email={email}
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("budget-summary/email")]
     public async Task<IActionResult> GetBudgetSummaryByEmail(
@@ -183,7 +183,7 @@ public class BudgetController : ControllerBase
         return Ok(response);
     }
 
-    // POST: api/v1/budget
+    // POST: api/v1/Budgets
     [Authorize(Policy = BudgetPermission.Create)]
     [HttpPost]
     public async Task<IActionResult> CreateBudget([FromBody] CreateBudgetRequestV1 createRequest, CancellationToken cancellationToken = default)
@@ -201,7 +201,7 @@ public class BudgetController : ControllerBase
     }
 
 
-    // PUT: api/v1/budget/{id}
+    // PUT: api/v1/Budgets/{id}
     [Authorize(Policy = BudgetPermission.Update)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateBudget(Guid id, [FromBody] UpdateBudgetRequestV1 updateRequest, CancellationToken cancellationToken = default)
@@ -224,7 +224,7 @@ public class BudgetController : ControllerBase
         return Ok(new {Success = true, Message = "Budget updated successfully" }); 
     }
 
-    // DELETE: api/v1/budget/{id}
+    // DELETE: api/v1/Budgets/{id}
     [Authorize(Policy = BudgetPermission.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteBudget(Guid id, CancellationToken cancellationToken = default)
@@ -236,7 +236,7 @@ public class BudgetController : ControllerBase
 
     //----  VIEW AND RESTORE DELETED BUDGETS    -----
 
-    // GET: api/v1/budget/deleted/my
+    // GET: api/v1/Budgets/deleted/my
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("deleted/my")]
     public async Task<IActionResult> GetAllDeletedBudgetsByEmail(
@@ -264,7 +264,7 @@ public class BudgetController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/budget/deleted/my/{id}
+    // GET: api/v1/Budgets/deleted/my/{id}
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("deleted/my/{id:guid}")]
     public async Task<IActionResult> GetDeletedBudgetById(
@@ -278,7 +278,7 @@ public class BudgetController : ControllerBase
         return Ok(mappedDeletedBudget);
     }
 
-    // GET: api/v1/budget/deleted/restore/{id}
+    // GET: api/v1/Budgets/deleted/restore/{id}
     [Authorize(Policy = BudgetPermission.View)]
     [HttpPost("deleted/restore/{id:guid}")]
     public async Task<IActionResult> RestoreDeletedBudgetById(

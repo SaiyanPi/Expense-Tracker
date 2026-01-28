@@ -16,16 +16,16 @@ namespace ExpenseTracker.API.Controllers.V1;
 [Authorize(Policy = AuditLogPermission.View)]
 [ApiController]
 [Route("api/[controller]")]
-public class AuditLogController : ControllerBase
+public class AuditLogsController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public AuditLogController(IMediator mediator)
+    public AuditLogsController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    // GET: api/auditLog?page=1&pageSize=7&sortBy=Date&sortDesc=true
+    // GET: api/auditLogs?page=1&pageSize=7&sortBy=Date&sortDesc=true
     //          &entityName={enum or string}&userId={userId}&action={enum or string}&from={date}&to={date}
     [HttpGet]
     public async Task<IActionResult> GetAuditLogs(
@@ -51,7 +51,7 @@ public class AuditLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/auditLog/{id}
+    // GET: api/auditLogs/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetAuditLogById(Guid id, CancellationToken cancellationToken = default)
     {
@@ -61,7 +61,7 @@ public class AuditLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/auditLog/timeline/entity/timeline/{enum or string}/{entityId}
+    // GET: api/auditLogs/timeline/entity/timeline/{enum or string}/{entityId}
     [HttpGet("timeline/entity/{entityName}/{entityId}")]
     public async Task<IActionResult> GetAuditTimelineByEntityNameAndId(
         string entityName,
@@ -79,7 +79,7 @@ public class AuditLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/auditLog/timeline/{userId}
+    // GET: api/auditLogs/timeline/{userId}
     [HttpGet("timeline/{userId}")]
     public async Task<IActionResult> GetAuditTimelineByUserId(
         string userId,
@@ -97,7 +97,7 @@ public class AuditLogController : ControllerBase
         return Ok(result);
     }
 
-    // GET: api/auditLog/export?format=entityName={enum or string}&userId={userId}&action={enum or string}
+    // GET: api/auditLogs/export?format=entityName={enum or string}&userId={userId}&action={enum or string}
     // &from={date}&to={date}
     [EnableRateLimiting("Heavy")] // overrides Global
     [HttpGet("export")]
