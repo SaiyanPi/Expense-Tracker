@@ -284,7 +284,6 @@ dotnet run --project ExpenseTracker.API
 - Designed with production-grade backend patterns
 - Incrementally designed
 - Focused on backend engineering concepts
-- Not production-ready by design
 - Serves as:
   - A reference architecture for real-world backend systems
   - A demonstration of backend maturity beyond CRUD
