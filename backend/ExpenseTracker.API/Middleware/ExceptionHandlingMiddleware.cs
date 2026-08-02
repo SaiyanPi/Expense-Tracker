@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
@@ -127,7 +128,8 @@ public class ExceptionHandlingMiddleware
             Message = statusCode == HttpStatusCode.InternalServerError
                 ? "An unexpected error occurred. Please try again later."
                 : ex.Message,
-            TraceId = correlationId,
+            // TraceId = correlationId,
+            TraceId = Activity.Current?.TraceId.ToString() ?? string.Empty,
             CorrelationId = correlationId
         };
        

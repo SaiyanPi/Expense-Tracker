@@ -36,6 +36,8 @@ using Microsoft.AspNetCore.Authorization;
 using ExpenseTracker.API.Security;
 using System.Text.Json.Serialization;
 using ExpenseTracker.Application.Common.Observability.Metrics.Cache;
+using ExpenseTracker.API.Models;
+using System.Diagnostics;
 
 
 // config Serilog
@@ -250,6 +252,33 @@ builder.Services.AddAuthorization(options =>
     // AuditLog policy
     options.AddPolicy(AuditLogPermission.View, policy =>
         policy.RequireClaim(AppClaimTypes.Permission, AuditLogPermission.View)); 
+});
+
+// for consistent Http response
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var response = new ErrorResponse
+        {
+            StatusCode = StatusCodes.Status400BadRequest,
+            Error = "ValidationException",
+            Message = "Validation failed.",
+            Details = context.ModelState
+                .Where(x => x.Value!.Errors.Count > 0)
+                .ToDictionary(
+                    x => x.Key,
+                    x => x.Value!.Errors
+                        .Select(e => e.ErrorMessage)
+                        .ToArray()
+                ),
+            TraceId = Activity.Current?.TraceId.ToString() ?? string.Empty,
+            CorrelationId = context.HttpContext.Items[CorrelationIdMiddleware.HeaderName]?.ToString()
+            ?? context.HttpContext.TraceIdentifier
+        };
+
+        return new BadRequestObjectResult(response);
+    };
 });
 
 // Add SignalR -------------------
