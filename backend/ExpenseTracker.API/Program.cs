@@ -89,6 +89,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+    // .AddXmlSerializerFormatters();
 
 // Modern FluentValidation registration
 builder.Services.AddFluentValidationAutoValidation();
@@ -261,13 +262,23 @@ builder.Services.AddSignalR()
 // CORS config ------------------
 builder.Services.AddCors(options =>
 {
+    // options.AddPolicy("FrontendPolicy", policy =>
+    // {
+    //     policy
+    //         .AllowAnyHeader()
+    //         .AllowAnyMethod()
+    //         .AllowCredentials()
+    //         .WithOrigins("http://localhost:4200"); // frontend URL
+    // });
+
+    // This is for testing JS AJAX. Totally not related to ExpenseTracker
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
-            .WithOrigins("http://localhost:4200"); // frontend URL
+            .WithOrigins("http://127.0.0.1:5500"); // frontend URL
     });
 });
 

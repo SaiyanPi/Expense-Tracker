@@ -143,8 +143,9 @@ public class ExceptionHandlingMiddleware
             });
         }
         
-        response.StatusCode = (int)statusCode;
+        context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
+        response.StatusCode = (int)statusCode;
         //context.Response.Headers["Trace-Id"] = context.TraceIdentifier;
         //context.Response.Headers["X-Correlation-ID"] = correlationId; // header is already set once in correlationId middleware
         response.CorrelationId = correlationId;
