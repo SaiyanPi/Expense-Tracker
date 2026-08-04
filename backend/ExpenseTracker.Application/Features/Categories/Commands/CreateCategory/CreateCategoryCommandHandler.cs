@@ -1,4 +1,5 @@
 using AutoMapper;
+using ExpenseTracker.Application.Common.Caching;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Observability.Metrics.Business.DomainSpecific;
@@ -6,6 +7,7 @@ using ExpenseTracker.Application.DTOs.Category;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Application.Features.Categories.Commands.CreateCategory;
@@ -18,12 +20,16 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
     private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateCategoryCommandHandler> _logger;
+    private readonly IMemoryCache _cache;
+    private readonly ICacheVersionService _cacheVersionService;
     public CreateCategoryCommandHandler(ICategoryRepository categoryRepository,
         IUserRepository userRepository,
         IUserRoleService userRoleService,
         IUserAccessor userAccessor,
         IMapper mapper,
-        ILogger<CreateCategoryCommandHandler> logger)
+        ILogger<CreateCategoryCommandHandler> logger,
+        IMemoryCache cache,
+        ICacheVersionService cacheVersionService)
     {
         _categoryRepository = categoryRepository;
         _userRepository = userRepository;
@@ -31,6 +37,8 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         _userAccessor = userAccessor;
         _mapper = mapper;
         _logger = logger;
+        _cache = cache;
+        _cacheVersionService = cacheVersionService;
     }
     public async Task<CategoryDto> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
@@ -39,8 +47,8 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
 
         _logger.LogInformation(
             "Creating category with Name {Name} for user {regularUserId}, initialized by UserId {userId}",
-            request.CreateCategoryDto.UserId,
             request.CreateCategoryDto.Name,
+            request.CreateCategoryDto.UserId,
             userId
         );
 
@@ -94,6 +102,18 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         var category = _mapper.Map<Category>(request.CreateCategoryDto);
         category.UserId = userIdToUse; // enforce the correct userId
         await _categoryRepository.AddAsync(category, cancellationToken);
+
+        // Invalidate the cache once a new category is created for the user, so that the next
+        // query will fetch fresh data
+            // var versionKey = CacheKeys.CategoryVersion(userIdToUse);
+            // if (_cache.TryGetValue(versionKey, out int version))
+            // {
+            //     _cache.Remove(versionKey);
+            //     _cache.Set(versionKey, version + 1);
+            // }
+        
+        //_categoryCacheVersionService.IncrementVersion(userIdToUse);
+        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userIdToUse);
 
         // hook the business metric
         CategoryMetrics.CategoryCreated();

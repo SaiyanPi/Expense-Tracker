@@ -3,9 +3,9 @@ using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Retention;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using ExpenseTracker.Infrastructure.Repositories;
-using ExpenseTracker.Infrastructure.Services;
 using ExpenseTracker.Infrastructure.Services.AuditLogsExport;
 using ExpenseTracker.Infrastructure.Services.BackgroundServices;
+using ExpenseTracker.Infrastructure.Services.Cache;
 using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.ExpenseExport;
 using ExpenseTracker.Infrastructure.Services.Identity;
@@ -75,6 +75,8 @@ public static class InfrastructureServiceRegistration
         // register audit logger for security events
         services.AddScoped<ISecurityEventLoggerService, SecurityEventLoggerService>();
 
+        // register category cache version service
+        services.AddSingleton<ICacheVersionService, CacheVersionService>();
         return services;
     }
 }

@@ -21,6 +21,7 @@ public class GetAllCategoriesByEmailQueryHandler : IRequestHandler<GetAllCategor
     private readonly IMapper _mapper;
     private readonly IMemoryCache _cache;
     private readonly ILogger<GetAllCategoriesByEmailQueryHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
 
     public GetAllCategoriesByEmailQueryHandler(
         ICategoryRepository categoryRepository, 
@@ -28,12 +29,14 @@ public class GetAllCategoriesByEmailQueryHandler : IRequestHandler<GetAllCategor
         IUserAccessor userAccessor, 
         IMapper mapper,
         IMemoryCache cache,
+        ICacheVersionService cacheVersionService,
         ILogger<GetAllCategoriesByEmailQueryHandler> logger)
     {
         _categoryRepository = categoryRepository;
         _userRepository = userRepository;
         _userAccessor = userAccessor;
         _mapper = mapper;
+        _cacheVersionService = cacheVersionService;
         _cache = cache;
         _logger = logger;
     }
@@ -49,22 +52,31 @@ public class GetAllCategoriesByEmailQueryHandler : IRequestHandler<GetAllCategor
 
         var query = request.Paging;
 
+        // determining the cache version for the user, if the version is not found in the cache,
+        // it will be initialized to 1
+            // var versionKey = CacheKeys.CategoryVersion(userId);
+            // if (!_cache.TryGetValue(versionKey, out int version))
+            // {
+            //     version = 1;
+            //     _cache.Set(versionKey, version);
+            // }
+        
+        //var version = _categoryCacheVersionService.GetVersion(userId);
+        var version = _cacheVersionService.GetVersion(CacheGroups.Categories, userId);
+
         // Check cache first
         var now = DateTime.UtcNow;
-        var cacheKey = CacheKeys.Expense(userId, now.Year, now.Month);
-        if (_cache.TryGetValue(cacheKey, out IReadOnlyList<CategoryDto>? cachedMappedCategories)
-            && cachedMappedCategories != null)
+        var cacheKey = CacheKeys.Category(userId, version, now.Year, now.Month, query.EffectivePage,
+            query.EffectivePageSize, query.SortBy, query.SortDesc);
+
+        if (_cache.TryGetValue(cacheKey, out PagedResult<CategoryDto>? cachedResult)
+            && cachedResult != null)
         {
             _logger.LogInformation("User Categories from In-memory cache");
 
             CacheMetrics.RecordHit();   // record cache hit metric
 
-            var totalCategories = cachedMappedCategories.Count;
-            return new PagedResult<CategoryDto>(
-                cachedMappedCategories,
-                totalCategories,
-                query.EffectivePage,
-                query.EffectivePageSize);
+            return cachedResult;
         }
 
         CacheMetrics.RecordMiss();  // record cache miss metric
@@ -79,18 +91,20 @@ public class GetAllCategoriesByEmailQueryHandler : IRequestHandler<GetAllCategor
         
         var mappedCategories = _mapper.Map<IReadOnlyList<CategoryDto>>(categories);
 
-        // cache the result
-        var cacheEntryOption = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(TimeSpan.FromMinutes(2))
-            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
-        _cache.Set(cacheKey, mappedCategories, cacheEntryOption);
-
-        _logger.LogInformation("User Categories from database");
-
-        return new PagedResult<CategoryDto>(
+        var result = new PagedResult<CategoryDto>(
             mappedCategories,
             totalCount,
             query.EffectivePage,
             query.EffectivePageSize);
+        
+         // cache the result
+        var cacheEntryOption = new MemoryCacheEntryOptions()
+            .SetSlidingExpiration(TimeSpan.FromMinutes(2))
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+        _cache.Set(cacheKey, result, cacheEntryOption);
+
+        _logger.LogInformation("User Categories from database");
+
+        return result;
     }
 }
