@@ -6,6 +6,7 @@ using AutoMapper;
 using ExpenseTracker.Application.Common.Authorization;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
+using ExpenseTracker.Domain.Security;
 using ExpenseTracker.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -121,7 +122,7 @@ public class IdentityRepository : IIdentityRepository
 
     // JWT Generation
     //---------------------------
-    public async Task<string> GenerateJwtTokenAsync(User user, CancellationToken cancellationToken)
+    public async Task<JwtToken> GenerateJwtTokenAsync(User user, CancellationToken cancellationToken)
     {
         var key = Encoding.UTF8.GetBytes(_config["JwtConfig:Secret"]!);
 
@@ -159,16 +160,18 @@ public class IdentityRepository : IIdentityRepository
         // Signing
         var signingKey = new SymmetricSecurityKey(key);
         var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+        var expireAt = DateTime.UtcNow.AddHours(3);
 
         var token = new JwtSecurityToken(
             issuer: _config["JwtConfig:Issuer"],
             audience: _config["JwtConfig:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(2),
+            expires: expireAt,
             signingCredentials: creds   // <-- Use the SAME credentials object
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtToken(jwt, expireAt);;
     }
 
 

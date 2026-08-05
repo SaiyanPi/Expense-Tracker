@@ -74,13 +74,14 @@ public class IdentityService : IIdentityService
             throw new EmailSendingException("Failed to send email confirmation link. Did you forget to run the local email server?", ex);
         }
       
-        var accessToken = await _identityRepository.GenerateJwtTokenAsync(user);
+        var jwtToken = await _identityRepository.GenerateJwtTokenAsync(user);
         var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(user);
         return new AuthResultDto
         {
             Success = true,
-            Token = accessToken,
-            RefreshToken = refreshToken
+            Token = jwtToken.AccessToken,
+            RefreshToken = refreshToken,
+            ExpiresAt = jwtToken.ExpiresAtUtc
         };
     }
 
@@ -102,9 +103,8 @@ public class IdentityService : IIdentityService
             return result;
         }
         
-        var accessToken = await _identityRepository.GenerateJwtTokenAsync(domainUser);
+        var jwtToken = await _identityRepository.GenerateJwtTokenAsync(domainUser);
         var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(domainUser);
-
         // store refresh token
         await _identityRepository.StoreRefreshTokenAsync(domainUser.Id, refreshToken, cancellationToken);
 
@@ -115,9 +115,9 @@ public class IdentityService : IIdentityService
         //     RefreshToken = refreshToken
         // };
         result.Success = true;
-        result.Token = accessToken;
+        result.Token = jwtToken.AccessToken;
         result.RefreshToken = refreshToken;
-
+        result.ExpiresAt = jwtToken.ExpiresAtUtc;
         return result;
     }
 
@@ -184,7 +184,7 @@ public class IdentityService : IIdentityService
             throw new IdentityOperationException("Invalid or expired refresh token.");
 
         // ---- STEP 4: Generate new tokens ----
-        var newAccessToken = await _identityRepository.GenerateJwtTokenAsync(appUser, cancellationToken);
+        var newJwtToken = await _identityRepository.GenerateJwtTokenAsync(appUser, cancellationToken);
         var newRefreshToken = await _identityRepository.GenerateRefreshTokenAsync(appUser, cancellationToken);
         
         // ---- STEP 5: Store new refresh token ----
@@ -196,8 +196,9 @@ public class IdentityService : IIdentityService
         return new AuthResultDto
         {
             Success = true,
-            Token = newAccessToken,
-            RefreshToken = newRefreshToken
+            Token = newJwtToken.AccessToken,
+            RefreshToken = newRefreshToken,
+            ExpiresAt = newJwtToken.ExpiresAtUtc
         };
     }
 
