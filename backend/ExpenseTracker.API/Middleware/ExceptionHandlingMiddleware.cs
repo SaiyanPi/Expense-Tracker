@@ -138,11 +138,12 @@ public class ExceptionHandlingMiddleware
         if (ex is FluentValidation.ValidationException fvEx)
         {
             response.Message = "One or more validation errors occurred.";
-            response.Details = fvEx.Errors.Select(e => new
-            {
-                e.PropertyName,
-                e.ErrorMessage
-            });
+            response.Details = fvEx.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray()
+                );
         }
         
         context.Response.StatusCode = (int)statusCode;
