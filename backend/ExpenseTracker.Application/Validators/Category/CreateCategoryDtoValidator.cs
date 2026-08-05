@@ -1,19 +1,19 @@
-using ExpenseTracker.Application.DTOs.Category;
+using ExpenseTracker.Application.Features.Categories.Commands.CreateCategory;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.Category;
-public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
+public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCommand>
 {
-    public CreateCategoryDtoValidator()
+    public CreateCategoryCommandValidator()
     {
-        RuleFor(x => x.Name)
+        RuleFor(x => x.CreateCategoryDto.Name)
             .NotEmpty().WithMessage("Name is required")
             .MinimumLength(3).WithMessage("Name must be at least 3 characters long");
 
         // Apply rule only when UserId is provided (not null or empty)
-        When(x => !string.IsNullOrWhiteSpace(x.UserId), () =>
+        When(x => !string.IsNullOrWhiteSpace(x.CreateCategoryDto.UserId), () =>
         {
-            RuleFor(x => x.UserId!)
+            RuleFor(x => x.CreateCategoryDto.UserId!)
                 .Must(BeAValidGuid)
                 .WithMessage("UserId must be a valid GUID when provided.");
         });

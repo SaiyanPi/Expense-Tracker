@@ -1,11 +1,11 @@
-using ExpenseTracker.Application.DTOs.Expense;
+using ExpenseTracker.Application.Features.Expenses.Commands.UpdateExpense;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.Expense;
 
-public class UpdateExpenseDtoValidator : AbstractValidator<UpdateExpenseDto>
+public class UpdateExpenseCommandValidator : AbstractValidator<UpdateExpenseCommand>
 {
-    public UpdateExpenseDtoValidator()
+    public UpdateExpenseCommandValidator()
     {
         RuleFor(x => x.Title)
             .NotEmpty().WithMessage("Title is required")

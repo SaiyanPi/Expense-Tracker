@@ -1,11 +1,12 @@
 using ExpenseTracker.Application.DTOs.Budget;
+using ExpenseTracker.Application.Features.Budgets.Commands.UpdateBudget;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.Budget;
 
-public class UpdateBudgetDtoValidator : AbstractValidator<UpdateBudgetDto>
+public class UpdateBudgetCommandValidator : AbstractValidator<UpdateBudgetCommand>
 {
-    public UpdateBudgetDtoValidator()
+    public UpdateBudgetCommandValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required")

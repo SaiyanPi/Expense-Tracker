@@ -1,11 +1,11 @@
-using ExpenseTracker.Application.DTOs.Category;
+using ExpenseTracker.Application.Features.Categories.Commands.UpdateCategory;
 using FluentValidation;
 
 namespace ExpenseTracker.Application.Validators.Category;
 
-public class UpdateCategoryDtoValidator : AbstractValidator<UpdateCategoryDto>
+public class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCommand>
 {
-    public UpdateCategoryDtoValidator()
+    public UpdateCategoryCommandValidator()
     {
 
         RuleFor(x => x.Name)
