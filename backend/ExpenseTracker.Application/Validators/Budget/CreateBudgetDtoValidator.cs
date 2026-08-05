@@ -7,31 +7,37 @@ public class CreateBudgetCommandValidator : AbstractValidator<CreateBudgetComman
     {
         RuleFor(x => x.CreateBudgetDto.Name)
             .NotEmpty().WithMessage("Name is required")
-            .MinimumLength(3).WithMessage("Name must be at least 3 characters long");
+            .MinimumLength(3).WithMessage("Name must be at least 3 characters long")
+            .OverridePropertyName("Name");
 
         RuleFor(x => x.CreateBudgetDto.Amount)
-            .GreaterThan(100).WithMessage("Budget amount must be greater than hundred.");
+            .GreaterThan(100).WithMessage("Budget amount must be greater than hundred.")
+            .OverridePropertyName("Amount");
 
         RuleFor(x => x.CreateBudgetDto.StartDate)
-        .NotEmpty().WithMessage("Start date is required.")
-        .Must(startDate => startDate >= DateTime.UtcNow.Date).WithMessage("Start date cannot be in the past.")
-        .LessThan(x => x.CreateBudgetDto.EndDate).WithMessage("Start date must be earlier than end date.");
+            .NotEmpty().WithMessage("Start date is required.")
+            .Must(startDate => startDate >= DateTime.UtcNow.Date).WithMessage("Start date cannot be in the past.")
+            .LessThan(x => x.CreateBudgetDto.EndDate).WithMessage("Start date must be earlier than end date.")
+            .OverridePropertyName("StartDate");
 
         RuleFor(x => x.CreateBudgetDto.EndDate)
             .NotEmpty().WithMessage("End date is required.")
-            .GreaterThan(x => x.CreateBudgetDto.StartDate).WithMessage("End date must be later than start date.");
+            .GreaterThan(x => x.CreateBudgetDto.StartDate).WithMessage("End date must be later than start date.")
+            .OverridePropertyName("EndDate");
 
         // Apply rule only when UserId is provided (not null or empty)
         When(x => !string.IsNullOrWhiteSpace(x.CreateBudgetDto.UserId), () =>
         {
             RuleFor(x => x.CreateBudgetDto.UserId!)
                 .Must(BeAValidGuid)
-                .WithMessage("UserId must be a valid GUID when provided.");
+                .WithMessage("UserId must be a valid GUID when provided.")
+                .OverridePropertyName("UserId");
         });
         
         RuleFor(x => x.CreateBudgetDto.CategoryId)
             .Must(categoryId => categoryId == null || categoryId != Guid.Empty)
-            .WithMessage("CategoryId must be a valid non-empty GUID when provided.");
+            .WithMessage("CategoryId must be a valid non-empty GUID when provided.")
+            .OverridePropertyName("CategoryId");
     }
 
     private bool BeAValidGuid(string userId)
