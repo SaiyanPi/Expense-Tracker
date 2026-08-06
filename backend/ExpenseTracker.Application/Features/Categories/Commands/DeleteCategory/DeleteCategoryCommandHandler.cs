@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Caching;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Observability.Metrics.Business.DomainSpecific;
@@ -14,16 +15,19 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
     private readonly IUserAccessor _userAccessor;
     private readonly IUserRoleService _userRoleService;
     private readonly ILogger<DeleteCategoryCommandHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
 
     public DeleteCategoryCommandHandler(
         ICategoryRepository categoryRepository,
         IUserAccessor userAccessor,
         IUserRoleService userRoleService,
+        ICacheVersionService cacheVersionService,
         ILogger<DeleteCategoryCommandHandler> logger)
     {
         _categoryRepository = categoryRepository;
         _userAccessor = userAccessor;
         _userRoleService = userRoleService;
+        _cacheVersionService = cacheVersionService;
         _logger = logger;
     }
 
@@ -60,6 +64,10 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
         }
 
         await _categoryRepository.DeleteAsync(category, cancellationToken);
+
+        // Invalidate the cache once a new category is deleted for the user, so that the deleted
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
 
         // hook the business metric
         CategoryMetrics.CategoryDeleted();
