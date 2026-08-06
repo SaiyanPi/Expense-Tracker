@@ -1,4 +1,5 @@
 using AutoMapper;
+using ExpenseTracker.Application.Common.Caching;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
@@ -14,19 +15,22 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
     private readonly IUserAccessor _userAccessor;
     private readonly IUserRoleService _userRoleService;
     private readonly IMapper _mapper;
+     private readonly ICacheVersionService _cacheVersionService;
 
     public UpdateCategoryCommandHandler(
         ICategoryRepository categoryRepository,
         IUserRepository userRepository,
         IUserAccessor userAccessor,
         IUserRoleService userRoleService,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheVersionService cacheVersionService)
     {
         _categoryRepository = categoryRepository;
         _userRepository = userRepository;
         _userAccessor = userAccessor;
         _userRoleService = userRoleService;
         _mapper = mapper;
+        _cacheVersionService = cacheVersionService;
     }
 
     public async Task<Unit> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
@@ -71,6 +75,10 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
 
         _mapper.Map(request, category);
         await _categoryRepository.UpdateAsync(category, cancellationToken);
+
+        // Invalidate the cache once a new category is updated for the user, so that the updated
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
         return Unit.Value;
     }
 }
