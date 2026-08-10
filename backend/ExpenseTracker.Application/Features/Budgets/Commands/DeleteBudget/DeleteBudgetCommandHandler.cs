@@ -1,3 +1,4 @@
+using ExpenseTracker.Application.Common.Caching;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Observability.Metrics.Business.DomainSpecific;
@@ -13,16 +14,20 @@ public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, U
     private readonly IBudgetRepository _budgetRepository;
     private readonly IUserAccessor _userAccessor;
     private readonly ILogger<DeleteBudgetCommandHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
+
 
 
     public DeleteBudgetCommandHandler(
         IBudgetRepository budgetRepository,
         IUserAccessor userAccessor,
-        ILogger<DeleteBudgetCommandHandler> logger)
+        ILogger<DeleteBudgetCommandHandler> logger,
+        ICacheVersionService cacheVersionService)
     {
         _budgetRepository = budgetRepository;
         _userAccessor = userAccessor;
         _logger = logger;
+        _cacheVersionService = cacheVersionService;
     }
 
     public async Task<Unit> Handle(DeleteBudgetCommand request, CancellationToken cancellationToken)
@@ -51,6 +56,10 @@ public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, U
             throw new BadRequestException("Active budgets with existing expenses cannot be deleted.");
 
         await _budgetRepository.DeleteAsync(budget, cancellationToken);
+
+        // Invalidate the cache once a new budget is deleted for the user, so that the deleted
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
 
         // hook the business metric
         BudgetMetrics.BudgetDeleted();

@@ -1,4 +1,5 @@
 using AutoMapper;
+using ExpenseTracker.Application.Common.Caching;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Observability.Metrics.Business.DomainSpecific;
@@ -17,13 +18,16 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
     private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
     private readonly ILogger<CreateBudgetCommandHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
+
 
     public CreateBudgetCommandHandler(
         IBudgetRepository budgetRepository,
         ICategoryRepository categoryRepository,
         IUserAccessor userAccessor,
         IMapper mapper,
-        ILogger<CreateBudgetCommandHandler> logger
+        ILogger<CreateBudgetCommandHandler> logger,
+        ICacheVersionService cacheVersionService
     )
     {
         _budgetRepository = budgetRepository;
@@ -31,6 +35,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
         _userAccessor = userAccessor;
         _mapper = mapper;
         _logger = logger;
+        _cacheVersionService = cacheVersionService;
     }
 
     public async Task<BudgetDto> Handle(CreateBudgetCommand request, CancellationToken cancellationToken)
@@ -76,6 +81,13 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
         budget.UserId = userId;
         await _budgetRepository.AddAsync(budget, cancellationToken);
 
+        // Invalidate the cache once a new budget is created for the user, so that the next
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
+
+        // hook the business metric
+        BudgetMetrics.BudgetCreated();
+
         _logger.LogInformation(
             "Budget created successfully with id {BudgetId} and Amount {Amount}, CategoryId {CategoryId}, and userId {UserId}",
             budget.Id,
@@ -83,10 +95,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
             request.CreateBudgetDto.CategoryId,
             userId
         );
-
-        // hook the business metric
-        BudgetMetrics.BudgetCreated();
-
+ 
         return _mapper.Map<BudgetDto>(budget);
     }
 }

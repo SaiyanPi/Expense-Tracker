@@ -12,4 +12,7 @@ public class BudgetResponseV1
     public bool IsActive => DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
     
     //public IReadOnlyList<ExpenseDto> Expenses { get; set; } = [];
+
+    public DateTime CreatedAt { get; set; } = default!;
+    public DateTime? UpdatedAt { get; set; }
 }
