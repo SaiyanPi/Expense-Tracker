@@ -8,6 +8,7 @@ using ExpenseTracker.Application.DTOs.Budget;
 using ExpenseTracker.Domain.Entities;
 using ExpenseTracker.Domain.Interfaces.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -21,6 +22,7 @@ public class GetAllBudgetsByEmailQueryHandler : IRequestHandler<GetAllBudgetsByE
     private readonly IMapper _mapper;
     private readonly IMemoryCache _cache;
     private readonly ILogger<GetAllBudgetsByEmailQueryHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
 
 
     public GetAllBudgetsByEmailQueryHandler
@@ -30,6 +32,7 @@ public class GetAllBudgetsByEmailQueryHandler : IRequestHandler<GetAllBudgetsByE
         IUserAccessor userAccessor,
         IMapper mapper,
         IMemoryCache cache,
+        ICacheVersionService cacheVersionService,
         ILogger<GetAllBudgetsByEmailQueryHandler> logger)
     {
         _budgetRepository = budgetRepository;
@@ -38,6 +41,7 @@ public class GetAllBudgetsByEmailQueryHandler : IRequestHandler<GetAllBudgetsByE
         _mapper = mapper;
         _cache = cache;
         _logger = logger;
+        _cacheVersionService = cacheVersionService;
     }
 
     public async Task<PagedResult<BudgetDto>> Handle(
@@ -48,22 +52,23 @@ public class GetAllBudgetsByEmailQueryHandler : IRequestHandler<GetAllBudgetsByE
 
         var query = request.Paging;
 
+        // determining the cache version for the user, if the version is not found in the cache,
+        // it will be initialized to 1
+        var version = _cacheVersionService.GetVersion(CacheGroups.Budgets, userId);
+
         // Check cache first
         var now = DateTime.UtcNow;
-        var cacheKey = CacheKeys.Expense(userId, now.Year, now.Month);
-        if (_cache.TryGetValue(cacheKey, out IReadOnlyList<BudgetDto>? cachedMappedBudgets)
-            && cachedMappedBudgets != null)
+        var cacheKey = CacheKeys.Budget(userId, version, now.Year, now.Month, query.EffectivePage,
+            query.EffectivePageSize, query.SortBy, query.SortDesc);
+
+        if (_cache.TryGetValue(cacheKey, out PagedResult<BudgetDto>? cachedResult)
+            && cachedResult != null)
         {
             _logger.LogInformation("User Budgets from In-memory cache");
 
             CacheMetrics.RecordHit();   // record cache hit metric
 
-            var totalCategories = cachedMappedBudgets.Count;
-            return new PagedResult<BudgetDto>(
-                cachedMappedBudgets,
-                totalCategories,
-                query.EffectivePage,
-                query.EffectivePageSize);
+            return cachedResult;
         }
 
         CacheMetrics.RecordMiss();  // record cache miss metric
@@ -78,18 +83,20 @@ public class GetAllBudgetsByEmailQueryHandler : IRequestHandler<GetAllBudgetsByE
         
         var mappedBudgets = _mapper.Map<IReadOnlyList<BudgetDto>>(budgets);
 
-        // cache the result
-        var cacheEntryOption = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(TimeSpan.FromMinutes(2))
-            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
-        _cache.Set(cacheKey, mappedBudgets, cacheEntryOption);
-
-        _logger.LogInformation("User Budgets from database");
-
-        return new PagedResult<BudgetDto>(
+        var result = new PagedResult<BudgetDto>(
             mappedBudgets,
             totalCount,
             query.EffectivePage,
             query.EffectivePageSize);
+
+        // cache the result
+        var cacheEntryOption = new MemoryCacheEntryOptions()
+            .SetSlidingExpiration(TimeSpan.FromMinutes(2))
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+        _cache.Set(cacheKey, result, cacheEntryOption);
+
+        _logger.LogInformation("User Budgets from database");
+
+        return result;
     }
 }

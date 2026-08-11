@@ -83,7 +83,7 @@ public class CreateBudgetCommandHandler : IRequestHandler<CreateBudgetCommand, B
 
         // Invalidate the cache once a new budget is created for the user, so that the next
         // query will fetch fresh data
-        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
 
         // hook the business metric
         BudgetMetrics.BudgetCreated();

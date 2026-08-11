@@ -67,7 +67,7 @@ public class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCommand, U
 
         // Invalidate the cache once a new budget is updated for the user, so that the updated
         // query will fetch fresh data
-        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
 
         return Unit.Value;
     }
