@@ -11,8 +11,8 @@ public interface IUserRepository
         string? sortBy = null,
         bool sortDesc = false,
         CancellationToken cancellationToken = default);
-    Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
-    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdAsync(string id);
+    Task<User?> GetByEmailAsync(string email);
     Task<string?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
     
 

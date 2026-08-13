@@ -42,7 +42,7 @@ public record DeleteProfileCommandHandler : IRequestHandler<DeleteProfileCommand
         //     targetUserId = userId;
         // }
         // await _identityService.DeleteAsync(targetUserId, cancellationToken);
-        await _identityService.DeleteAsync(userId, cancellationToken);
+        await _identityService.DeleteAsync(userId);
         return Unit.Value;
     }
 }   

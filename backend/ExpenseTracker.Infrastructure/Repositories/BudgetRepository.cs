@@ -274,8 +274,7 @@ public class BudgetRepository : IBudgetRepository
             b.Name == name &&
             b.UserId == userId &&
             (!excludeBudgetId.HasValue || b.Id != excludeBudgetId) &&
-            b.CategoryId == catId,
-            cancellationToken);
+            b.CategoryId == catId, cancellationToken);
     }
 
     // view and restore soft deleted expenses
@@ -314,14 +313,14 @@ public class BudgetRepository : IBudgetRepository
     {
         var softDeletedBudget = await _dbContext.Budgets
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted);
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted, cancellationToken);
         
         return softDeletedBudget;
     }
 
     public async Task<bool> RestoreDeletedBudgetAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
     }

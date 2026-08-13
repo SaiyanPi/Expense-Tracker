@@ -20,7 +20,7 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
     {
         var userId = _userAccessor.UserId;
 
-        await _identityService.ChangePasswordAsync(userId, request.ChangePasswordDto, cancellationToken);
+        await _identityService.ChangePasswordAsync(userId, request.ChangePasswordDto);
         return Unit.Value;
     }
 }

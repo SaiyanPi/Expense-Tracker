@@ -38,22 +38,22 @@ public class IdentityService : IIdentityService
     public async Task<AuthResultDto> RegisterUserAsync(RegisterUserDto dto, string role, CancellationToken cancellationToken = default)
     {
         // check if user with email already exists
-        if (await _userRepository.GetByEmailAsync(dto.Email, cancellationToken) != null)
+        if (await _userRepository.GetByEmailAsync(dto.Email) != null)
             throw new ConflictException($"User with email {dto.Email} already exists.");
             
         var domainUser = _mapper.Map<User>(dto);
 
         // create user in identity
-        var (Succeeded, UserId, Errors) = await _identityRepository.RegisterAsync(domainUser, dto.Password, role, cancellationToken);
+        var (Succeeded, UserId, Errors) = await _identityRepository.RegisterAsync(domainUser, dto.Password, role);
         if (!Succeeded)
             throw new IdentityOperationException("User registration failed.");
 
-        var user = await _userRepository.GetByEmailAsync(dto.Email, cancellationToken)
+        var user = await _userRepository.GetByEmailAsync(dto.Email)
             ?? throw new Exception("User not found after registration.");
         try
         {
             // 1. automatically generate email confirmation token
-            var emailConfirmationToken = await _identityRepository.GenerateEmailConfirmationTokenAsync(user.Id, cancellationToken);
+            var emailConfirmationToken = await _identityRepository.GenerateEmailConfirmationTokenAsync(user.Id);
             if (emailConfirmationToken == null)
                 throw new IdentityOperationException("Failed to generate email confirmation token.");
 
@@ -70,12 +70,18 @@ public class IdentityService : IIdentityService
         catch (Exception ex)
         {
             // rollback
-            await _identityRepository.DeleteAsync(user, cancellationToken);
+            await _identityRepository.DeleteAsync(user);
             throw new EmailSendingException("Failed to send email confirmation link. Did you forget to run the local email server?", ex);
         }
       
         var jwtToken = await _identityRepository.GenerateJwtTokenAsync(user);
-        var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(user);
+        var refreshToken = _identityRepository.GenerateRefreshToken();
+
+        var stored = await _identityRepository.StoreRefreshTokenAsync(user.Id, refreshToken);
+
+        if (!stored)
+            throw new IdentityOperationException("Unable to store refresh token.");
+
         return new AuthResultDto
         {
             Success = true,
@@ -85,7 +91,7 @@ public class IdentityService : IIdentityService
         };
     }
 
-    public async Task<AuthResultDto> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default)
+    public async Task<AuthResultDto> LoginAsync(LoginUserDto dto)
     {
         var result = new AuthResultDto(); // start as success = false
 
@@ -96,7 +102,7 @@ public class IdentityService : IIdentityService
             return result;
         }
 
-        var valid = await _identityRepository.CheckPasswordAsync(dto.Email, dto.Password, cancellationToken);
+        var valid = await _identityRepository.CheckPasswordAsync(dto.Email, dto.Password);
         if (!valid)
         {
             result.Errors = new[] { "Invalid credentials." };
@@ -104,9 +110,13 @@ public class IdentityService : IIdentityService
         }
         
         var jwtToken = await _identityRepository.GenerateJwtTokenAsync(domainUser);
-        var refreshToken = await _identityRepository.GenerateRefreshTokenAsync(domainUser);
+        var refreshToken = _identityRepository.GenerateRefreshToken();
+
         // store refresh token
-        await _identityRepository.StoreRefreshTokenAsync(domainUser.Id, refreshToken, cancellationToken);
+        var stored = await _identityRepository.StoreRefreshTokenAsync(domainUser.Id, refreshToken);
+
+        if (!stored)
+            throw new IdentityOperationException("Unable to store refresh token.");
 
         // return new AuthResultDto
         // {
@@ -121,7 +131,7 @@ public class IdentityService : IIdentityService
         return result;
     }
 
-    public async Task UpdateAsync(string userId, UpdateUserDto dto, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(string userId, UpdateUserDto dto)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if(user is null)
@@ -129,33 +139,33 @@ public class IdentityService : IIdentityService
         
         _mapper.Map(dto, user);
 
-        var updated = await _identityRepository.UpdateAsync(user, cancellationToken);
+        var updated = await _identityRepository.UpdateAsync(user);
         if(!updated)
             throw new IdentityOperationException("User update failed.");
     }
 
-    public async Task DeleteAsync( string userId, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync( string userId)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if(user is null)
             throw new NotFoundException(nameof(User), userId);
         
-        var delete = await _identityRepository.DeleteAsync(user, cancellationToken);
+        var delete = await _identityRepository.DeleteAsync(user);
         if(!delete)
             throw new IdentityOperationException("Profile deletion failed.");
     }
 
-    public async Task LogoutAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task LogoutAsync(string userId)
     {
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(userId);
         if( user is null)
             throw new NotFoundException(nameof(User), userId);
 
-        var storedRefresh = await _identityRepository.GetRefreshTokenAsync(user.Id, cancellationToken);
+        var storedRefresh = await _identityRepository.GetRefreshTokenAsync(user.Id);
         if (storedRefresh == null)
             throw new IdentityOperationException("Logout failed. No refresh token found.");
         
-        var revoked = await _identityRepository.RevokeRefreshTokenAsync(user.Id, storedRefresh, cancellationToken);
+        var revoked = await _identityRepository.RevokeRefreshTokenAsync(user.Id, storedRefresh);
         if (!revoked)
             throw new IdentityOperationException("No active session, User already logged out.");
     }
@@ -177,18 +187,17 @@ public class IdentityService : IIdentityService
              throw new NotFoundException(nameof(User), userId);
 
         // ---- STEP 3: Validate refresh token ----
-        var isValid = await _identityRepository.ValidateRefreshTokenAsync(
-            userId, dto.RefreshToken, cancellationToken);
+        var isValid = await _identityRepository.ValidateRefreshTokenAsync(userId, dto.RefreshToken);
 
         if (!isValid)
             throw new IdentityOperationException("Invalid or expired refresh token.");
 
         // ---- STEP 4: Generate new tokens ----
-        var newJwtToken = await _identityRepository.GenerateJwtTokenAsync(appUser, cancellationToken);
-        var newRefreshToken = await _identityRepository.GenerateRefreshTokenAsync(appUser, cancellationToken);
+        var newJwtToken = await _identityRepository.GenerateJwtTokenAsync(appUser);
+        var newRefreshToken = _identityRepository.GenerateRefreshToken();
         
         // ---- STEP 5: Store new refresh token ----
-        var stored = await _identityRepository.StoreRefreshTokenAsync(userId, newRefreshToken, cancellationToken);
+        var stored = await _identityRepository.StoreRefreshTokenAsync(userId, newRefreshToken);
         if (!stored)
             throw new IdentityOperationException("Unable to store new refresh token.");
 
@@ -205,42 +214,42 @@ public class IdentityService : IIdentityService
 
     // Change Password
     //-------------------
-    public async Task ChangePasswordAsync(string userId, ChangePasswordDto dto, CancellationToken cancellationToken = default)
+    public async Task ChangePasswordAsync(string userId, ChangePasswordDto dto)
     {
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
             throw new NotFoundException(nameof(User), userId);
         
         // check if the current password is correct
-        var isCurrentPasswordValid = await _identityRepository.CheckPasswordAsync(user.Email, dto.CurrentPassword, cancellationToken);
+        var isCurrentPasswordValid = await _identityRepository.CheckPasswordAsync(user.Email, dto.CurrentPassword);
         if (!isCurrentPasswordValid)
             throw new IdentityOperationException("Your Current password is incorrect.");
 
-        var changed = await _identityRepository.ChangePasswordAsync(user.Id, dto.CurrentPassword, dto.NewPassword, cancellationToken);
+        var changed = await _identityRepository.ChangePasswordAsync(user.Id, dto.CurrentPassword, dto.NewPassword);
         if (!changed)
             throw new IdentityOperationException("Password change failed. Current password may be incorrect.");
     }
 
     // Email Confirmation
     //-----------------------
-    public async Task RequestEmailConfirmationTokenAsync(RequestEmailConfirmationDto dto, CancellationToken cancellationToken = default)
+    public async Task RequestEmailConfirmationTokenAsync(RequestEmailConfirmationDto dto)
     {
-        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(dto.UserId);
         if (user == null)
             throw new NotFoundException(nameof(User), dto.UserId);
 
-        var token = await _identityRepository.GenerateEmailConfirmationTokenAsync(dto.UserId, cancellationToken);
+        var token = await _identityRepository.GenerateEmailConfirmationTokenAsync(dto.UserId);
         if (token == null)
             throw new IdentityOperationException("Failed to generate email confirmation token.");
     }
 
-    public async Task ConfirmEmailAsync(VerifyEmailDto dto, CancellationToken cancellationToken = default)
+    public async Task ConfirmEmailAsync(VerifyEmailDto dto)
     {
-        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(dto.UserId);
         if (user == null)
             throw new NotFoundException(nameof(User), dto.UserId);
         
-        var confirm = await _identityRepository.ConfirmEmailAsync(dto.UserId, dto.Token, cancellationToken);
+        var confirm = await _identityRepository.ConfirmEmailAsync(dto.UserId, dto.Token);
         if (!confirm)
             throw new IdentityOperationException("Email confirmation failed.");
     }
@@ -249,11 +258,11 @@ public class IdentityService : IIdentityService
     //-----------------------
     public async Task ForgotPasswordResetTokenAsync(ForgotPasswordDto dto, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByEmailAsync(dto.UserEmail, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(dto.UserEmail);
         if (user == null)
             throw new NotFoundException(nameof(User), dto.UserEmail);
 
-        var token = await _identityRepository.GeneratePasswordResetTokenAsync(user.Id, cancellationToken);
+        var token = await _identityRepository.GeneratePasswordResetTokenAsync(user.Id);
         if (token == null)
             throw new IdentityOperationException("Failed to generate password reset token.");
 
@@ -269,13 +278,13 @@ public class IdentityService : IIdentityService
 
     }
 
-    public async Task ResetPasswordAsync(string userId, string token, ResetPasswordDto dto, CancellationToken cancellationToken = default)
+    public async Task ResetPasswordAsync(string userId, string token, ResetPasswordDto dto)
     {
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
             throw new NotFoundException(nameof(User), userId);
 
-        var reset = await _identityRepository.ResetPasswordAsync(userId, token, dto.NewPassword, cancellationToken);
+        var reset = await _identityRepository.ResetPasswordAsync(userId, token, dto.NewPassword);
         if (!reset)
             throw new IdentityOperationException("Password reset failed.");
     }
@@ -284,7 +293,7 @@ public class IdentityService : IIdentityService
     // ---------------------
     public async Task RequestChangeEmailAsync(string userId, ChangeEmailRequestDto dto, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
             throw new NotFoundException(nameof(User), userId);
         
@@ -292,7 +301,7 @@ public class IdentityService : IIdentityService
         if(emailTaken is true)
             throw new ConflictException($"User with email {dto.NewEmail} already exists.");
 
-        var token = await _identityRepository.GenerateChangeEmailTokenAsync(user.Id, dto.NewEmail, cancellationToken);
+        var token = await _identityRepository.GenerateChangeEmailTokenAsync(user.Id, dto.NewEmail);
         if (token == null)
             throw new IdentityOperationException("Failed to generate change email token.");
 
@@ -305,13 +314,13 @@ public class IdentityService : IIdentityService
             cancellationToken: cancellationToken);
     }
 
-    public async Task ConfirmChangeEmailAsync(ConfirmChangeEmailDto dto, CancellationToken cancellationToken = default)
+    public async Task ConfirmChangeEmailAsync(ConfirmChangeEmailDto dto)
     {
-        var user = await _userRepository.GetByIdAsync(dto.UserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(dto.UserId);
         if (user == null)
             throw new NotFoundException(nameof(User), dto.UserId);
 
-        var changed = await _identityRepository.ChangeEmailAsync(dto.UserId, dto.NewEmail, dto.Token, cancellationToken);
+        var changed = await _identityRepository.ChangeEmailAsync(dto.UserId, dto.NewEmail, dto.Token);
         if (!changed)
             throw new IdentityOperationException("Change email confirmation failed.");
     }
@@ -320,7 +329,7 @@ public class IdentityService : IIdentityService
     // --------------------
     public async Task GeneratePhoneConfirmationTokenAsync(PhoneConfirmationDto dto, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByEmailAsync(dto.UserEmail, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(dto.UserEmail);
         if (user == null)
             throw new NotFoundException(nameof(User), dto.UserEmail);
 
@@ -328,9 +337,9 @@ public class IdentityService : IIdentityService
         await _smsSenderService.SendOtpAsync(dto.PhoneNumber, $"Your confirmation code is: {token}", cancellationToken);
     }
 
-    public async Task ConfirmPhoneNumberAsync(VerifyPhoneDto dto, CancellationToken cancellationToken = default)
+    public async Task ConfirmPhoneNumberAsync(VerifyPhoneDto dto)
     {
-        var user = await _userRepository.GetByEmailAsync(dto.UserEmail, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(dto.UserEmail);
         if (user == null)
             throw new NotFoundException(nameof(User), dto.UserEmail);
 

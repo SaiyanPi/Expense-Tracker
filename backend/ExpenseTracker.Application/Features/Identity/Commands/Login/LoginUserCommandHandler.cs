@@ -29,7 +29,7 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthRes
     {
         var httpContext = _httpContextAccessor.HttpContext;
       
-        var result = await _identityService.LoginAsync(request.LoginUserDto, cancellationToken);
+        var result = await _identityService.LoginAsync(request.LoginUserDto);
 
         if (!result.Success)
         {

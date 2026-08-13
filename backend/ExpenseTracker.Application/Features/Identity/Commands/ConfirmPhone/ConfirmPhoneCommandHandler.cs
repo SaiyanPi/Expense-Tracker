@@ -14,7 +14,7 @@ public class ConfirmPhoneCommandHandler : IRequestHandler<ConfirmPhoneCommand, U
 
     public async Task<Unit> Handle(ConfirmPhoneCommand request, CancellationToken cancellationToken)
     {
-        await _identityService.ConfirmPhoneNumberAsync(request.VerifyPhoneDto, cancellationToken);
+        await _identityService.ConfirmPhoneNumberAsync(request.VerifyPhoneDto);
         
         return Unit.Value;
     }

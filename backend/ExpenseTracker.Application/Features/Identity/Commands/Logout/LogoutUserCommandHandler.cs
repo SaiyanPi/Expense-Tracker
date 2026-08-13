@@ -32,7 +32,7 @@ public class LogoutUserCommandHandler : IRequestHandler<LogoutUserCommand, Unit>
         var userId = _userAccessor.UserId;
         var userEmail = _userAccessor.UserEmail;
 
-        await _identityService.LogoutAsync(userId, cancellationToken);
+        await _identityService.LogoutAsync(userId);
 
         await _securityEventLogger.LogSecurityEventAsync(new SecurityEventLog
         {

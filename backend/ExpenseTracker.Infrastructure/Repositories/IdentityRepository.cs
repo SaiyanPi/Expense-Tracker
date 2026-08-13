@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
 using ExpenseTracker.Application.Common.Authorization;
@@ -37,7 +38,7 @@ public class IdentityRepository : IIdentityRepository
     // User Registration
     //---------------------------
     public async Task<(bool Succeeded, IEnumerable<string>? Errors, User? User)> RegisterAsync
-        (User user, string password, string role, CancellationToken cancellationToken = default)
+        (User user, string password, string? role)
     {
         // using automapper(domainUser -> appUser) for creating identity may cause bugs and breaks identity rule
         // var appUser = _mapper.Map<ApplicationUser>(user);
@@ -70,7 +71,7 @@ public class IdentityRepository : IIdentityRepository
 
     // User Update
     //-----------------------
-    public async Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(User user)
     {
         var appUser = await _userManager.FindByIdAsync(user.Id);
         if (appUser is null) return false;
@@ -98,7 +99,7 @@ public class IdentityRepository : IIdentityRepository
 
     // Delete profile
     //-----------------
-    public async Task<bool> DeleteAsync(User user, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(User user)
     {
         var appUser = await _userManager.FindByIdAsync(user.Id);
         if(appUser is null) return false;
@@ -110,7 +111,7 @@ public class IdentityRepository : IIdentityRepository
 
     // Check Password
     //---------------------------
-    public async Task<bool> CheckPasswordAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task<bool> CheckPasswordAsync(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null) return false;
@@ -122,7 +123,7 @@ public class IdentityRepository : IIdentityRepository
 
     // JWT Generation
     //---------------------------
-    public async Task<JwtToken> GenerateJwtTokenAsync(User user, CancellationToken cancellationToken)
+    public async Task<JwtToken> GenerateJwtTokenAsync(User user)
     {
         var key = Encoding.UTF8.GetBytes(_config["JwtConfig:Secret"]!);
 
@@ -171,24 +172,24 @@ public class IdentityRepository : IIdentityRepository
         );
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-        return new JwtToken(jwt, expireAt);;
+        return new JwtToken(jwt, expireAt);
     }
 
-
+ 
 
     // Refresh Token Generation
     //---------------------------
-    public Task<string> GenerateRefreshTokenAsync(User user, CancellationToken cancellationToken)
+    public string GenerateRefreshToken()
     {
-        var refresh = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-        return Task.FromResult(refresh);
+        var bytes = RandomNumberGenerator.GetBytes(64);
+        return Convert.ToBase64String(bytes);
     }
 
 
 
     // Store Refresh Token (Identity Tokens table)
     //--------------------------------------------
-    public async Task<bool> StoreRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken)
+    public async Task<bool> StoreRefreshTokenAsync(string userId, string refreshToken)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
@@ -202,7 +203,7 @@ public class IdentityRepository : IIdentityRepository
 
     // Validate Refresh Token
     //---------------------------
-    public async Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken)
+    public async Task<bool> ValidateRefreshTokenAsync(string userId, string refreshToken)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
@@ -216,7 +217,7 @@ public class IdentityRepository : IIdentityRepository
 
     // Revoke Refresh Token (Logout)
     //---------------------------------
-    public async Task<bool> RevokeRefreshTokenAsync(string userId, string refreshToken, CancellationToken cancellationToken)
+    public async Task<bool> RevokeRefreshTokenAsync(string userId, string refreshToken)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
@@ -230,7 +231,7 @@ public class IdentityRepository : IIdentityRepository
 
     // Get Refresh Token (for Logout)
     //---------------------------------
-    public async Task<string?> GetRefreshTokenAsync(string userId, CancellationToken cancellationToken)
+    public async Task<string?> GetRefreshTokenAsync(string userId)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return null;
@@ -243,7 +244,7 @@ public class IdentityRepository : IIdentityRepository
 
     // Change Password
     //---------------------------
-    public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword, CancellationToken cancellationToken)
+    public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
@@ -255,7 +256,7 @@ public class IdentityRepository : IIdentityRepository
 
     // generate email confirmation token
     //------------------------------------
-    public async Task<string?> GenerateEmailConfirmationTokenAsync(string userId, CancellationToken cancellationToken)
+    public async Task<string?> GenerateEmailConfirmationTokenAsync(string userId)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return null;
@@ -266,7 +267,7 @@ public class IdentityRepository : IIdentityRepository
 
     // confirm email
     //------------------------------------
-    public async Task<bool> ConfirmEmailAsync(string userId, string token, CancellationToken cancellationToken)
+    public async Task<bool> ConfirmEmailAsync(string userId, string token)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
@@ -280,7 +281,7 @@ public class IdentityRepository : IIdentityRepository
 
     // generate password reset token
     //------------------------------------
-    public async Task<string?> GeneratePasswordResetTokenAsync(string userId, CancellationToken cancellationToken)
+    public async Task<string?> GeneratePasswordResetTokenAsync(string userId)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return null;
@@ -291,7 +292,7 @@ public class IdentityRepository : IIdentityRepository
 
     // reset password
     //------------------------------------
-    public async Task<bool> ResetPasswordAsync(string userId, string token, string newPassword, CancellationToken cancellationToken)
+    public async Task<bool> ResetPasswordAsync(string userId, string token, string newPassword)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
@@ -306,7 +307,7 @@ public class IdentityRepository : IIdentityRepository
 
     // check if email is taken
     //------------------------------------
-    public async Task<bool> IsEmailTakenAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<bool> IsEmailTakenAsync(string email)
     {
         var appUser = await _userManager.FindByEmailAsync(email);
         if (appUser == null) return false;
@@ -317,7 +318,7 @@ public class IdentityRepository : IIdentityRepository
 
     // generate change email token
     //------------------------------------
-    public async Task<string?> GenerateChangeEmailTokenAsync(string userId, string newEmail, CancellationToken cancellationToken = default)
+    public async Task<string?> GenerateChangeEmailTokenAsync(string userId, string newEmail)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return null;
@@ -328,7 +329,7 @@ public class IdentityRepository : IIdentityRepository
 
     // change email
     //------------------------------------
-    public async Task<bool> ChangeEmailAsync(string userId, string newEmail, string token, CancellationToken cancellationToken = default)
+    public async Task<bool> ChangeEmailAsync(string userId, string newEmail, string token)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null) return false;
@@ -344,7 +345,7 @@ public class IdentityRepository : IIdentityRepository
 
 
     // phone confirmation
-    public async Task<string> GeneratePhoneConfirmationTokenAsync(string userId, string phoneNumber, CancellationToken cancellationToken = default)
+    public async Task<string> GeneratePhoneConfirmationTokenAsync(string userId, string phoneNumber)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null)
@@ -353,7 +354,7 @@ public class IdentityRepository : IIdentityRepository
         return await _userManager.GenerateChangePhoneNumberTokenAsync(appUser, phoneNumber);
     }
 
-    public async Task<bool> ConfirmPhoneNumberAsync(string userId, string phoneNumber, string token, CancellationToken cancellationToken = default)
+    public async Task<bool> ConfirmPhoneNumberAsync(string userId, string phoneNumber, string token)
     {
         var appUser = await _userManager.FindByIdAsync(userId);
         if (appUser == null)

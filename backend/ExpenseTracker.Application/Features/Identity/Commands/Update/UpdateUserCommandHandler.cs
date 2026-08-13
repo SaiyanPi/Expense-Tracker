@@ -41,7 +41,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
             PhoneNumber = request.PhoneNumber
         };
 
-        await _identityService.UpdateAsync(userId, dto, cancellationToken);
+        await _identityService.UpdateAsync(userId, dto);
         return Unit.Value;
     }
 }

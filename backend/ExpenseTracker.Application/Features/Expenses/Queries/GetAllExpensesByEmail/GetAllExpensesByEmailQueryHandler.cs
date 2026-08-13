@@ -21,6 +21,7 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
     private readonly IMapper _mapper;
     private readonly IMemoryCache _cache;
     private readonly ILogger<GetAllExpensesByEmailQueryHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
 
     public GetAllExpensesByEmailQueryHandler(
         IExpenseRepository expenseRepository,
@@ -28,6 +29,7 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
         IUserAccessor userAccessor,
         IMapper mapper,
         IMemoryCache cache,
+        ICacheVersionService cacheVersionService,
         ILogger<GetAllExpensesByEmailQueryHandler> logger)
     {
         _expenseRepository = expenseRepository;
@@ -36,6 +38,7 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
         _mapper = mapper;
         _cache = cache;
         _logger = logger;
+        _cacheVersionService = cacheVersionService;
     }
 
     public async Task<PagedResult<ExpenseDto>> Handle(
@@ -49,22 +52,23 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
         
         var query = request.Paging;
 
+        // determining the cache version for the user, if the version is not found in the cache,
+        // it will be initialized to 1
+        var version = _cacheVersionService.GetVersion(CacheGroups.Expenses, userId);
+
         // Check cache first
         var now = DateTime.UtcNow;
-        var cacheKey = CacheKeys.Expense(userId, now.Year, now.Month);
-        if (_cache.TryGetValue(cacheKey, out IReadOnlyList<ExpenseDto>? cachedMappedExpenses)
-            && cachedMappedExpenses != null)
+        var cacheKey = CacheKeys.Expense(userId, version, now.Year, now.Month, query.EffectivePage,
+            query.EffectivePageSize, query.SortBy, query.SortDesc);
+
+        if (_cache.TryGetValue(cacheKey, out PagedResult<ExpenseDto>? cachedResult)
+            && cachedResult != null)
         {
             _logger.LogInformation("User Expenses from In-memory cache");
 
             CacheMetrics.RecordHit();   // record cache hit metric
 
-            var totalExpenses = cachedMappedExpenses.Count;
-            return new PagedResult<ExpenseDto>(
-                cachedMappedExpenses,
-                totalExpenses,
-                query.EffectivePage,
-                query.EffectivePageSize);
+            return cachedResult;
         }
 
         CacheMetrics.RecordMiss();  // record cache miss metric
@@ -79,18 +83,20 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
         
         var mappedExpenses = _mapper.Map<IReadOnlyList<ExpenseDto>>(expenses);
 
-        // cache the result
-        var cacheEntryOption = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(TimeSpan.FromMinutes(2))
-            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
-        _cache.Set(cacheKey, mappedExpenses, cacheEntryOption);
-
-        _logger.LogInformation("User Expenses from database");
-
-        return new PagedResult<ExpenseDto>(
+        var result = new PagedResult<ExpenseDto>(
             mappedExpenses,
             totalCount,
             query.EffectivePage,
             query.EffectivePageSize);
+
+        // cache the result
+        var cacheEntryOption = new MemoryCacheEntryOptions()
+            .SetSlidingExpiration(TimeSpan.FromMinutes(2))
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
+        _cache.Set(cacheKey, result, cacheEntryOption);
+
+        _logger.LogInformation("User Expenses from database");
+
+        return result;
     }
 }

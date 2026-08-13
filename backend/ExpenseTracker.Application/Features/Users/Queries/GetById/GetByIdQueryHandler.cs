@@ -32,7 +32,7 @@ public class GetByIdQueryHandler : IRequestHandler<GetByIdQuery, UserDto>
        // Determine target user: use requested UserId if provided, otherwise use current user's ID
         var targetUserId = string.IsNullOrEmpty(request.UserId) ? _userAccessor.UserId : request.UserId;
         
-        var user = await _userRepository.GetByIdAsync(targetUserId, cancellationToken);
+        var user = await _userRepository.GetByIdAsync(targetUserId);
         if (user == null)
             throw new NotFoundException(nameof(UserDto), targetUserId);
 

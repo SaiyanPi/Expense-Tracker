@@ -20,7 +20,7 @@ public class GetByEmailQueryHandler : IRequestHandler<GetByEmailQuery, UserDto>
 
     public async Task<UserDto> Handle(GetByEmailQuery request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        var user = await _userRepository.GetByEmailAsync(request.Email);
         if (user == null)
             throw new NotFoundException(nameof(UserDto), request.Email);
 

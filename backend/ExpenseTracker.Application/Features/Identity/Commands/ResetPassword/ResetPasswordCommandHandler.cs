@@ -19,7 +19,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand,
     public async Task<Unit> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
         var userId = _userAccessor.UserId;
-        await _identityService.ResetPasswordAsync(request.UserId, request.Token, request.ResetPasswordDto, cancellationToken);
+        await _identityService.ResetPasswordAsync(request.UserId, request.Token, request.ResetPasswordDto);
         return Unit.Value;
     }
 }

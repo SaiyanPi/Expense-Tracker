@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using AutoMapper;
+using ExpenseTracker.Application.Common.Caching;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces;
 using ExpenseTracker.Application.Common.Interfaces.Services;
@@ -21,6 +22,7 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
     private readonly IMapper _mapper;
     private readonly INotificationService _notificationService;
     private readonly ILogger<CreateExpenseCommandHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
 
 
     public CreateExpenseCommandHandler(IExpenseRepository expenseRepository,
@@ -29,6 +31,7 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         IUserAccessor userAccessor,
         IMapper mapper,
         INotificationService notificationService,
+        ICacheVersionService cacheVersionService,
         ILogger<CreateExpenseCommandHandler> logger)
     {
         _expenseRepository = expenseRepository;
@@ -38,6 +41,7 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         _mapper = mapper;
         _notificationService = notificationService; 
         _logger = logger;
+        _cacheVersionService = cacheVersionService;
     }
 
     public async Task<ExpenseDto> Handle(CreateExpenseCommand request, CancellationToken cancellationToken)
@@ -118,6 +122,10 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
         expense.UserId = userId;
         await _expenseRepository.AddAsync(expense, cancellationToken);
+
+        // Invalidate the cache once a new expense is created for the user, so that the next
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
 
         // hook the business metric
         ExpenseMetrics.ExpenseCreated();

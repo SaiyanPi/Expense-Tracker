@@ -57,7 +57,7 @@ public class UserRepository : IUserRepository
 
     // Get User By Id
     // ---------------
-    public async Task<User?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdAsync(string id)
     {
         var appUser = await _userManager.FindByIdAsync(id);
         return appUser is null ? null : _mapper.Map<User>(appUser);
@@ -66,7 +66,7 @@ public class UserRepository : IUserRepository
 
     // Get User By Email
     // -------------------
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByEmailAsync(string email)
     {
         var appUser = await _userManager.FindByEmailAsync(email);
         return appUser is null ? null : _mapper.Map<User>(appUser);

@@ -14,7 +14,7 @@ public class EmailConfirmationCommandHandler : IRequestHandler<EmailConfirmation
 
     public async Task<Unit> Handle(EmailConfirmationCommand request, CancellationToken cancellationToken)
     {
-        await _identityService.ConfirmEmailAsync(request.VerifyEmailDto, cancellationToken);
+        await _identityService.ConfirmEmailAsync(request.VerifyEmailDto);
         return Unit.Value;
     }
 }

@@ -67,26 +67,26 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var category = await _dbContext.Categories.FindAsync(id);
+        var category = await _dbContext.Categories.FindAsync(id, cancellationToken);
         return category;
     }
 
     public async Task AddAsync(Category category, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Categories.AddAsync(category);
+        await _dbContext.Categories.AddAsync(category, cancellationToken);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Category category, CancellationToken cancellationToken = default)
     {
         _dbContext.Categories.Update(category);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Category category, CancellationToken cancellationToken = default)
     {
         _dbContext.Categories.Remove(category);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     // view and restore soft deleted categories
@@ -125,14 +125,14 @@ public class CategoryRepository : ICategoryRepository
     {
         var softDeletedCategory = await _dbContext.Categories
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted);
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted, cancellationToken);
         
         return softDeletedCategory;
     }
 
     public async Task<bool> RestoreDeletedCategoryAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
     }
@@ -145,8 +145,7 @@ public class CategoryRepository : ICategoryRepository
         return await _dbContext.Categories.AnyAsync(c =>
             c.Name == name &&
             c.UserId == userId &&
-            (!excludeCategoryId.HasValue || c.Id != excludeCategoryId),
-            cancellationToken);
+            (!excludeCategoryId.HasValue || c.Id != excludeCategoryId), cancellationToken);
     }
 
     public async Task<bool> UserOwnsCategoryAsync(Guid categoryId, string userId, CancellationToken cancellationToken = default)

@@ -73,7 +73,7 @@ public interface IExpenseRepository
 
     IQueryable<Expense> GetExpensesQueryable();
 
-    Task<Expense> AddAsync(Expense expense, CancellationToken cancellationToken = default);
+    Task AddAsync(Expense expense, CancellationToken cancellationToken = default);
     Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default);
     Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default);
 

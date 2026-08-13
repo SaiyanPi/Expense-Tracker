@@ -34,7 +34,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
         if (userIsAdmin)
                 throw new ForbiddenException("Admin cannot delete another admin.");
 
-        await _identityService.DeleteAsync(request.UserId, cancellationToken);
+        await _identityService.DeleteAsync(request.UserId);
         return Unit.Value;
     }
 }   

@@ -341,28 +341,28 @@ public class ExpenseRepository : IExpenseRepository
             .AsNoTracking();
     }
 
-    public async Task<Expense> AddAsync(Expense expense, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Expense expense, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Expenses.AddAsync(expense);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.Expenses.AddAsync(expense, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        // load category for category name
-        await _dbContext.Entry(expense).Reference(e => e.Category).LoadAsync(cancellationToken);
-        // load Budget for Budget name
-        await _dbContext.Entry(expense).Reference(e => e.Budget).LoadAsync(cancellationToken);
-        return expense;
+        // // load category for category name
+        // await _dbContext.Entry(expense).Reference(e => e.Category).LoadAsync(cancellationToken);
+        // // load Budget for Budget name
+        // await _dbContext.Entry(expense).Reference(e => e.Budget).LoadAsync(cancellationToken);
+        // return expense;
     }
 
     public async Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default)
     {
         _dbContext.Expenses.Update(expense);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Expense expense, CancellationToken cancellationToken = default)
     {
         _dbContext.Expenses.Remove(expense);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
 
@@ -403,14 +403,14 @@ public class ExpenseRepository : IExpenseRepository
     {
         var softDeletedExpense = await _dbContext.Expenses
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted);
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId && e.IsDeleted, cancellationToken);
         
         return softDeletedExpense;
     }
 
     public async Task<bool> RestoreDeletedExpenseAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
     }
@@ -431,7 +431,7 @@ public class ExpenseRepository : IExpenseRepository
     {
         return await _dbContext.Expenses
             .Where(e => e.BudgetId == budgetId & e.UserId == userId)
-            .SumAsync(e => e.Amount);
+            .SumAsync(e => e.Amount, cancellationToken);
     }
 }
 

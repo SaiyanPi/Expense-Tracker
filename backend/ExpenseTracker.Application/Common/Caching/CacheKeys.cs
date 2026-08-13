@@ -10,9 +10,14 @@ public static class CacheKeys
     
     public static string Expense(
         string userId,
+        int version,
         int year,
-        int month)
-        => $"expense:{userId}:{year}:{month}";
+        int month,
+        int page,
+        int pageSize,
+        string? sortBy,
+        bool sortDesc)
+        => $"expense:{userId}:{version}:{year}:{month}:page:{page}:pageSize:{pageSize}:sortBy:{sortBy}:sortDesc:{sortDesc}";
 
     public static string Category(
         string userId,

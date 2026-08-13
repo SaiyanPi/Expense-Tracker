@@ -67,7 +67,7 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
             }
             
             // check if the userId exists
-            var userExists = await _userRepository.GetByIdAsync(request.CreateCategoryDto.UserId, cancellationToken);
+            var userExists = await _userRepository.GetByIdAsync(request.CreateCategoryDto.UserId);
             if (userExists is null)
                 throw new NotFoundException(nameof(User), request.CreateCategoryDto.UserId);  
             

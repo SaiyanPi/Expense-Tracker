@@ -1,4 +1,5 @@
 using AutoMapper;
+using ExpenseTracker.Application.Common.Caching;
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Domain.Entities;
@@ -15,11 +16,14 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
     private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
 
+    private readonly ICacheVersionService _cacheVersionService;
+
     public UpdateExpenseCommandHandler(
         IExpenseRepository expenseRepository,
         ICategoryRepository categoryRepository,
         IBudgetRepository budgetRepository,
         IUserAccessor userAccessor,
+        ICacheVersionService cacheVersionService,
         IMapper mapper)
     {
         _expenseRepository = expenseRepository;
@@ -27,6 +31,7 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
         _budgetRepository = budgetRepository;
         _userAccessor = userAccessor;
         _mapper = mapper;
+        _cacheVersionService = cacheVersionService;
     }
 
     public async Task<Unit> Handle(UpdateExpenseCommand request, CancellationToken cancellationToken)
@@ -61,6 +66,11 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
         _mapper.Map(request, expense);
 
         await _expenseRepository.UpdateAsync(expense, cancellationToken);
+
+        // Invalidate the cache once a new expense is updated for the user, so that the updated
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+
         return Unit.Value;
     }
 }
