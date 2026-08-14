@@ -24,8 +24,9 @@ public class CreateExpenseCommandValidator : AbstractValidator<CreateExpenseComm
             .OverridePropertyName("Amount");
 
         RuleFor(x => x.CreateExpenseDto.Date)
-            .NotEmpty().WithMessage("Date is required")
-            .LessThanOrEqualTo(DateTime.Now).WithMessage("Date must be in the past or present")
+            .LessThanOrEqualTo(DateTime.Now)
+            .When(x => x.CreateExpenseDto.Date.HasValue)
+            .WithMessage("Date must be in the past or present")
             .OverridePropertyName("Date");
 
         RuleFor(x => x.CreateExpenseDto.CategoryId)

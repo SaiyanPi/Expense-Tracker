@@ -346,11 +346,10 @@ public class ExpenseRepository : IExpenseRepository
         await _dbContext.Expenses.AddAsync(expense, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        // // load category for category name
-        // await _dbContext.Entry(expense).Reference(e => e.Category).LoadAsync(cancellationToken);
-        // // load Budget for Budget name
-        // await _dbContext.Entry(expense).Reference(e => e.Budget).LoadAsync(cancellationToken);
-        // return expense;
+        // load category for category name
+        await _dbContext.Entry(expense).Reference(e => e.Category).LoadAsync(cancellationToken);
+        // load Budget for Budget name
+        await _dbContext.Entry(expense).Reference(e => e.Budget).LoadAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default)

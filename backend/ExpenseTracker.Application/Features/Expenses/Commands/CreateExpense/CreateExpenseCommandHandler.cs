@@ -121,6 +121,8 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
       
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
         expense.UserId = userId;
+        expense.Date = request.CreateExpenseDto.Date ?? DateTime.UtcNow;
+        
         await _expenseRepository.AddAsync(expense, cancellationToken);
 
         // Invalidate the cache once a new expense is created for the user, so that the next
