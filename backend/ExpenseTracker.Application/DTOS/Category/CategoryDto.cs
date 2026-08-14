@@ -7,4 +7,5 @@ public class CategoryDto
     public string? UserId { get; set; }     // foreign key 
     public DateTime CreatedAt { get; set; } = default!;
     public DateTime? UpdatedAt { get; set; }
+    
 }

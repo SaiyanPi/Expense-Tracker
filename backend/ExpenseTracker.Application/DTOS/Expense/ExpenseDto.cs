@@ -13,4 +13,6 @@ public class ExpenseDto
     public string? BudgetName { get; set; }   // included for user-friendly display
     public string? UserId { get; set; }     // foreign key
     
+    public DateTime CreatedAt { get; set; } = default!;
+    public DateTime? UpdatedAt { get; set; }
 }

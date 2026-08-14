@@ -29,14 +29,18 @@ public class CreateExpenseCommandValidator : AbstractValidator<CreateExpenseComm
             .WithMessage("Date must be in the past or present")
             .OverridePropertyName("Date");
 
+        // If CategoryId is provided validate for Guid
         RuleFor(x => x.CreateExpenseDto.CategoryId)
-            .NotEmpty().WithMessage("CategoryId is required")
+            .Must(categoryId => categoryId != Guid.Empty)
+            .When(x => x.CreateExpenseDto.CategoryId.HasValue)
+            .WithMessage("Category Id must be a valid GUID when provided.")
             .OverridePropertyName("CategoryId");
 
-        // Apply rule only when BudgetId is provided(not null or empty)
+        // If BudgetId is provided validate for Guid
         RuleFor(x => x.CreateExpenseDto.BudgetId)
-            .Must(budgetId => budgetId == null || budgetId != Guid.Empty)
-            .WithMessage("BudgetId must be a valid GUID when provided.")
+            .Must(budgetId => budgetId != Guid.Empty)
+            .When(x => x.CreateExpenseDto.BudgetId.HasValue)
+            .WithMessage("Budget Id must be a valid GUID when provided.")
             .OverridePropertyName("BudgetId");
 
         // // Apply rule only when UserId is provided (not null or empty)
