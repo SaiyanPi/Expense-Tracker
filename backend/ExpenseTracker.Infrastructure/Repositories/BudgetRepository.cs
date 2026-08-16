@@ -53,6 +53,7 @@ public class BudgetRepository : IBudgetRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Budgets
+            .Include(b => b.Category)   // Here Include() metters because there is noprojection with Select unlike in Expense
             .Where(b => b.UserId == userId)
             .AsNoTracking()
             .AsQueryable();

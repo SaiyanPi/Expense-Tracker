@@ -89,7 +89,7 @@ public class ExpenseRepository : IExpenseRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
-            //.Include(e => e.Category) // it does nothing, Include() is ignored when projecting with Select(). EF Core automatically generates the necessary JOIN for Category without tracking it.
+            //.Include(e => e.Category)  does nothing, Include() is ignored when projecting with Select(). EF Core automatically generates the necessary JOIN for Category without tracking it.
             .Where(e => e.BudgetId == budgetId && e.UserId == userId)
             .AsNoTracking()
             .AsQueryable();
@@ -345,11 +345,6 @@ public class ExpenseRepository : IExpenseRepository
     {
         await _dbContext.Expenses.AddAsync(expense, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-
-        // load category for category name
-        await _dbContext.Entry(expense).Reference(e => e.Category).LoadAsync(cancellationToken);
-        // load Budget for Budget name
-        await _dbContext.Entry(expense).Reference(e => e.Budget).LoadAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(Expense expense, CancellationToken cancellationToken = default)

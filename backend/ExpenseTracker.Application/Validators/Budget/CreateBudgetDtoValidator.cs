@@ -34,9 +34,11 @@ public class CreateBudgetCommandValidator : AbstractValidator<CreateBudgetComman
                 .OverridePropertyName("UserId");
         });
         
+        // If CategoryId is provided validate for Guid
         RuleFor(x => x.CreateBudgetDto.CategoryId)
-            .Must(categoryId => categoryId == null || categoryId != Guid.Empty)
-            .WithMessage("CategoryId must be a valid non-empty GUID when provided.")
+            .Must(categoryId => categoryId != Guid.Empty)
+            .When(x => x.CreateBudgetDto.CategoryId.HasValue)
+            .WithMessage("Category Id must be a valid GUID when provided.")
             .OverridePropertyName("CategoryId");
     }
 

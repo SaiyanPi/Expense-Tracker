@@ -30,7 +30,12 @@ public class BudgetConfiguration : IEntityTypeConfiguration<Budget>
             .HasForeignKey(b => b.UserId)
             .OnDelete(DeleteBehavior.SetNull);
         
-        builder.HasOne<Category>()
+        // builder.HasOne<Category>()
+        //     .WithMany()
+        //     .HasForeignKey(b => b.CategoryId)
+        //     .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(b => b.Category)
             .WithMany()
             .HasForeignKey(b => b.CategoryId)
             .OnDelete(DeleteBehavior.SetNull);
