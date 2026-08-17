@@ -123,10 +123,17 @@ public class BudgetRepository : IBudgetRepository
                 Description = e.Description,
                 Amount = e.Amount,
                 Date = e.Date,
-                CategoryId = e.Category != null ? e.Category.Id : null,
-                CategoryName = e.Category != null ? e.Category.Name : null,  
+
+                CategoryId = e.CategoryId,
+                CategoryName = e.Category != null ? e.Category.Name : null,
+
                 BudgetId = e.BudgetId,
-                UserId = e.UserId
+                BudgetName = e.Budget != null ? e.Budget.Name : null,
+
+                UserId = e.UserId,
+
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt
             })
             .AsQueryable();
         // Calculate value
