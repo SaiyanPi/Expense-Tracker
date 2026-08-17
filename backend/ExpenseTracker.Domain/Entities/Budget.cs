@@ -9,18 +9,16 @@ public class Budget : BaseSoftDeletableEntity
     public DateTime EndDate { get; set; }
     public string? UserId { get; set; }
     public Guid? CategoryId { get; set; }
-    public string? CategoryName { get; set; }
     public ICollection<Expense> Expenses { get; set; } = new List<Expense>(); 
     public bool IsActive => DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
-     public Category Category { get; private set; } = default!;      // reference navigation to Category
+    public Category Category { get; private set; } = default!;      // reference navigation to Category
 
     public Budget(string name,
         decimal amount,
         DateTime startDate,
         DateTime endDate,
         string? userId = default!,
-        Guid? categoryId = null,
-        string? categoryName = default!)
+        Guid? categoryId = null)
     {
         Id = Guid.NewGuid();
         Name = name;
@@ -29,7 +27,6 @@ public class Budget : BaseSoftDeletableEntity
         EndDate = endDate;
         UserId = userId;
         CategoryId = categoryId;
-        CategoryName = categoryName;
     }
 
 
