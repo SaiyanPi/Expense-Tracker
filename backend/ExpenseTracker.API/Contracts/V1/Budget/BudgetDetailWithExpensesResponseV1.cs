@@ -15,6 +15,8 @@ public class BudgetDetailWithExpensesResponseV1
     public decimal PercentageUsed => Limit == 0 ? 0 : (TotalSpent / Limit) * 100;
     public bool IsOverBudget => TotalSpent > Limit;
     public bool IsActive { get; set; }
+    public Guid? CategoryId { get; set; }
+    public string? CategoryName { get; set; }
 
     public PagedResultResponseV1<ExpenseResponseV1> Expenses { get; set; } = default!;
 }

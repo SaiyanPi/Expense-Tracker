@@ -53,7 +53,7 @@ public class BudgetRepository : IBudgetRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Budgets
-            .Include(b => b.Category)   // Here Include() metters because there is noprojection with Select unlike in Expense
+            .Include(b => b.Category)   // Here Include() metters because there is no projection with Select unlike in Expense
             .Where(b => b.UserId == userId)
             .AsNoTracking()
             .AsQueryable();
@@ -105,8 +105,10 @@ public class BudgetRepository : IBudgetRepository
                 Id = b.Id,
                 Name = b.Name,
                 Limit = b.Amount,
-                IsActive = b.IsActive
+                IsActive = b.IsActive,
 
+                CategoryId = b.CategoryId,
+                CategoryName = b.Category != null ? b.Category.Name : null,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -158,6 +160,10 @@ public class BudgetRepository : IBudgetRepository
             Limit = budget.Limit,
             TotalSpent = totalSpent,
             IsActive = budget.IsActive,
+
+            CategoryId = budget.CategoryId,
+            CategoryName = budget.CategoryName,
+            
             Expenses = expenses,
             TotalCount = totalCount
         };

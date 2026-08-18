@@ -131,6 +131,9 @@ public class BudgetsController : ControllerBase
             Limit = budgetDetailWithExpensesByEmail.Limit,
             TotalSpent = budgetDetailWithExpensesByEmail.TotalSpent,
             IsActive = budgetDetailWithExpensesByEmail.IsActive,
+
+            CategoryId = budgetDetailWithExpensesByEmail.CategoryId,
+            CategoryName = budgetDetailWithExpensesByEmail.CategoryName,
             
             Expenses = new PagedResultResponseV1<ExpenseResponseV1>
             {
