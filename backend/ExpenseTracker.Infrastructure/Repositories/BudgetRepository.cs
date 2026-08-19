@@ -107,6 +107,9 @@ public class BudgetRepository : IBudgetRepository
                 Limit = b.Amount,
                 IsActive = b.IsActive,
 
+                StartDate = b.StartDate,
+                EndDate = b.EndDate,
+
                 CategoryId = b.CategoryId,
                 CategoryName = b.Category != null ? b.Category.Name : null,
             })
@@ -160,6 +163,9 @@ public class BudgetRepository : IBudgetRepository
             Limit = budget.Limit,
             TotalSpent = totalSpent,
             IsActive = budget.IsActive,
+
+            StartDate = budget.StartDate,
+            EndDate = budget.EndDate,
 
             CategoryId = budget.CategoryId,
             CategoryName = budget.CategoryName,

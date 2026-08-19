@@ -69,8 +69,13 @@ public class GetBudgetDetailWithExpensesByEmailQueryHandler : IRequestHandler<Ge
             Limit = budgetDetailWithExpensesByEmailSummary.Limit,
             TotalSpent = budgetDetailWithExpensesByEmailSummary.TotalSpent,
             IsActive = budgetDetailWithExpensesByEmailSummary.IsActive,
+
+            StartDate = budgetDetailWithExpensesByEmailSummary.StartDate,
+            EndDate = budgetDetailWithExpensesByEmailSummary.EndDate,
+
             CategoryId = budgetDetailWithExpensesByEmailSummary.CategoryId,
             CategoryName = budgetDetailWithExpensesByEmailSummary.CategoryName,
+
             Expenses = pagedExpenses
         };
     }

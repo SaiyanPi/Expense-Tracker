@@ -13,6 +13,8 @@ public class BudgetDetailWithExpensesDto
     public decimal PercentageUsed => Limit == 0 ? 0 : (TotalSpent / Limit) * 100;
     public bool IsOverBudget => TotalSpent > Limit;
     public bool IsActive { get; set; }
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
     public Guid? CategoryId { get; set; }
     public string? CategoryName { get; set; }
 

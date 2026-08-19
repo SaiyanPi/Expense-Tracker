@@ -132,7 +132,11 @@ public class BudgetsController : ControllerBase
             TotalSpent = budgetDetailWithExpensesByEmail.TotalSpent,
             IsActive = budgetDetailWithExpensesByEmail.IsActive,
 
+            StartDate = budgetDetailWithExpensesByEmail.StartDate,
+            EndDate = budgetDetailWithExpensesByEmail.EndDate,
+
             CategoryId = budgetDetailWithExpensesByEmail.CategoryId,
+            
             CategoryName = budgetDetailWithExpensesByEmail.CategoryName,
             
             Expenses = new PagedResultResponseV1<ExpenseResponseV1>
