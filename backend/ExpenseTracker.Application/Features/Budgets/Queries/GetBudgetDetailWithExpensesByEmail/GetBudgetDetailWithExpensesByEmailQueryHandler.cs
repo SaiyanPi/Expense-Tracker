@@ -69,6 +69,10 @@ public class GetBudgetDetailWithExpensesByEmailQueryHandler : IRequestHandler<Ge
             Limit = budgetDetailWithExpensesByEmailSummary.Limit,
             TotalSpent = budgetDetailWithExpensesByEmailSummary.TotalSpent,
             IsActive = budgetDetailWithExpensesByEmailSummary.IsActive,
+            
+            Remaining = budgetDetailWithExpensesByEmailSummary.Remaining,
+            PercentageUsed = budgetDetailWithExpensesByEmailSummary.PercentageUsed,
+            IsOverBudget = budgetDetailWithExpensesByEmailSummary.IsOverBudget,
 
             StartDate = budgetDetailWithExpensesByEmailSummary.StartDate,
             EndDate = budgetDetailWithExpensesByEmailSummary.EndDate,

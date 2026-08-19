@@ -48,6 +48,9 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
     {
         var userId = _userAccessor.UserId;
 
+        // defining date for the request with empty date value
+        var expenseDate = request.CreateExpenseDto.Date ?? DateTime.UtcNow;
+
         _logger.LogInformation(
             "Creating expense for UserId {UserId} with Amount {Amount}, CategoryId {CategoryId}, and BudgetId {BudgetId}",
             userId,
@@ -58,6 +61,8 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
 
         // BUISNESS RULE:
         // Admins cannot create expenses
+        // user cannot create budget's expense with date outside the budget's date range
+
         // Duplicate titles allowed
 
         if (!string.IsNullOrWhiteSpace(request.CreateExpenseDto.UserId))
@@ -88,6 +93,13 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
                 throw new NotFoundException("You cannot create an expense for an inactive/expired budget.");
             
             var budget = await _budgetRepository.GetByIdAsync(budgetId, cancellationToken);
+
+            // check if the budget's expense date is out of budget's date range
+            if (expenseDate.Date < budget!.StartDate.Date || expenseDate.Date > budget.EndDate.Date)
+            {
+                throw new BadRequestException($"Expense date must be between " +
+                    $"{budget.StartDate:yyyy-MM-dd} and {budget.EndDate:yyyy-MM-dd}.");
+            }
 
             var totalSpent = await _expenseRepository
                 .GetTotalExpensesUnderABudgetAsync(budget!.Id, userId, cancellationToken);
@@ -121,7 +133,7 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
       
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
         expense.UserId = userId;
-        expense.Date = request.CreateExpenseDto.Date ?? DateTime.UtcNow;
+        expense.Date = expenseDate;
         
         await _expenseRepository.AddAsync(expense, cancellationToken);
 

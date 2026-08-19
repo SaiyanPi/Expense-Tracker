@@ -9,9 +9,9 @@ public class BudgetDetailWithExpensesDto
     public string Name { get; set; } = default!;
     public decimal Limit { get; set; }
     public decimal TotalSpent { get; set; }
-    public decimal Remaining => Limit - TotalSpent;
-    public decimal PercentageUsed => Limit == 0 ? 0 : (TotalSpent / Limit) * 100;
-    public bool IsOverBudget => TotalSpent > Limit;
+    public decimal Remaining { get; set; }
+    public decimal PercentageUsed { get; set; }
+    public bool IsOverBudget { get; set; }
     public bool IsActive { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
