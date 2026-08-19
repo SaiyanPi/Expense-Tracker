@@ -13,7 +13,7 @@ public interface IBudgetRepository
         bool sortDesc = false,
         CancellationToken cancellationToken = default);
 
-    Task<(IEnumerable<Budget> Budgets, int totalCount)> GetAllBudgetsByEmailAsync(
+    Task<(IEnumerable<BudgetSummary> Budgets, int totalCount)> GetAllBudgetsByEmailAsync(
         string userId,
         int skip,
         int take,

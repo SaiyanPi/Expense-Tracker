@@ -44,7 +44,7 @@ public class BudgetRepository : IBudgetRepository
     }
    
 
-    public async Task<(IEnumerable<Budget> Budgets, int totalCount)> GetAllBudgetsByEmailAsync(
+    public async Task<(IEnumerable<BudgetSummary> Budgets, int totalCount)> GetAllBudgetsByEmailAsync(
         string userId,
         int skip,
         int take,
@@ -53,10 +53,46 @@ public class BudgetRepository : IBudgetRepository
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Budgets
-            .Include(b => b.Category)   // Here Include() metters because there is no projection with Select unlike in Expense
+            // .Include(b => b.Category)   
             .Where(b => b.UserId == userId)
             .AsNoTracking()
-            .AsQueryable();
+            .Select(b => new
+            {
+                Budget = b,
+
+                TotalSpent = b.Expenses
+                    .Where(e => e.Date >= b.StartDate &&
+                                e.Date <= b.EndDate)
+                    .Sum(e => e.Amount)
+            })
+            .Select(x => new BudgetSummary
+            {
+                Id = x.Budget.Id,
+                Name = x.Budget.Name,
+                Amount = x.Budget.Amount,
+
+                TotalSpent = x.TotalSpent,
+                Remaining = x.Budget.Amount - x.TotalSpent,
+
+                PercentageUsed = x.Budget.Amount == 0
+                    ? 0
+                    : x.TotalSpent / x.Budget.Amount * 100,
+
+                IsOverBudget = x.TotalSpent > x.Budget.Amount,
+
+                StartDate = x.Budget.StartDate,
+                EndDate = x.Budget.EndDate,
+
+                UserId = x.Budget.UserId!,
+
+                CategoryId = x.Budget.CategoryId,
+                CategoryName = x.Budget.Category != null
+                    ? x.Budget.Category.Name
+                    : null,
+
+                CreatedAt = x.Budget.CreatedAt,
+                UpdatedAt = x.Budget.UpdatedAt
+            });
 
         var totalCount = await query
             .CountAsync(cancellationToken);

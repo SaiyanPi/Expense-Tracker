@@ -31,8 +31,9 @@ public class BudgetMappingProfile : Profile
         CreateMap<Budget, UpdateBudgetDto>();
         
         // Entity -> Read DTO
-        CreateMap<Budget, BudgetDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+        // CreateMap<Budget, BudgetDto>()
+        //     .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+        CreateMap<BudgetSummary, BudgetDto>();
 
         // Budget summary
         CreateMap<BudgetsSummary, BudgetSummaryDto>()
