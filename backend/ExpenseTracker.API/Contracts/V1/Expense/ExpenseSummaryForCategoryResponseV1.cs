@@ -10,4 +10,7 @@ public class ExpenseSummaryForCategoryResponseV1
     public string CategoryName { get; set; } = default!;  
     public Guid? BudgetId { get; set; }     
     public string UserId { get; set; } = default!; 
+
+    public DateTime CreatedAt { get; set; } = default!;
+    public DateTime? UpdatedAt { get; set; }
 }

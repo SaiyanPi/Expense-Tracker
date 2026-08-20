@@ -149,7 +149,10 @@ public class ExpenseRepository : IExpenseRepository
                 CategoryId = e.Category.Id,
                 CategoryName = e.Category.Name,
                 BudgetId = e.BudgetId,
-                UserId = e.UserId!
+                UserId = e.UserId!,
+
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt
             })
             .Skip(skip)
             .Take(take)
