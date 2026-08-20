@@ -149,6 +149,7 @@ public class ExpenseRepository : IExpenseRepository
                 CategoryId = e.Category.Id,
                 CategoryName = e.Category.Name,
                 BudgetId = e.BudgetId,
+                BudgetName = e.Budget != null ? e.Budget.Name : null,
                 UserId = e.UserId!,
 
                 CreatedAt = e.CreatedAt,

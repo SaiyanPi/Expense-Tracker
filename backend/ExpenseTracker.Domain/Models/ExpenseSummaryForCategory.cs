@@ -8,7 +8,8 @@ public class ExpenseSummaryForCategory
     public DateTime Date { get; set; }
     public Guid CategoryId { get; set; }
     public string CategoryName { get; set; } = default!;  
-    public Guid? BudgetId { get; set; }     
+    public Guid? BudgetId { get; set; }    
+    public string? BudgetName { get; set; }  
     public string UserId { get; set; } = default!;     
     
     public DateTime CreatedAt { get; set; } = default!;
