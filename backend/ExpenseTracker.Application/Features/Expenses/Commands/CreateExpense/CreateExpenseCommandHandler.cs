@@ -52,11 +52,12 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         var expenseDate = request.CreateExpenseDto.Date ?? DateTime.UtcNow;
 
         _logger.LogInformation(
-            "Creating expense for UserId {UserId} with Amount {Amount}, CategoryId {CategoryId}, and BudgetId {BudgetId}",
+            "Creating expense for UserId {UserId} with Amount {Amount}, CategoryId {CategoryId}, and BudgetId {BudgetId}, Date {Date}",
             userId,
             request.CreateExpenseDto.Amount,
             request.CreateExpenseDto.CategoryId,
-            request.CreateExpenseDto.BudgetId
+            request.CreateExpenseDto.BudgetId,
+            request.CreateExpenseDto.Date
         );
 
         // BUISNESS RULE:
@@ -145,10 +146,11 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         ExpenseMetrics.ExpenseCreated();
 
         _logger.LogInformation(
-            "Expense created successfully. ExpenseId {ExpenseId}, UserId {UserId}, Amount {Amount}",
+            "Expense created successfully. ExpenseId {ExpenseId}, UserId {UserId}, Amount {Amount}, Date{Date}",
             expense.Id,
             userId,
-            expense.Amount
+            expense.Amount,
+            expense.Date
         );
 
         return _mapper.Map<ExpenseDto>(expense);

@@ -118,9 +118,9 @@ public class BudgetRepository : IBudgetRepository
 
     public async Task<bool> GetBudgetStatusByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        var today = DateTime.Now.Date;
         return await _dbContext.Budgets
-            .Where(b => b.Id == id && b.StartDate <= DateTime.Now && b.EndDate >= DateTime.Now)
-            .FirstOrDefaultAsync(cancellationToken) != null;
+            .AnyAsync(b => b.Id == id && b.StartDate.Date <= today && b.EndDate.Date >= today, cancellationToken);
     }
 
     public async Task<BudgetDetailWithExpensesSummary> GetBudgetDetailWithExpensesByEmailAsync(
