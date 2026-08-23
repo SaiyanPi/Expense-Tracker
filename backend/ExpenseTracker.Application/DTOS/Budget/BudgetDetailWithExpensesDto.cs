@@ -18,5 +18,7 @@ public class BudgetDetailWithExpensesDto
     public Guid? CategoryId { get; set; }
     public string? CategoryName { get; set; }
 
+
     public PagedResult<ExpenseDto> Expenses { get; set; } = default!;
+
 }

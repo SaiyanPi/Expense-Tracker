@@ -191,6 +191,20 @@ public class BudgetRepository : IBudgetRepository
             .Take(take)
             .ToListAsync(cancellationToken);
         
+        // To fix bug: expense creation under a budget with later deleted category, 
+        // we need to query the deleted category deliberately for this read-only historical context.
+        var category = budget.CategoryId.HasValue
+            ? await _dbContext.Categories
+                .IgnoreQueryFilters()
+                .Where(c => c.Id == budget.CategoryId.Value)
+                .Select(c => new
+                {
+                    c.Name,
+                    c.IsDeleted
+                })
+                .FirstOrDefaultAsync(cancellationToken)
+            : null;
+            
         // Build and return domain model
         return new BudgetDetailWithExpensesSummary
         {
@@ -203,8 +217,12 @@ public class BudgetRepository : IBudgetRepository
             StartDate = budget.StartDate,
             EndDate = budget.EndDate,
 
-            CategoryId = budget.CategoryId,
-            CategoryName = budget.CategoryName,
+            CategoryId = category is not null && !category.IsDeleted
+                ? budget.CategoryId
+                : null,
+            CategoryName = category is not null && !category.IsDeleted
+                ? category.Name
+                : null,
             
             Expenses = expenses,
             TotalCount = totalCount

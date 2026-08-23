@@ -87,13 +87,47 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
             bool ownsBudget = await _budgetRepository.UserOwnsBudgetAsync(budgetId, userId, cancellationToken);
             if (!ownsBudget)
                 throw new ConflictException($"You don't have the Budget with id '{budgetId}'.");
+            
+            // load the budget once
+            var budget = await _budgetRepository.GetByIdAsync(budgetId,cancellationToken);
+
+            if (budget is null)
+                throw new NotFoundException(nameof(Budget), budgetId);
 
             // check the budget isActive 
             var isActive = await _budgetRepository.GetBudgetStatusByIdAsync(budgetId, cancellationToken);
             if (!isActive)
                 throw new NotFoundException("You cannot create an expense for an inactive/expired budget.");
             
-            var budget = await _budgetRepository.GetByIdAsync(budgetId, cancellationToken);
+            if (budget.CategoryId is Guid budgetCategoryId)
+            {
+                // Budget has a category, therefore the expense must
+                // also have a category.
+                if (request.CreateExpenseDto.CategoryId is not Guid expenseCategoryId)
+                {
+                    throw new BadRequestException(
+                        $"A category is required when creating an expense under budget '{budget.Name}'.");
+                }
+
+                // The expense category must match the budget category.
+                if (expenseCategoryId != budgetCategoryId)
+                {
+                    throw new ConflictException(
+                        $"The expense category must match the category assigned to budget '{budget.Name}'.");
+                }
+
+                // The category must still be active; should not be soft-deleted
+                // UserOwnsCategoryAsync() respects the global query filter, so a soft-deleted category will fail here.
+                var ownsBudgetCategory = await _categoryRepository.UserOwnsCategoryAsync(budgetCategoryId, userId, cancellationToken);
+
+                if (!ownsBudgetCategory)
+                {
+                    throw new ConflictException(
+                        $"The category assigned to budget '{budget.Name}' has been deleted. " +
+                        "You cannot create a new expense under this budget.");
+                }
+            }
+
 
             // check if the budget's expense date is out of budget's date range
             if (expenseDate.Date < budget!.StartDate.Date || expenseDate.Date > budget.EndDate.Date)
@@ -122,6 +156,11 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
                     remainingAmount
                 );
 
+                // ⚠️⚠️
+                // Also, one unrelated issue worth flagging: your budget-threshold calculation happens before the new expense is 
+                // added, so percentageUsed represents spending before this expense. If the intention is "notify when this new 
+                // expense causes the budget to cross 50%", your calculation needs to include dto.Amount. That's separate from 
+                // today's category bug, but it's a genuine logic issue.
                 await _notificationService.BudgetExceededAsync(
                     budget.Id,
                     budget.Name,

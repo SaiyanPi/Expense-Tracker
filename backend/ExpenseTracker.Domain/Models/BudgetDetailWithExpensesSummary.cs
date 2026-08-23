@@ -15,6 +15,7 @@ public class BudgetDetailWithExpensesSummary
     public DateTime EndDate { get; set; }
     public Guid? CategoryId { get; set; }
     public string? CategoryName { get; set; }
+
     public IReadOnlyList<ExpenseSummary> Expenses { get; set; } = default!;
 
     // for paging info
