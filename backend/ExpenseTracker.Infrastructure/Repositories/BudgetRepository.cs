@@ -136,18 +136,15 @@ public class BudgetRepository : IBudgetRepository
         // 1. Load budget
         var budget = await _dbContext.Budgets
             .Where(b => b.Id == budgetId && b.UserId == userId)
-            .Select(b => new BudgetDetailWithExpensesSummary
+            .Select(b => new 
             {
-                Id = b.Id,
-                Name = b.Name,
+                b.Id,
+                b.Name,
                 Limit = b.Amount,
-                IsActive = b.IsActive,
-
-                StartDate = b.StartDate,
-                EndDate = b.EndDate,
-
-                CategoryId = b.CategoryId,
-                CategoryName = b.Category != null ? b.Category.Name : null,
+                b.IsActive,
+                b.StartDate,
+                b.EndDate,
+                b.CategoryId
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -199,12 +196,16 @@ public class BudgetRepository : IBudgetRepository
                 .Where(c => c.Id == budget.CategoryId.Value)
                 .Select(c => new
                 {
+                    c.Id,
                     c.Name,
                     c.IsDeleted
                 })
                 .FirstOrDefaultAsync(cancellationToken)
             : null;
-            
+        
+        Guid? effectiveCategoryId = category?.IsDeleted == false? category.Id : null;
+        string? effectiveCategoryName = category?.IsDeleted == false? category.Name: null;
+
         // Build and return domain model
         return new BudgetDetailWithExpensesSummary
         {
@@ -217,12 +218,9 @@ public class BudgetRepository : IBudgetRepository
             StartDate = budget.StartDate,
             EndDate = budget.EndDate,
 
-            CategoryId = category is not null && !category.IsDeleted
-                ? budget.CategoryId
-                : null,
-            CategoryName = category is not null && !category.IsDeleted
-                ? category.Name
-                : null,
+            CategoryId = effectiveCategoryId,
+
+            CategoryName = effectiveCategoryName,
             
             Expenses = expenses,
             TotalCount = totalCount

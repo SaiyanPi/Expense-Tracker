@@ -101,31 +101,32 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
             
             if (budget.CategoryId is Guid budgetCategoryId)
             {
-                // Budget has a category, therefore the expense must
-                // also have a category.
-                if (request.CreateExpenseDto.CategoryId is not Guid expenseCategoryId)
-                {
-                    throw new BadRequestException(
-                        $"A category is required when creating an expense under budget '{budget.Name}'.");
-                }
-
-                // The expense category must match the budget category.
-                if (expenseCategoryId != budgetCategoryId)
-                {
-                    throw new ConflictException(
-                        $"The expense category must match the category assigned to budget '{budget.Name}'.");
-                }
-
-                // The category must still be active; should not be soft-deleted
-                // UserOwnsCategoryAsync() respects the global query filter, so a soft-deleted category will fail here.
+                // Check whether the budget's category is still active(not soft-deleted).
                 var ownsBudgetCategory = await _categoryRepository.UserOwnsCategoryAsync(budgetCategoryId, userId, cancellationToken);
 
-                if (!ownsBudgetCategory)
+                if (ownsBudgetCategory)
                 {
-                    throw new ConflictException(
-                        $"The category assigned to budget '{budget.Name}' has been deleted. " +
-                        "You cannot create a new expense under this budget.");
+                    // Budget has an ACTIVE category.
+                    // Therefore the expense must use that category.
+
+                    if (request.CreateExpenseDto.CategoryId is not Guid expenseCategoryId)
+                    {
+                        throw new BadRequestException(
+                            $"A category is required when creating an expense under budget '{budget.Name}'.");
+                    }
+
+                    if (expenseCategoryId != budgetCategoryId)
+                    {
+                        throw new ConflictException(
+                            $"The expense category must match the category assigned to budget '{budget.Name}'.");
+                    }
                 }
+
+                // If ownsBudgetCategory == false, the budget's category
+                // has been soft-deleted.
+                //
+                // In that case, treat the budget as having NO category.
+                // The user may choose any active category or no category.
             }
 
 
