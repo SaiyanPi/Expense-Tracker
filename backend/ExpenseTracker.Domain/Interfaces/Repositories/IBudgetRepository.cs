@@ -20,6 +20,15 @@ public interface IBudgetRepository
         string? sortBy = null,
         bool sortDesc = false,
         CancellationToken cancellationToken = default);
+    
+    Task<(IEnumerable<BudgetSummary> Budgets, int totalCount)> GetAllActiveBudgetsByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default);
+
 
     Task <Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task <bool> GetBudgetStatusByIdAsync(Guid id, CancellationToken cancellationToken = default);

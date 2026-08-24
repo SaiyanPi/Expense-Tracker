@@ -107,6 +107,76 @@ public class BudgetRepository : IBudgetRepository
         return (budgets, totalCount);
     }
 
+
+     public async Task<(IEnumerable<BudgetSummary> Budgets, int totalCount)> GetAllActiveBudgetsByEmailAsync(
+        string userId,
+        int skip,
+        int take,
+        string? sortBy = null,
+        bool sortDesc = false,
+        CancellationToken cancellationToken = default)
+    {
+        var today = DateTime.Now.Date;
+
+        var query = _dbContext.Budgets
+            // .Include(b => b.Category)   
+            .Where(b =>
+            b.UserId == userId &&
+            b.StartDate <= today &&
+            b.EndDate >= today)  
+            .AsNoTracking()
+            .Select(b => new
+            {
+                Budget = b,
+
+                TotalSpent = b.Expenses
+                    .Where(e => e.Date >= b.StartDate &&
+                                e.Date <= b.EndDate)
+                    .Sum(e => e.Amount)
+            })
+            .Select(x => new BudgetSummary
+            {
+                Id = x.Budget.Id,
+                Name = x.Budget.Name,
+                Amount = x.Budget.Amount,
+
+                TotalSpent = x.TotalSpent,
+                Remaining = x.Budget.Amount - x.TotalSpent,
+
+                PercentageUsed = x.Budget.Amount == 0
+                    ? 0
+                    : x.TotalSpent / x.Budget.Amount * 100,
+
+                IsOverBudget = x.TotalSpent > x.Budget.Amount,
+
+                StartDate = x.Budget.StartDate,
+                EndDate = x.Budget.EndDate,
+
+                UserId = x.Budget.UserId!,
+
+                CategoryId = x.Budget.CategoryId,
+                CategoryName = x.Budget.Category != null
+                    ? x.Budget.Category.Name
+                    : null,
+
+                CreatedAt = x.Budget.CreatedAt,
+                UpdatedAt = x.Budget.UpdatedAt
+            });
+
+        var totalCount = await query
+            .CountAsync(cancellationToken);
+
+        query = query.ApplySorting(sortBy, sortDesc);
+
+        var budgets = await query
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return (budgets, totalCount);
+    }
+
+
     public async Task<Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var budget = await _dbContext.Budgets

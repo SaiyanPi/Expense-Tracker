@@ -20,6 +20,7 @@ using ExpenseTracker.API.Contracts.V1.Common.Pagination;
 using ExpenseTracker.API.Contracts.V1.Budget;
 using ExpenseTracker.API.Contracts.V1.Expense;
 using Microsoft.AspNetCore.RateLimiting;
+using ExpenseTracker.Application.Features.Budgets.Queries.GetAllActiveBudgetsByEmail;
 
 namespace ExpenseTracker.API.Controllers.V1;
 
@@ -73,6 +74,34 @@ public class BudgetsController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var query = new GetAllBudgetsByEmailQuery(new PagedQuery(
+            pagedResultRequest.page,
+            pagedResultRequest.pageSize,
+            pagedResultRequest.sortBy,
+            pagedResultRequest.sortDesc));
+        var budgets = await _mediator.Send(query, cancellationToken);
+
+        var response = new PagedResultResponseV1<BudgetResponseV1>
+        {
+            Items = _mapper.Map<List<BudgetResponseV1>>(budgets.Items),
+
+            TotalCount = budgets.TotalCount,
+            Page = budgets.Page,
+            PageSize = budgets.PageSize,
+            TotalPages = budgets.TotalPages,
+            HasNext = budgets.HasNext,
+            HasPrevious = budgets.HasPrevious
+        };
+        return Ok(response);
+    }
+
+    // GET: api/v1/Budgets/active
+    [Authorize(Policy = BudgetPermission.View)]
+    [HttpGet("active")]
+    public async Task<IActionResult> GetAllActiveBudgetsByEmail(
+        [FromQuery] PagedResultRequestV1 pagedResultRequest,
+        CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllActiveBudgetsByEmailQuery(new PagedQuery(
             pagedResultRequest.page,
             pagedResultRequest.pageSize,
             pagedResultRequest.sortBy,
