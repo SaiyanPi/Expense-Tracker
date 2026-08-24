@@ -431,6 +431,16 @@ public class ExpenseRepository : IExpenseRepository
             .Where(e => e.BudgetId == budgetId & e.UserId == userId)
             .SumAsync(e => e.Amount, cancellationToken);
     }
+
+
+    // bulk update the expense's category to null if the category is deleted
+    public async Task ClearCategoryReferencesAsync(Guid categoryId, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Expenses
+            .Where(e => e.CategoryId == categoryId)
+            .ExecuteUpdateAsync( setters => 
+                setters.SetProperty( e => e.CategoryId, (Guid?)null), cancellationToken);
+    }
 }
 
 

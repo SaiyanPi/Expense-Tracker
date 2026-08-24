@@ -108,7 +108,7 @@ public class BudgetRepository : IBudgetRepository
     }
 
 
-     public async Task<(IEnumerable<BudgetSummary> Budgets, int totalCount)> GetAllActiveBudgetsByEmailAsync(
+    public async Task<(IEnumerable<BudgetSummary> Budgets, int totalCount)> GetAllActiveBudgetsByEmailAsync(
         string userId,
         int skip,
         int take,
@@ -214,7 +214,10 @@ public class BudgetRepository : IBudgetRepository
                 b.IsActive,
                 b.StartDate,
                 b.EndDate,
-                b.CategoryId
+                b.CategoryId,
+                CategoryName = b.Category != null
+                    ? b.Category.Name
+                    : null
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -258,23 +261,6 @@ public class BudgetRepository : IBudgetRepository
             .Take(take)
             .ToListAsync(cancellationToken);
         
-        // To fix bug: expense creation under a budget with later deleted category, 
-        // we need to query the deleted category deliberately for this read-only historical context.
-        var category = budget.CategoryId.HasValue
-            ? await _dbContext.Categories
-                .IgnoreQueryFilters()
-                .Where(c => c.Id == budget.CategoryId.Value)
-                .Select(c => new
-                {
-                    c.Id,
-                    c.Name,
-                    c.IsDeleted
-                })
-                .FirstOrDefaultAsync(cancellationToken)
-            : null;
-        
-        Guid? effectiveCategoryId = category?.IsDeleted == false? category.Id : null;
-        string? effectiveCategoryName = category?.IsDeleted == false? category.Name: null;
 
         // Build and return domain model
         return new BudgetDetailWithExpensesSummary
@@ -288,9 +274,9 @@ public class BudgetRepository : IBudgetRepository
             StartDate = budget.StartDate,
             EndDate = budget.EndDate,
 
-            CategoryId = effectiveCategoryId,
+            CategoryId = budget.CategoryId,
 
-            CategoryName = effectiveCategoryName,
+            CategoryName = budget.CategoryName,
             
             Expenses = expenses,
             TotalCount = totalCount
@@ -465,6 +451,16 @@ public class BudgetRepository : IBudgetRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+
+    // bulk update the budget's category to null if the category is deleted
+    public async Task ClearCategoryReferencesAsync(Guid categoryId, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.Budgets
+            .Where(b => b.CategoryId == categoryId)
+            .ExecuteUpdateAsync( setters => 
+                setters.SetProperty( b => b.CategoryId, (Guid?)null), cancellationToken);
     }
 
 }

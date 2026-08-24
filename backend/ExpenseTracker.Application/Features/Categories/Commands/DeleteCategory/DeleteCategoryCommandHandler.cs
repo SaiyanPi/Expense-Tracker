@@ -12,6 +12,8 @@ namespace ExpenseTracker.Application.Features.Categories.Commands.DeleteCategory
 public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryCommand, Unit>
 {
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IExpenseRepository _expenseRepository;
+    private readonly IBudgetRepository _budgetRepository;
     private readonly IUserAccessor _userAccessor;
     private readonly IUserRoleService _userRoleService;
     private readonly ILogger<DeleteCategoryCommandHandler> _logger;
@@ -19,12 +21,16 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
 
     public DeleteCategoryCommandHandler(
         ICategoryRepository categoryRepository,
+        IExpenseRepository expenseRepository,
+        IBudgetRepository budgetRepository,
         IUserAccessor userAccessor,
         IUserRoleService userRoleService,
         ICacheVersionService cacheVersionService,
         ILogger<DeleteCategoryCommandHandler> logger)
     {
         _categoryRepository = categoryRepository;
+        _expenseRepository = expenseRepository;
+        _budgetRepository = budgetRepository;
         _userAccessor = userAccessor;
         _userRoleService = userRoleService;
         _cacheVersionService = cacheVersionService;
@@ -62,6 +68,26 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
             if (category.UserId != userId)
                 throw new ForbiddenException($"You don't have access to delete category with id '{request.Id}'.");
         }
+
+         // Clear all expense references to this category.
+        //
+        // We do this before soft-deleting the category so that after deletion:
+        //
+        // Expense.CategoryId   = null
+        // Expense.CategoryName = null
+        //
+        // For a system category, this must affect expenses belonging
+        // to all users that reference the category.
+        await _expenseRepository.ClearCategoryReferencesAsync(
+            category.Id,
+            cancellationToken);
+
+        // Clear all budget references to this category as well.
+        await _budgetRepository.ClearCategoryReferencesAsync(
+            category.Id,
+            cancellationToken);
+
+
 
         await _categoryRepository.DeleteAsync(category, cancellationToken);
 

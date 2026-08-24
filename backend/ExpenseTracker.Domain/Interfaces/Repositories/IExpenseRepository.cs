@@ -92,6 +92,10 @@ public interface IExpenseRepository
     Task<bool> ExistsByTitleAsync(string title, CancellationToken cancellationToken = default);
     Task<bool> UserOwnsExpenseAsync(Guid expenseId, string userId, CancellationToken cancellationToken = default);
     Task<decimal> GetTotalExpensesUnderABudgetAsync(Guid budgetId, string userId, CancellationToken cancellationToken = default);
+
+
+    // remove the category reference and set to null once the expense's category get's deleted
+    Task ClearCategoryReferencesAsync(Guid categoryId, CancellationToken cancellationToken = default);
 }
 
 
