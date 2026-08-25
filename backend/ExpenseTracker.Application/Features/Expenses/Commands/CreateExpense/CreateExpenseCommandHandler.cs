@@ -158,7 +158,7 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
                 );
 
                 // ⚠️⚠️
-                // Also, one unrelated issue worth flagging: your budget-threshold calculation happens before the new expense is 
+                // Also, one issue worth flagging: budget-threshold calculation happens before the new expense is 
                 // added, so percentageUsed represents spending before this expense. If the intention is "notify when this new 
                 // expense causes the budget to cross 50%", your calculation needs to include dto.Amount. That's separate from 
                 // today's category bug, but it's a genuine logic issue.
@@ -181,6 +181,7 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
         // Invalidate the cache once a new expense is created for the user, so that the next
         // query will fetch fresh data
         _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
 
         // hook the business metric
         ExpenseMetrics.ExpenseCreated();
