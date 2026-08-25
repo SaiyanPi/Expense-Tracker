@@ -53,7 +53,7 @@ public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, U
 
         // check if the budget is active and has expense(s)
         if(budget.IsActive == true && budget.Expenses.Any())
-            throw new BadRequestException("Active budgets with existing expenses cannot be deleted.");
+            throw new BadRequestException("This budget has expenses, cannot delete it.");
 
         await _budgetRepository.DeleteAsync(budget, cancellationToken);
 
