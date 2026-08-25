@@ -94,6 +94,8 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
         // Invalidate the cache once a new category is deleted for the user, so that the deleted
         // query will fetch fresh data
         _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
 
         // hook the business metric
         CategoryMetrics.CategoryDeleted();

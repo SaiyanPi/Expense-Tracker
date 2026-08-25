@@ -60,6 +60,8 @@ public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, U
         // Invalidate the cache once a new budget is deleted for the user, so that the deleted
         // query will fetch fresh data
         _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+
 
         // hook the business metric
         BudgetMetrics.BudgetDeleted();
