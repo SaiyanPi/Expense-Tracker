@@ -8,5 +8,6 @@ public class ExportExpensesRequestV1
     public decimal? minAmount {get; set;}
     public decimal? maxAmount {get; set;}
     public Guid? categoryId {get; set;}
+    public Guid? budgetId {get; set;}
     public string? userId {get; set;}
 }

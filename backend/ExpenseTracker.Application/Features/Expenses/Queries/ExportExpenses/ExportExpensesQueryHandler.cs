@@ -80,6 +80,9 @@ public class ExportExpensesQueryHandler : IRequestHandler<ExportExpensesQuery, E
 
         if (filter.CategoryId.HasValue)
             query = query.Where(e => e.CategoryId == filter.CategoryId.Value);
+        
+        if (filter.BudgetId.HasValue)
+            query = query.Where(e => e.BudgetId == filter.BudgetId.Value);
 
         if (!string.IsNullOrEmpty(effectiveUserId))
             query = query.Where(e => e.UserId == effectiveUserId);

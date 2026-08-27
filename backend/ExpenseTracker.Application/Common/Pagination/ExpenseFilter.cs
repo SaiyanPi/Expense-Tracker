@@ -6,5 +6,6 @@ public record ExpenseFilter(
     decimal? MinAmount =null, 
     decimal? MaxAmount = null,
     Guid? CategoryId = null,
+    Guid? BudgetId = null,
     string? UserId = null
 );

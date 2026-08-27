@@ -255,7 +255,7 @@ public class ExpensesController : ControllerBase
         return Ok(response);
     }
 
-    // GET: api/v1/expenses/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&userId=
+    // GET: api/v1/expenses/filter?startDate=&endDate=&minAmount=&maxAmount=&categoryId=&budgetId=&userId=
     [Authorize(Policy = "Expense.Filter")]
     [HttpGet("filter")]
     public async Task<IActionResult> FilterExpenses(
@@ -271,6 +271,7 @@ public class ExpensesController : ControllerBase
                 filterRequest.minAmount,
                 filterRequest.maxAmount,
                 filterRequest.categoryId,
+                filterRequest.budgetId,
                 filterRequest.userId),
             new PagedQuery(
                 pagedRequest.page,
@@ -368,6 +369,7 @@ public class ExpensesController : ControllerBase
                 request.minAmount,
                 request.maxAmount,
                 request.categoryId,
+                request.budgetId,
                 request.userId));
         var exportResult = await _mediator.Send(query, cancellationToken);
 
