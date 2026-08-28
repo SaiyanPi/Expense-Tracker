@@ -75,14 +75,17 @@ public class ExpensesController : ControllerBase
     [Authorize(Policy = ExpensePermission.View)]
     [HttpGet("my")]
     public async Task<IActionResult> GetExpensesByEmail(
-        [FromQuery] PagedResultRequestV1 pagedRequest,
+        [FromQuery] SearchPagedResultRequestV1 searchPagedResultRequest,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllExpensesByEmailQuery(new PagedQuery(
-            pagedRequest.page,
-            pagedRequest.pageSize,
-            pagedRequest.sortBy,
-            pagedRequest.sortDesc));
+        var query = new GetAllExpensesByEmailQuery(
+            new SearchPagedQuery(
+                searchPagedResultRequest.search,
+                searchPagedResultRequest.page,
+                searchPagedResultRequest.pageSize,
+                searchPagedResultRequest.sortBy,
+                searchPagedResultRequest.sortDesc));
+                
         var expensesByEmail = await _mediator.Send(query, cancellationToken);
 
         var response = new PagedResultResponseV1<ExpenseResponseV1>
@@ -260,7 +263,7 @@ public class ExpensesController : ControllerBase
     [HttpGet("filter")]
     public async Task<IActionResult> FilterExpenses(
         [FromQuery] ExpenseFilterRequestV1 filterRequest,
-        [FromQuery] PagedResultRequestV1 pagedRequest,
+        [FromQuery] SearchPagedResultRequestV1 searchPagedRequest,
 
         CancellationToken cancellationToken = default)
     {
@@ -273,11 +276,12 @@ public class ExpensesController : ControllerBase
                 filterRequest.categoryId,
                 filterRequest.budgetId,
                 filterRequest.userId),
-            new PagedQuery(
-                pagedRequest.page,
-                pagedRequest.pageSize,
-                pagedRequest.sortBy,
-                pagedRequest.sortDesc));
+            new SearchPagedQuery(
+                searchPagedRequest.search,
+                searchPagedRequest.page,
+                searchPagedRequest.pageSize,
+                searchPagedRequest.sortBy,
+                searchPagedRequest.sortDesc));
 
         var result = await _mediator.Send(query, cancellationToken);
         // return Ok(result);

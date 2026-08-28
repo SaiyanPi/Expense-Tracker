@@ -70,14 +70,17 @@ public class BudgetsController : ControllerBase
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("my")]
     public async Task<IActionResult> GetAllBudgetsByEmail(
-        [FromQuery] PagedResultRequestV1 pagedResultRequest,
+        [FromQuery] SearchPagedResultRequestV1 searchPagedResultRequest,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllBudgetsByEmailQuery(new PagedQuery(
-            pagedResultRequest.page,
-            pagedResultRequest.pageSize,
-            pagedResultRequest.sortBy,
-            pagedResultRequest.sortDesc));
+        var query = new GetAllBudgetsByEmailQuery(
+            new SearchPagedQuery(
+                searchPagedResultRequest.search,
+                searchPagedResultRequest.page,
+                searchPagedResultRequest.pageSize,
+                searchPagedResultRequest.sortBy,
+                searchPagedResultRequest.sortDesc));
+                
         var budgets = await _mediator.Send(query, cancellationToken);
 
         var response = new PagedResultResponseV1<BudgetResponseV1>
@@ -98,14 +101,17 @@ public class BudgetsController : ControllerBase
     [Authorize(Policy = BudgetPermission.View)]
     [HttpGet("active")]
     public async Task<IActionResult> GetAllActiveBudgetsByEmail(
-        [FromQuery] PagedResultRequestV1 pagedResultRequest,
+        [FromQuery] SearchPagedResultRequestV1 searchPagedResultRequest,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllActiveBudgetsByEmailQuery(new PagedQuery(
-            pagedResultRequest.page,
-            pagedResultRequest.pageSize,
-            pagedResultRequest.sortBy,
-            pagedResultRequest.sortDesc));
+        var query = new GetAllActiveBudgetsByEmailQuery(
+            new SearchPagedQuery(
+                searchPagedResultRequest.search,
+                searchPagedResultRequest.page,
+                searchPagedResultRequest.pageSize,
+                searchPagedResultRequest.sortBy,
+                searchPagedResultRequest.sortDesc));
+                
         var budgets = await _mediator.Send(query, cancellationToken);
 
         var response = new PagedResultResponseV1<BudgetResponseV1>

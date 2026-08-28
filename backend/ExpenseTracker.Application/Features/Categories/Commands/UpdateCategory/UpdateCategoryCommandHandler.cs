@@ -79,6 +79,9 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
         // Invalidate the cache once a new category is updated for the user, so that the updated
         // query will fetch fresh data
         _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
+        
         return Unit.Value;
     }
 }

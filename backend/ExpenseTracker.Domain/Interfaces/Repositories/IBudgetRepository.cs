@@ -19,6 +19,7 @@ public interface IBudgetRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default);
     
     Task<(IEnumerable<BudgetSummary> Budgets, int totalCount)> GetAllActiveBudgetsByEmailAsync(
@@ -27,6 +28,7 @@ public interface IBudgetRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default);
 
 

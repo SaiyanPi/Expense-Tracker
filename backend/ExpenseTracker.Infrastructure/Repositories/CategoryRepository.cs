@@ -45,18 +45,31 @@ public class CategoryRepository : ICategoryRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Categories
             .Where(c => c.UserId == userId)
             .AsNoTracking()
             .AsQueryable();
+        
+        // Search
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
 
+            query = query.Where(c =>
+                c.Name.Contains(search));
+        }
+
+        // Total count after search
         var totalCount = await query
             .CountAsync(cancellationToken);
         
+        // Sorting
         query = query.ApplySorting(sortBy, sortDesc);
 
+        // Pagination
         var categories = await query
             .Skip(skip)
             .Take(take)

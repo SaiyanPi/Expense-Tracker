@@ -59,7 +59,7 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
         // Check cache first
         var now = DateTime.UtcNow;
         var cacheKey = CacheKeys.Expense(userId, version, now.Year, now.Month, query.EffectivePage,
-            query.EffectivePageSize, query.SortBy, query.SortDesc);
+            query.EffectivePageSize, query.SortBy, query.SortDesc, query.Search);
 
         if (_cache.TryGetValue(cacheKey, out PagedResult<ExpenseDto>? cachedResult)
             && cachedResult != null)
@@ -79,6 +79,7 @@ public class GetAllExpensesByEmailQueryHandler : IRequestHandler<GetAllExpensesB
             take: query.EffectivePageSize,
             sortBy: query.SortBy,
             sortDesc: query.SortDesc,
+            search: query.Search,
             cancellationToken: cancellationToken);
         
         var mappedExpenses = _mapper.Map<IReadOnlyList<ExpenseDto>>(expenses);

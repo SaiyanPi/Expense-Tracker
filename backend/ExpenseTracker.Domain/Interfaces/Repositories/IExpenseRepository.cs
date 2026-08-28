@@ -18,6 +18,7 @@ public interface IExpenseRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default);
     
     Task<(IReadOnlyList<ExpenseSummaryForBudget> Expenses, int TotalCount)> GetAllExpensesForABudgetByEmailAsync(

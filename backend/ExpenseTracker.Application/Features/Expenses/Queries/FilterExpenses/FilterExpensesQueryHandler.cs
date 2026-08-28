@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
 
-public class FilterExpenseQueryHandler : IRequestHandler<FilterExpensesQuery, FilteredExpensesResultDto>
+public class FilterExpensesQueryHandler : IRequestHandler<FilterExpensesQuery, FilteredExpensesResultDto>
 {
     private readonly IExpenseRepository _expenseRepository;
     private readonly ICategoryRepository _categoryRepository;
@@ -19,7 +19,7 @@ public class FilterExpenseQueryHandler : IRequestHandler<FilterExpensesQuery, Fi
     private readonly IUserRoleService _userRoleService;
     private readonly IMapper _mapper;
 
-    public FilterExpenseQueryHandler(
+    public FilterExpensesQueryHandler(
         IExpenseRepository expenseRepository,
         ICategoryRepository categoryRepository,
         IUserRepository userRepository,
@@ -64,6 +64,16 @@ public class FilterExpenseQueryHandler : IRequestHandler<FilterExpensesQuery, Fi
         var page = request.Paging;
 
         IQueryable<Expense> query = _expenseRepository.GetExpensesQueryable();
+
+
+        if (!string.IsNullOrWhiteSpace(page.Search))
+        {
+            var search = page.Search.Trim();
+
+            query = query.Where(e =>
+                e.Title.Contains(search) ||
+                (e.Description != null && e.Description.Contains(search)));
+        }
 
         if (filter.StartDate.HasValue)
             query = query.Where(e => e.Date >= filter.StartDate.Value);

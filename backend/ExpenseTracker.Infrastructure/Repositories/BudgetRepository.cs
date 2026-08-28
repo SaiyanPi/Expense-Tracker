@@ -50,6 +50,7 @@ public class BudgetRepository : IBudgetRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Budgets
@@ -93,6 +94,14 @@ public class BudgetRepository : IBudgetRepository
                 CreatedAt = x.Budget.CreatedAt,
                 UpdatedAt = x.Budget.UpdatedAt
             });
+        
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+
+            query = query.Where(c =>
+                c.Name.Contains(search));
+        }
 
         var totalCount = await query
             .CountAsync(cancellationToken);
@@ -114,6 +123,7 @@ public class BudgetRepository : IBudgetRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var today = DateTime.Now.Date;
@@ -162,6 +172,14 @@ public class BudgetRepository : IBudgetRepository
                 CreatedAt = x.Budget.CreatedAt,
                 UpdatedAt = x.Budget.UpdatedAt
             });
+        
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+
+            query = query.Where(b =>
+                b.Name.Contains(search));
+        }
 
         var totalCount = await query
             .CountAsync(cancellationToken);

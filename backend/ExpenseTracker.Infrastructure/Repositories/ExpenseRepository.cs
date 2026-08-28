@@ -57,6 +57,7 @@ public class ExpenseRepository : IExpenseRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Expenses
@@ -64,6 +65,14 @@ public class ExpenseRepository : IExpenseRepository
             .AsNoTracking()
             .AsQueryable();
         
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+
+            query = query.Where(e =>
+                e.Title.Contains(search) || e.Description.Contains(search));
+        }
+
         var totalCount = await query
             .CountAsync(cancellationToken);
 

@@ -4,4 +4,4 @@ using MediatR;
 
 namespace ExpenseTracker.Application.Features.Expenses.Queries.GetAllExpensesByEmail;
 
-public record GetAllExpensesByEmailQuery(PagedQuery Paging) : IRequest<PagedResult<ExpenseDto>>;
+public record GetAllExpensesByEmailQuery(SearchPagedQuery Paging) : IRequest<PagedResult<ExpenseDto>>;

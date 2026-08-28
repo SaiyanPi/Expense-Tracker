@@ -17,6 +17,7 @@ public interface ICategoryRepository
         int take,
         string? sortBy = null,
         bool sortDesc = false,
+        string? search = null,
         CancellationToken cancellationToken = default);
         
     Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

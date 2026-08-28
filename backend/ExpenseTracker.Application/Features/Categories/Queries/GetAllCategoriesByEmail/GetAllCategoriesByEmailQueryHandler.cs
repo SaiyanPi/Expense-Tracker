@@ -67,7 +67,7 @@ public class GetAllCategoriesByEmailQueryHandler : IRequestHandler<GetAllCategor
         // Check cache first
         var now = DateTime.UtcNow;
         var cacheKey = CacheKeys.Category(userId, version, now.Year, now.Month, query.EffectivePage,
-            query.EffectivePageSize, query.SortBy, query.SortDesc);
+            query.EffectivePageSize, query.SortBy, query.SortDesc, query.Search);
 
         if (_cache.TryGetValue(cacheKey, out PagedResult<CategoryDto>? cachedResult)
             && cachedResult != null)
@@ -87,6 +87,7 @@ public class GetAllCategoriesByEmailQueryHandler : IRequestHandler<GetAllCategor
             take: query.EffectivePageSize,
             sortBy: query.SortBy,
             sortDesc: query.SortDesc,
+            search: query.Search,
             cancellationToken: cancellationToken);
         
         var mappedCategories = _mapper.Map<IReadOnlyList<CategoryDto>>(categories);

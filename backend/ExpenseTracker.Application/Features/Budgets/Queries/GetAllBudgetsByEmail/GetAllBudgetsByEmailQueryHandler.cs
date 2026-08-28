@@ -59,7 +59,7 @@ public class GetAllBudgetsByEmailQueryHandler : IRequestHandler<GetAllBudgetsByE
         // Check cache first
         var now = DateTime.UtcNow;
         var cacheKey = CacheKeys.Budget(userId, version, now.Year, now.Month, query.EffectivePage,
-            query.EffectivePageSize, query.SortBy, query.SortDesc);
+            query.EffectivePageSize, query.SortBy, query.SortDesc, query.Search);
 
         if (_cache.TryGetValue(cacheKey, out PagedResult<BudgetDto>? cachedResult)
             && cachedResult != null)
@@ -79,6 +79,7 @@ public class GetAllBudgetsByEmailQueryHandler : IRequestHandler<GetAllBudgetsByE
             take: query.EffectivePageSize,
             sortBy: query.SortBy,
             sortDesc: query.SortDesc,
+            search: query.Search,
             cancellationToken: cancellationToken);
         
         var mappedBudgets = _mapper.Map<IReadOnlyList<BudgetDto>>(budgets);

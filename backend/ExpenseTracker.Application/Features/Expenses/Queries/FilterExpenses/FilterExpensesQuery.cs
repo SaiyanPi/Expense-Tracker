@@ -15,4 +15,7 @@ namespace ExpenseTracker.Application.Features.Expenses.Queries.FilterExpenses;
 //     PagedQuery Paging
 // ) : IRequest<FilteredExpensesResultDto>;
 
-public record FilterExpensesQuery(ExpenseFilter Filter, PagedQuery Paging) : IRequest<FilteredExpensesResultDto>;
+// public record FilterExpensesQuery(ExpenseFilter Filter, PagedQuery Paging) : IRequest<FilteredExpensesResultDto>;
+
+public record FilterExpensesQuery(ExpenseFilter Filter, SearchPagedQuery Paging) 
+    : IRequest<FilteredExpensesResultDto>;

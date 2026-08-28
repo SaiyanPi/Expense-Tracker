@@ -16,8 +16,9 @@ public static class CacheKeys
         int page,
         int pageSize,
         string? sortBy,
-        bool sortDesc)
-        => $"expense:{userId}:{version}:{year}:{month}:page:{page}:pageSize:{pageSize}:sortBy:{sortBy}:sortDesc:{sortDesc}";
+        bool sortDesc,
+        string? search)
+        => $"expense:{userId}:{version}:{year}:{month}:page:{page}:pageSize:{pageSize}:sortBy:{sortBy}:sortDesc:{sortDesc}:search:{search}";
 
     public static string Category(
         string userId,
@@ -27,8 +28,9 @@ public static class CacheKeys
         int page,
         int pageSize,
         string? sortBy,
-        bool sortDesc)
-        => $"category:{userId}:{version}:{year}:{month}:page:{page}:pageSize:{pageSize}:sortBy:{sortBy}:sortDesc:{sortDesc}";
+        bool sortDesc,
+        string? search)
+        => $"category:{userId}:{version}:{year}:{month}:page:{page}:pageSize:{pageSize}:sortBy:{sortBy}:sortDesc:{sortDesc}:search:{search}";
 
     public static string Budget(
         string userId,
@@ -38,8 +40,27 @@ public static class CacheKeys
         int page,
         int pageSize,
         string? sortBy,
-        bool sortDesc)
-        => $"budget:{userId}:{version}:{year}:{month}:page={page}:pageSize={pageSize}:sortBy={sortBy}:sortDesc={sortDesc}";
+        bool sortDesc,
+        string? search)
+        => $"budget:{userId}:{version}:{year}:{month}:page:{page}:pageSize:{pageSize}:sortBy:{sortBy}:sortDesc:{sortDesc}:search:{search}";
+    
+    // public static string FilteredExpenses(
+    //     string userId,
+    //     int version,
+    //     int year,
+    //     int month,
+    //     int page,
+    //     int pageSize,
+    //     string? sortBy,
+    //     bool sortDesc,
+    //     string? search,
+    //     Guid? categoryId,
+    //     Guid? budgetId,
+    //     DateTime? startDate,
+    //     DateTime? endDate,
+    //     decimal? minAmount,
+    //     decimal? maxAmount)
+    //     => $"expense:filtered:{userId}:{version}:{year}:{month}:page:{page}:pageSize:{pageSize}:sortBy:{sortBy}:sortDesc:{sortDesc}:search:{search}:categoryId:{categoryId}:budgetId:{budgetId}:startDate:{startDate}:endDate:{endDate}:minAmount:{minAmount}:maxAmount:{maxAmount}";
     
 
     public static string CacheVersion(string cacheGroup, string userId)

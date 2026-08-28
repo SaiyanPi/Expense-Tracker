@@ -66,14 +66,17 @@ public class CategoriesController : ControllerBase
     [Authorize(Policy = CategoryPermission.View)]
     [HttpGet("my")]
     public async Task<IActionResult> GetAllByEmail(
-        [FromQuery] PagedResultRequestV1 pagedResultRequest,    
+        [FromQuery] SearchPagedResultRequestV1 searchPagedResultRequest,    
         CancellationToken cancellationToken = default)
     {
-        var query = new GetAllCategoriesByEmailQuery( new PagedQuery(
-            pagedResultRequest.page,
-            pagedResultRequest.pageSize,
-            pagedResultRequest.sortBy,
-            pagedResultRequest.sortDesc));
+        var query = new GetAllCategoriesByEmailQuery( 
+            new SearchPagedQuery(
+                searchPagedResultRequest.search,
+                searchPagedResultRequest.page,
+                searchPagedResultRequest.pageSize,
+                searchPagedResultRequest.sortBy,
+                searchPagedResultRequest.sortDesc));
+                
         var categories = await _mediator.Send(query, cancellationToken);
         
         var response = new PagedResultResponseV1<CategoryResponseV1>
