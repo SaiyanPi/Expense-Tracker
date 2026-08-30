@@ -6,31 +6,31 @@ namespace ExpenseTracker.Domain.Interfaces.Repositories;
 public interface IDashboardRepository
 
 {
-    Task<decimal> GetTotalExpensesForMonthAsync(
+    Task<decimal> GetTotalExpensesAsync(
         string userId,
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
 
-    Task<decimal> GetTotalBudgetForMonthAsync(
+    Task<decimal> GetTotalBudgetAsync(
         string userId,
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<DashboardCategoryExpenseSummary>> GetExpensesByCategoryForMonthAsync(
+    Task<IReadOnlyList<DashboardCategoryExpenseSummary>> GetExpensesByCategoryAsync(
         string userId,
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyList<DashboardDailyExpenseSummary>> GetDailyExpensesForMonthAsync(
+    Task<IReadOnlyList<DashboardDailyExpenseSummary>> GetDailyExpensesAsync(
         string userId,
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Expense>> GetRecentExpensesForMonthAsync(
+    Task<IReadOnlyList<Expense>> GetRecentExpensesAsync(
         string userId,
         DateTime startDate,
         DateTime endDate,

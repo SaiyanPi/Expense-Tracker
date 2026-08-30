@@ -59,6 +59,8 @@ public class DeleteExpenseCommandHandler : IRequestHandler<DeleteExpenseCommand,
         // Invalidate the cache once a new expense is deleted for the user, so that the deleted
         // query will fetch fresh data
         _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Dashboard, userId);
 
         // hook the business metric
         ExpenseMetrics.ExpenseDeleted();

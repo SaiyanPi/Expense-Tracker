@@ -11,54 +11,58 @@ using Microsoft.Extensions.Logging;
 
 namespace ExpenseTracker.Application.Features.Dashboard.Query;
 
-public class GetMonthlyDashboardQueryHandler : IRequestHandler<GetMonthlyDashboardQuery, DashboardSummaryDto>
+public class GetDashboardQueryHandler : IRequestHandler<GetDashboardQuery, DashboardSummaryDto>
 {
     private readonly IDashboardRepository _dashboardRepository;
     private readonly IUserAccessor _userAccessor;
     private readonly IMapper _mapper;
     private readonly IMemoryCache _cache;
-    private readonly ILogger<GetMonthlyDashboardQueryHandler> _logger;
+    private readonly ICacheVersionService _cacheVersionService;
+    private readonly ILogger<GetDashboardQueryHandler> _logger;
 
-    public GetMonthlyDashboardQueryHandler(
+    public GetDashboardQueryHandler(
         IDashboardRepository dashboardRepository,
         IUserAccessor userAccessor,
         IMapper mapper,
         IMemoryCache cache,
-        ILogger<GetMonthlyDashboardQueryHandler> logger)
+        ICacheVersionService cacheVersionService,
+        ILogger<GetDashboardQueryHandler> logger)
     {
         _dashboardRepository = dashboardRepository;
         _userAccessor = userAccessor;
         _mapper = mapper;
         _cache = cache;
+        _cacheVersionService = cacheVersionService;
         _logger = logger;
     }
 
     public async Task<DashboardSummaryDto> Handle(
-        GetMonthlyDashboardQuery request,
+        GetDashboardQuery request,
         CancellationToken cancellationToken)
     {
         var userId = _userAccessor.UserId;
         var now = DateTime.UtcNow;
-        var startDate = new DateTime(now.Year, now.Month, 1);
-        var endDate = startDate.AddMonths(1).AddDays(-1); // get the last date of the month 2025-12-31
-        // var endDate = startDate.AddMonths(1);    // get the start pf the next month 2026-01-01
+        var startDate = request.StartDate.Date;
+        var endDate = request.EndDate.Date.AddDays(1); 
+
+        var version = _cacheVersionService.GetVersion(CacheGroups.Dashboard, userId);
 
         // Check cache first
-        var cacheKey = CacheKeys.Dashboard(userId, now.Year, now.Month);
-        if (_cache.TryGetValue(cacheKey, out DashboardSummaryDto? cachedDashboard) && cachedDashboard != null)
+        var cacheKey = CacheKeys.Dashboard(userId,version, request.StartDate, request.EndDate);
+        if (_cache.TryGetValue(cacheKey, out DashboardSummaryDto? cachedResult) && cachedResult != null)
         {
             _logger.LogInformation("Dashboard from In-memory cache");
             CacheMetrics.RecordHit();   // record cache hit metric
-            return cachedDashboard;
+            return cachedResult;
         }
 
         CacheMetrics.RecordMiss();  // record cache miss metric
 
-        var totalExpenses = await _dashboardRepository.GetTotalExpensesForMonthAsync(userId, startDate, endDate, cancellationToken);
-        var totalBudgets = await _dashboardRepository.GetTotalBudgetForMonthAsync(userId, startDate, endDate, cancellationToken);
-        var expensesByCategory = await _dashboardRepository.GetExpensesByCategoryForMonthAsync(userId, startDate, endDate, cancellationToken);
-        var dailyExpenses = await _dashboardRepository.GetDailyExpensesForMonthAsync(userId, startDate, endDate, cancellationToken);
-        var recentExpenses = await _dashboardRepository.GetRecentExpensesForMonthAsync(userId, startDate, endDate, 5, cancellationToken);
+        var totalExpenses = await _dashboardRepository.GetTotalExpensesAsync(userId, startDate, endDate, cancellationToken);
+        var totalBudgets = await _dashboardRepository.GetTotalBudgetAsync(userId, startDate, endDate, cancellationToken);
+        var expensesByCategory = await _dashboardRepository.GetExpensesByCategoryAsync(userId, startDate, endDate, cancellationToken);
+        var dailyExpenses = await _dashboardRepository.GetDailyExpensesAsync(userId, startDate, endDate, cancellationToken);
+        var recentExpenses = await _dashboardRepository.GetRecentExpensesAsync(userId, startDate, endDate, 5, cancellationToken);
 
         var mappedDashboardCategoryExpenseSummary = _mapper.Map<List<CategoryExpenseDto>>(expensesByCategory);
         var mappedDashboardDailyExpenseSummary = _mapper.Map<List<DailyExpenseDto>>(dailyExpenses);
@@ -87,6 +91,7 @@ public class GetMonthlyDashboardQueryHandler : IRequestHandler<GetMonthlyDashboa
         _cache.Set(cacheKey, dashboard, cacheEntryOption);
 
         _logger.LogInformation("Dashboard from database");
+
         return dashboard;
     }
 }

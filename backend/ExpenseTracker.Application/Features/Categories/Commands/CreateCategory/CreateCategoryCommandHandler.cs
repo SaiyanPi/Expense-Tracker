@@ -112,8 +112,12 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
             //     _cache.Set(versionKey, version + 1);
             // }
         
-        //_categoryCacheVersionService.IncrementVersion(userIdToUse);
-        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userIdToUse);
+        // Invalidate the cache once a new expense is created for the user, so that the next
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Categories, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Dashboard, userId);
 
         // hook the business metric
         CategoryMetrics.CategoryCreated();

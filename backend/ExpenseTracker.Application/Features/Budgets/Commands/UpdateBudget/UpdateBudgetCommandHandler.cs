@@ -40,6 +40,10 @@ public class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCommand, U
         if (budget == null)
             throw new NotFoundException(nameof(Domain.Entities.Budget), request.Id);
 
+        var today = DateTime.Now.Date;
+        if(budget.EndDate < today)
+            throw new ForbiddenException("Budget is expired. You cannot update expired budget.");
+
         if(budget.UserId != userId)
             throw new ForbiddenException("You cannot update this budget.");
 
@@ -67,8 +71,9 @@ public class UpdateBudgetCommandHandler : IRequestHandler<UpdateBudgetCommand, U
 
         // Invalidate the cache once a new budget is updated for the user, so that the updated
         // query will fetch fresh data
-        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);;
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
         _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Dashboard, userId);
 
         return Unit.Value;
     }

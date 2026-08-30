@@ -24,9 +24,11 @@ public class DashboardController : ControllerBase
     // api/dashboard
     [Authorize(Policy = DashboardPermission.View)]
     [HttpGet("dashboard")]
-    public async Task<IActionResult> GetMonthlyDashboard(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetMonthlyDashboard(
+        [FromQuery] DashboardRequestV1 dashboardRequest,
+        CancellationToken cancellationToken = default)
     {
-        var query = new GetMonthlyDashboardQuery();
+        var query = new GetDashboardQuery(dashboardRequest.StartDate, dashboardRequest.EndDate);
         var dashboardSummary = await _mediator.Send(query, cancellationToken);
         // return Ok(dashboardSummary);
         

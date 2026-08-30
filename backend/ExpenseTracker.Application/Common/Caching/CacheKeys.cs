@@ -4,9 +4,10 @@ public static class CacheKeys
 {
     public static string Dashboard(
         string userId,
-        int year,
-        int month)
-        => $"dashboard:{userId}:{year}:{month}";
+        int version,
+        DateTime? startDate,
+        DateTime? endDate)
+        => $"dashboard:{userId}:{version}:{startDate}:{endDate}";
     
     public static string Expense(
         string userId,

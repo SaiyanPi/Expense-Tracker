@@ -225,15 +225,11 @@ public class UpdateExpenseCommandHandler : IRequestHandler<UpdateExpenseCommand,
             expense,
             cancellationToken);
 
-        // Expense changed.
-        _cacheVersionService.IncrementVersion(
-            CacheGroups.Expenses,
-            userId);
-
-        // Budget totals/summary may have changed.
-        _cacheVersionService.IncrementVersion(
-            CacheGroups.Budgets,
-            userId);
+        // Invalidate the cache once a new expense is created for the user, so that the next
+        // query will fetch fresh data
+        _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Dashboard, userId);
 
         return Unit.Value;
     }

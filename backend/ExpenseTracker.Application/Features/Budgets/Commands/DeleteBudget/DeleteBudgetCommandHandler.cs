@@ -63,6 +63,7 @@ public class DeleteBudgetCommandHandler : IRequestHandler<DeleteBudgetCommand, U
         // query will fetch fresh data
         _cacheVersionService.IncrementVersion(CacheGroups.Budgets, userId);
         _cacheVersionService.IncrementVersion(CacheGroups.Expenses, userId);
+        _cacheVersionService.IncrementVersion(CacheGroups.Dashboard, userId);
 
 
         // hook the business metric
