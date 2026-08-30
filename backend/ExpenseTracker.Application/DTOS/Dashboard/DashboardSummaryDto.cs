@@ -7,7 +7,7 @@ public class DashboardSummaryDto
     public decimal TotalBudgets { get; set; }
     public CategoryExpenseDto? TopCategory { get; set; }    // nullable in no expenses case
 
-    public decimal? RemainingBudget { get; set; }   // nullable in no budgets case
+    // public decimal? RemainingBudget { get; set; }   // nullable in no budgets case
 
     public IReadOnlyList<CategoryExpenseDto> ExpenseByCategory { get; set; } = [];
 

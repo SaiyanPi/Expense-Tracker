@@ -43,7 +43,7 @@ public class DashboardController : ControllerBase
                     TotalAmount = dashboardSummary.TopCategory.TotalAmount
                 }
                 : null,
-            RemainingBudget = dashboardSummary.RemainingBudget,
+            // RemainingBudget = dashboardSummary.RemainingBudget,
             ExpenseByCategory = dashboardSummary.ExpenseByCategory
                 .Select(x => new CategoryExpenseResponseV1
                 {

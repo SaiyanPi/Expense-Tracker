@@ -1,5 +1,6 @@
 using AutoMapper;
 using ExpenseTracker.Application.Common.Caching;
+using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
 using ExpenseTracker.Application.Common.Observability.Metrics.Cache;
 using ExpenseTracker.Application.DTOs.Dashboard;
@@ -41,9 +42,25 @@ public class GetDashboardQueryHandler : IRequestHandler<GetDashboardQuery, Dashb
         CancellationToken cancellationToken)
     {
         var userId = _userAccessor.UserId;
-        var now = DateTime.UtcNow;
-        var startDate = request.StartDate.Date;
-        var endDate = request.EndDate.Date.AddDays(1); 
+
+        // Validate the user-provided date range before normalization.
+        var requestedStartDate = request.StartDate?.Date;
+        var requestedEndDate = request.EndDate?.Date;
+
+        if (requestedStartDate.HasValue && requestedEndDate.HasValue &&
+            requestedStartDate.Value > requestedEndDate.Value)
+        {
+            throw new ValidationException("Start date cannot be after end date.");
+        }
+
+         // Default to the current calendar month when dates are not provided.
+        var today = DateTime.UtcNow.Date;
+        var startDate = requestedStartDate ?? new DateTime(today.Year, today.Month, 1);
+        var endDate = requestedEndDate ?? today;
+
+        // The repository uses an exclusive end date:
+        // [startDate, endDateExclusive)
+        var endDateExclusive = endDate.AddDays(1);
 
         var version = _cacheVersionService.GetVersion(CacheGroups.Dashboard, userId);
 
@@ -58,11 +75,11 @@ public class GetDashboardQueryHandler : IRequestHandler<GetDashboardQuery, Dashb
 
         CacheMetrics.RecordMiss();  // record cache miss metric
 
-        var totalExpenses = await _dashboardRepository.GetTotalExpensesAsync(userId, startDate, endDate, cancellationToken);
-        var totalBudgets = await _dashboardRepository.GetTotalBudgetAsync(userId, startDate, endDate, cancellationToken);
-        var expensesByCategory = await _dashboardRepository.GetExpensesByCategoryAsync(userId, startDate, endDate, cancellationToken);
-        var dailyExpenses = await _dashboardRepository.GetDailyExpensesAsync(userId, startDate, endDate, cancellationToken);
-        var recentExpenses = await _dashboardRepository.GetRecentExpensesAsync(userId, startDate, endDate, 5, cancellationToken);
+        var totalExpenses = await _dashboardRepository.GetTotalExpensesAsync(userId, startDate, endDateExclusive, cancellationToken);
+        var totalBudgets = await _dashboardRepository.GetTotalBudgetAsync(userId, startDate, endDateExclusive, cancellationToken);
+        var expensesByCategory = await _dashboardRepository.GetExpensesByCategoryAsync(userId, startDate, endDateExclusive, cancellationToken);
+        var dailyExpenses = await _dashboardRepository.GetDailyExpensesAsync(userId, startDate, endDateExclusive, cancellationToken);
+        var recentExpenses = await _dashboardRepository.GetRecentExpensesAsync(userId, startDate, endDateExclusive, 6, cancellationToken);
 
         var mappedDashboardCategoryExpenseSummary = _mapper.Map<List<CategoryExpenseDto>>(expensesByCategory);
         var mappedDashboardDailyExpenseSummary = _mapper.Map<List<DailyExpenseDto>>(dailyExpenses);
@@ -77,7 +94,7 @@ public class GetDashboardQueryHandler : IRequestHandler<GetDashboardQuery, Dashb
         {
             TotalExpenses = totalExpenses,
             TotalBudgets = totalBudgets,
-            RemainingBudget = totalBudgets > 0 ? totalBudgets - totalExpenses : null,
+            // RemainingBudget = totalBudgets > 0 ? totalBudgets - totalExpenses : null,
             TopCategory = topCategory,
             ExpenseByCategory = mappedDashboardCategoryExpenseSummary,
             DailyExpenses = mappedDashboardDailyExpenseSummary,

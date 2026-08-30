@@ -16,34 +16,34 @@ public class DashBoardRepository : IDashboardRepository
     public async Task<decimal> GetTotalExpensesAsync(
         string userId,
         DateTime startDate,
-        DateTime endDate,
+        DateTime endDateExclusive,
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Expenses
-            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDate)
+            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDateExclusive)
             .SumAsync(e => e.Amount, cancellationToken);
     }
 
     public async Task<decimal> GetTotalBudgetAsync(
         string userId,
         DateTime startDate,
-        DateTime endDate,
+        DateTime endDateExclusive,
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Budgets
             // .Where(b => b.UserId == userId && b.StartDate >= startDate && b.EndDate <= endDate)  // Budget is entirely contained within the specified range.
-            .Where(b => b.UserId == userId && b.StartDate <= endDate && b.EndDate >= startDate) // Any budget that touches the range, even partially, will be included.
+            .Where(b => b.UserId == userId && b.StartDate < endDateExclusive && b.EndDate >= startDate) // Any budget that touches the range, even partially, will be included.
             .SumAsync(b => b.Amount, cancellationToken);
     }
 
     public async Task<IReadOnlyList<DashboardCategoryExpenseSummary>> GetExpensesByCategoryAsync(
         string userId,
         DateTime startDate,
-        DateTime endDate,
+        DateTime endDateExclusive,
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Expenses
-            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDate)
+            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDateExclusive)
             .GroupBy(e => e.Category)
             .Select(g => new DashboardCategoryExpenseSummary
             {
@@ -56,11 +56,11 @@ public class DashBoardRepository : IDashboardRepository
     public async Task<IReadOnlyList<DashboardDailyExpenseSummary>> GetDailyExpensesAsync(
         string userId,
         DateTime startDate,
-        DateTime endDate,
+        DateTime endDateExclusive,
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Expenses
-            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDate)
+            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDateExclusive)
             .GroupBy(e => DateOnly.FromDateTime(e.Date))
             .Select(g => new DashboardDailyExpenseSummary
             {
@@ -73,12 +73,12 @@ public class DashBoardRepository : IDashboardRepository
     public async Task<IReadOnlyList<Expense>> GetRecentExpensesAsync(
         string userId,
         DateTime startDate,
-        DateTime endDate,
+        DateTime endDateExclusive,
         int take,
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Expenses
-            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDate)
+            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDateExclusive)
             .OrderByDescending(e => e.Date)
             .Take(take)
             .ToListAsync(cancellationToken);

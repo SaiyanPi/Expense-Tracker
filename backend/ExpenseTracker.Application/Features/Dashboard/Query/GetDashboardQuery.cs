@@ -4,6 +4,6 @@ using MediatR;
 namespace ExpenseTracker.Application.Features.Dashboard.Query;
 
 public record GetDashboardQuery(
-    DateTime StartDate,
-    DateTime EndDate
+    DateTime? StartDate,
+    DateTime? EndDate
 ) : IRequest<DashboardSummaryDto>;
