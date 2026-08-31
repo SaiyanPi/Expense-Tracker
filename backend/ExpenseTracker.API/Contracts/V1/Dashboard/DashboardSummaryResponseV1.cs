@@ -11,7 +11,7 @@ public class DashboardSummaryResponseV1
     // public decimal? RemainingBudget { get; set; }   // nullable in no budgets case
 
     public IReadOnlyList<CategoryExpenseResponseV1> ExpenseByCategory { get; set; } = [];
+    public IReadOnlyList<BudgetUtilizationResponseV1> BudgetUtilization { get; set; } = [];
     public IReadOnlyList<DailyExpenseResponseV1> DailyExpenses { get; set; } = [];
-
     public IReadOnlyList<RecentExpenseResponseV1> RecentExpenses { get; set; } = [];
 }

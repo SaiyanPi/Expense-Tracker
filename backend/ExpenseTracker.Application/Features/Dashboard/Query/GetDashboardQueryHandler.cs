@@ -78,10 +78,12 @@ public class GetDashboardQueryHandler : IRequestHandler<GetDashboardQuery, Dashb
         var totalExpenses = await _dashboardRepository.GetTotalExpensesAsync(userId, startDate, endDateExclusive, cancellationToken);
         var totalBudgets = await _dashboardRepository.GetTotalBudgetAsync(userId, startDate, endDateExclusive, cancellationToken);
         var expensesByCategory = await _dashboardRepository.GetExpensesByCategoryAsync(userId, startDate, endDateExclusive, cancellationToken);
+        var budgetUtilization = await _dashboardRepository.GetBudgetUtilizationAsync(userId, startDate, endDateExclusive, cancellationToken);
         var dailyExpenses = await _dashboardRepository.GetDailyExpensesAsync(userId, startDate, endDateExclusive, cancellationToken);
         var recentExpenses = await _dashboardRepository.GetRecentExpensesAsync(userId, startDate, endDateExclusive, 6, cancellationToken);
 
         var mappedDashboardCategoryExpenseSummary = _mapper.Map<List<CategoryExpenseDto>>(expensesByCategory);
+        var mappedDashboardBudgetUtilizationSummary = _mapper.Map<List<BudgetUtilizationDto>>(budgetUtilization);
         var mappedDashboardDailyExpenseSummary = _mapper.Map<List<DailyExpenseDto>>(dailyExpenses);
         var mappedDashboardRecentExpense = _mapper.Map<List<RecentExpenseDto>>(recentExpenses);
 
@@ -97,6 +99,7 @@ public class GetDashboardQueryHandler : IRequestHandler<GetDashboardQuery, Dashb
             // RemainingBudget = totalBudgets > 0 ? totalBudgets - totalExpenses : null,
             TopCategory = topCategory,
             ExpenseByCategory = mappedDashboardCategoryExpenseSummary,
+            BudgetUtilization = mappedDashboardBudgetUtilizationSummary,
             DailyExpenses = mappedDashboardDailyExpenseSummary,
             RecentExpenses = mappedDashboardRecentExpense
         };

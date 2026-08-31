@@ -35,7 +35,9 @@ public class DashboardController : ControllerBase
         var response = new DashboardSummaryResponseV1
         {
             TotalExpenses = dashboardSummary.TotalExpenses,
+
             TotalBudgets = dashboardSummary.TotalBudgets,
+
             TopCategory = dashboardSummary.TopCategory != null
                 ? new CategoryExpenseResponseV1
                 {
@@ -50,12 +52,23 @@ public class DashboardController : ControllerBase
                     Category = x.Category,
                     TotalAmount = x.TotalAmount
                 }).ToList(),
+
+            BudgetUtilization = dashboardSummary.BudgetUtilization
+                .Select(x => new BudgetUtilizationResponseV1
+                {
+                    BudgetName = x.BudgetName,
+                    BudgetTarget = x.BudgetTarget,
+                    ActualSpent = x.ActualSpent,
+                    UtilizationPercentage = x.UtilizationPercentage
+                }).ToList(),
+
             DailyExpenses = dashboardSummary.DailyExpenses
                 .Select(x => new DailyExpenseResponseV1
                 {
                     Date = x.Date, 
                     TotalAmount = x.TotalAmount
                 }).ToList(),
+
             RecentExpenses = dashboardSummary.RecentExpenses
                 .Select(x => new RecentExpenseResponseV1
                 {

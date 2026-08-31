@@ -53,6 +53,53 @@ public class DashBoardRepository : IDashboardRepository
         .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<DashboardBudgetUtilizationSummary>> GetBudgetUtilizationAsync(
+        string userId,
+        DateTime startDate,
+        DateTime endDateExclusive,
+        CancellationToken cancellationToken = default)
+    {
+        var expenseTotals = _dbContext.Expenses
+            .AsNoTracking()
+            .Where(e =>
+                e.UserId == userId &&
+                e.BudgetId != null &&
+                e.CreatedAt >= startDate &&
+                e.CreatedAt < endDateExclusive)
+            .GroupBy(e => e.BudgetId!.Value)
+            .Select(g => new
+            {
+                BudgetId = g.Key,
+                ActualSpent = g.Sum(e => e.Amount)
+            });
+
+        return await _dbContext.Budgets
+            .AsNoTracking()
+            .Where(b =>
+                b.UserId == userId &&
+                b.StartDate < endDateExclusive &&
+                b.EndDate >= startDate)
+            .GroupJoin(
+                expenseTotals,
+                budget => budget.Id,
+                expense => expense.BudgetId,
+                (budget, expenses) => new
+                {
+                    budget.Name,
+                    BudgetTarget = budget.Amount,
+                    ActualSpent = expenses
+                        .Select(e => (decimal?)e.ActualSpent)
+                        .FirstOrDefault()
+                })
+            .Select(x => new DashboardBudgetUtilizationSummary
+            {
+                BudgetName = x.Name,
+                BudgetTarget = x.BudgetTarget,
+                ActualSpent = x.ActualSpent
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<DashboardDailyExpenseSummary>> GetDailyExpensesAsync(
         string userId,
         DateTime startDate,

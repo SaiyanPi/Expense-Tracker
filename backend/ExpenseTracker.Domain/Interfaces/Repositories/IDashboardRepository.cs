@@ -23,6 +23,11 @@ public interface IDashboardRepository
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<DashboardBudgetUtilizationSummary>> GetBudgetUtilizationAsync(
+        string userId,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default);
     
     Task<IReadOnlyList<DashboardDailyExpenseSummary>> GetDailyExpensesAsync(
         string userId,
