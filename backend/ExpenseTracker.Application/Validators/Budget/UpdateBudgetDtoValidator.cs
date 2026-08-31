@@ -16,9 +16,7 @@ public class UpdateBudgetCommandValidator : AbstractValidator<UpdateBudgetComman
             .GreaterThan(100).WithMessage("Budget amount must be greater than hundred.");
 
         RuleFor(x => x.StartDate)
-        .NotEmpty().WithMessage("Start date is required.")
-        .Must(startDate => startDate >= DateTime.UtcNow.Date).WithMessage("Start date cannot be in the past.")
-        .LessThan(x => x.EndDate).WithMessage("Start date must be earlier than end date.");
+        .NotEmpty().WithMessage("Start date is required.");
 
         RuleFor(x => x.EndDate)
             .NotEmpty().WithMessage("End date is required.")
