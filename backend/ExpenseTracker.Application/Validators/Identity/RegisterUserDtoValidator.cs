@@ -26,7 +26,7 @@ public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto>
         
         RuleFor(x => x.PhoneNumber)
             .NotEmpty().WithMessage("PhoneNumber is required.")
-            .Matches(@"^\+?[0-9]{7,15}$")
+            .Matches(@"^(?:\+977)?9[678]\d{8}$")
             .WithMessage("Phone number must contain only digits and may start with '+'.");
     }
 }

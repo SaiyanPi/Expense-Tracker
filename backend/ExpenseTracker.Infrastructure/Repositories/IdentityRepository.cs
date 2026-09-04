@@ -161,7 +161,7 @@ public class IdentityRepository : IIdentityRepository
         // Signing
         var signingKey = new SymmetricSecurityKey(key);
         var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-        var expireAt = DateTime.UtcNow.AddHours(3);
+        var expireAt = DateTime.UtcNow.AddHours(5);
 
         var token = new JwtSecurityToken(
             issuer: _config["JwtConfig:Issuer"],

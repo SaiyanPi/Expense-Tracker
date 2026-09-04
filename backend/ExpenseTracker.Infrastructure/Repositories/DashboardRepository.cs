@@ -61,11 +61,8 @@ public class DashBoardRepository : IDashboardRepository
     {
         var expenseTotals = _dbContext.Expenses
             .AsNoTracking()
-            .Where(e =>
-                e.UserId == userId &&
-                e.BudgetId != null &&
-                e.CreatedAt >= startDate &&
-                e.CreatedAt < endDateExclusive)
+            .Where(e => e.UserId == userId && e.BudgetId != null &&
+                e.Date >= startDate && e.Date < endDateExclusive)
             .GroupBy(e => e.BudgetId!.Value)
             .Select(g => new
             {
@@ -75,10 +72,7 @@ public class DashBoardRepository : IDashboardRepository
 
         return await _dbContext.Budgets
             .AsNoTracking()
-            .Where(b =>
-                b.UserId == userId &&
-                b.StartDate < endDateExclusive &&
-                b.EndDate >= startDate)
+            .Where(b => b.UserId == userId && b.StartDate < endDateExclusive && b.EndDate >= startDate)
             .GroupJoin(
                 expenseTotals,
                 budget => budget.Id,
