@@ -9,6 +9,9 @@ public interface IIdentityRepository
         string? role);
     
     Task<bool> UpdateAsync(User user);
+
+    // Task<bool> UploadProfileImageAsync(string userId, string? profileImageUrl);
+    Task<bool> UpdateProfileImageAsync(string userId, string? profileImageUrl);
     Task<bool> DeleteAsync(User user);
     Task<bool> CheckPasswordAsync(string email, string password);
 

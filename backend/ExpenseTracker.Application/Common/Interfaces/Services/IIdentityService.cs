@@ -7,6 +7,8 @@ public interface IIdentityService
     Task<AuthResultDto> RegisterUserAsync(RegisterUserDto dto, string role, CancellationToken cancellationToken = default);
     Task<AuthResultDto> LoginAsync(LoginUserDto dto);
     Task UpdateAsync(string userId, UpdateUserDto dto);
+    // Task UploadProfileImageAsync(string userId, Stream image, string fileName, CancellationToken cancellationToken = default);
+    Task UpdateProfileImageAsync(string userId, Stream image, string fileName, CancellationToken cancellationToken = default);
     Task DeleteAsync(string userId);
     // GetAll, GetById, GetByEmail methods are not considered identity operation therefore they
     // resides inside user repository

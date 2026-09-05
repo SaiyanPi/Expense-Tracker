@@ -18,6 +18,7 @@ public class IdentityService : IIdentityService
     private readonly IUserRepository _userRepository;
     private readonly IEmailService _emailService;
     private readonly ISmsSenderService _smsSenderService;
+    private readonly IProfileImageStorageService _profileImageStorageService;
 
     private readonly IMapper _mapper;
 
@@ -26,12 +27,14 @@ public class IdentityService : IIdentityService
         IUserRepository userRepository,
         IEmailService emailService,
         ISmsSenderService smsSenderService,
+        IProfileImageStorageService profileImageStorageService,
         IMapper mapper)
     {
         _identityRepository = identityRepository;
         _userRepository = userRepository;
         _emailService = emailService;
         _smsSenderService = smsSenderService;
+        _profileImageStorageService = profileImageStorageService;
         _mapper = mapper;
     }
 
@@ -143,6 +146,72 @@ public class IdentityService : IIdentityService
         if(!updated)
             throw new IdentityOperationException("User update failed.");
     }
+
+
+    // public async Task UploadProfileImageAsync(string userId, Stream image, string fileName, CancellationToken cancellationToken = default)
+    // {
+    //     var user = await _userRepository.GetByIdAsync(userId);
+
+    //     if (user is null)
+    //         throw new NotFoundException(nameof(User), userId);
+
+    //     var imageUrl = await _profileImageStorageService.SaveAsync(
+    //         image,
+    //         fileName,
+    //         cancellationToken);
+
+    //     user.ProfileImageUrl = imageUrl;
+
+    //     var upload = await _identityRepository.UploadProfileImageAsync(
+    //         userId,
+    //         imageUrl);
+
+    //     if (!upload)
+    //     {
+    //         // Important: don't leave the newly uploaded file orphaned.
+    //         await _profileImageStorageService.DeleteAsync(imageUrl, cancellationToken);
+
+    //         throw new IdentityOperationException("Profile image upload failed.");
+    //     }
+
+    // }
+
+
+    public async Task UpdateProfileImageAsync(string userId, Stream image, string fileName, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user is null)
+            throw new NotFoundException(nameof(User), userId);
+
+        var oldImageUrl = user.ProfileImageUrl;
+
+        var newImageUrl = await _profileImageStorageService.SaveAsync(
+            image,
+            fileName,
+            cancellationToken);
+
+        user.ProfileImageUrl = newImageUrl;
+
+        var updated = await _identityRepository.UpdateProfileImageAsync(
+            userId,
+            newImageUrl);
+
+        if (!updated)
+        {
+            // Important: don't leave the newly uploaded file orphaned.
+            await _profileImageStorageService.DeleteAsync(newImageUrl, cancellationToken);
+
+            throw new IdentityOperationException("Profile image update failed.");
+        }
+
+        // Only delete the old image AFTER the database update succeeded.
+        if (!string.IsNullOrWhiteSpace(oldImageUrl))
+        {
+            await _profileImageStorageService.DeleteAsync(oldImageUrl, cancellationToken);
+        }
+    }
+
 
     public async Task DeleteAsync( string userId)
     {

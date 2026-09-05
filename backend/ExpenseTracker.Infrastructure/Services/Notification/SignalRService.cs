@@ -1,4 +1,4 @@
-using ExpenseTracker.Application.Common.Interfaces;
+using ExpenseTracker.Application.Common.Interfaces.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ExpenseTracker.Infrastructure.Services.Notification;

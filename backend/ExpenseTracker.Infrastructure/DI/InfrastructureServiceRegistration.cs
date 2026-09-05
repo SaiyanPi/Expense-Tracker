@@ -9,6 +9,7 @@ using ExpenseTracker.Infrastructure.Services.Cache;
 using ExpenseTracker.Infrastructure.Services.Email;
 using ExpenseTracker.Infrastructure.Services.ExpenseExport;
 using ExpenseTracker.Infrastructure.Services.Identity;
+using ExpenseTracker.Infrastructure.Services.LocalProfileImageStorage;
 using ExpenseTracker.Infrastructure.Services.Notification;
 using ExpenseTracker.Infrastructure.Services.SecurityEventLogger;
 using ExpenseTracker.Infrastructure.Services.SecurityEventLogsExport;
@@ -64,6 +65,9 @@ public static class InfrastructureServiceRegistration
 
         // register user role(isAdmin) service
         services.AddScoped<IUserRoleService, UserRoleService>();
+
+        // register profile image storage service
+        services.AddScoped<IProfileImageStorageService, LocalProfileImageStorageService>();
 
         // registering user accessor service
         services.AddHttpContextAccessor();

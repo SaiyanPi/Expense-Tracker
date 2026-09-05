@@ -97,6 +97,34 @@ public class IdentityRepository : IIdentityRepository
         return result.Succeeded;
     }
 
+
+    // // Upload Profile Image
+    // //-----------------------
+    // public async Task<bool> UploadProfileImageAsync(string userId, string? profileImageUrl)
+    // {
+    //     var appUser = await _userManager.FindByIdAsync(userId);
+    //     if (appUser is null)
+    //         return false;
+
+    //     appUser.ProfileImageUrl = profileImageUrl;
+    //     var result = await _userManager.UpdateAsync(appUser);
+    //     return result.Succeeded;
+    // }
+
+
+    // Update Profile Image
+    //-----------------------
+    public async Task<bool> UpdateProfileImageAsync(string userId, string? profileImageUrl)
+    {
+        var appUser = await _userManager.FindByIdAsync(userId);
+        if (appUser is null)
+            return false;
+
+        appUser.ProfileImageUrl = profileImageUrl;
+        var result = await _userManager.UpdateAsync(appUser);
+        return result.Succeeded;
+    }
+
     // Delete profile
     //-----------------
     public async Task<bool> DeleteAsync(User user)

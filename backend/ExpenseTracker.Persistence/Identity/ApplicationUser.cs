@@ -6,6 +6,7 @@ namespace ExpenseTracker.Persistence.Identity;
 public class ApplicationUser : IdentityUser
 {
     public string FullName { get; set; } = default!;
+    public string? ProfileImageUrl { get; set; }
     public string? RefreshToken { get; private set; }
     public DateTime? RefreshTokenExpiryTime { get; private set; }
 
@@ -25,7 +26,8 @@ public class ApplicationUser : IdentityUser
         Id = this.Id, // though Id is not defined here in ApplicationUser it is inherited from IdentityUser
         FullName = this.FullName,
         Email = this.Email ?? string.Empty,
-        PhoneNumber = this.PhoneNumber ?? string.Empty
+        PhoneNumber = this.PhoneNumber ?? string.Empty,
+        ProfileImageUrl = this.ProfileImageUrl
     };
 }
 

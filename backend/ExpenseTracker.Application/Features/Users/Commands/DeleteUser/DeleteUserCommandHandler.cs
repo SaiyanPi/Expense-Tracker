@@ -8,20 +8,14 @@ namespace ExpenseTracker.Application.Features.Users.Commands.DeleteUser;
 
 public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
 {
-    private readonly IUserRepository _userRepository;
     private readonly IIdentityService _identityService;
-    private readonly IUserAccessor _userAccessor;
     private readonly IUserRoleService _userRoleService;
     public DeleteUserCommandHandler(
-        IUserRepository userRepository,
         IIdentityService identityService,
-        IUserAccessor userAccessor,
         IUserRoleService userRoleService
         )
     {
-        _userRepository = userRepository;
         _identityService = identityService;
-        _userAccessor = userAccessor;
         _userRoleService = userRoleService;
     }       
 
@@ -32,7 +26,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Unit>
 
         var userIsAdmin = await _userRoleService.IsAdminAsync(request.UserId);
         if (userIsAdmin)
-                throw new ForbiddenException("Admin cannot delete another admin.");
+            throw new ForbiddenException("Admin cannot delete another admin.");
 
         await _identityService.DeleteAsync(request.UserId);
         return Unit.Value;

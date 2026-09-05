@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Application.Common.Interfaces;
+namespace ExpenseTracker.Application.Common.Interfaces.Services;
 
 public interface INotificationService
 {

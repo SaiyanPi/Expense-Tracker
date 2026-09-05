@@ -499,6 +499,8 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();   // for profile image uploads, etc.
+
 app.UseCors("FrontendPolicy");
 
 app.UseAuthentication();  

@@ -1,8 +1,3 @@
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.csproj.AssemblyReference.cache
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.AssemblyInfoInputs.cache
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.AssemblyInfo.cs
-C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.csproj.CoreCompileInputs.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\bin\Debug\net8.0\LatoFont\Lato-Black.ttf
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\bin\Debug\net8.0\LatoFont\Lato-BlackItalic.ttf
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\bin\Debug\net8.0\LatoFont\Lato-Bold.ttf
@@ -31,6 +26,11 @@ C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\bin\D
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\bin\Debug\net8.0\ExpenseTracker.Application.pdb
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\bin\Debug\net8.0\ExpenseTracker.Domain.pdb
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\bin\Debug\net8.0\ExpenseTracker.Persistence.pdb
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.AssemblyInfo.cs
+C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.csproj.CoreCompileInputs.cache
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseT.546500FC.Up2Date
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\ExpenseTracker.Infrastructure.dll
 C:\Users\zlams\source\ExpenseTracker\backend\ExpenseTracker.Infrastructure\obj\Debug\net8.0\refint\ExpenseTracker.Infrastructure.dll

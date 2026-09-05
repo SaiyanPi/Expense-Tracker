@@ -4,6 +4,7 @@ using ExpenseTracker.Application.Features.Identity.Commands.ConfirmChangeEmail;
 using ExpenseTracker.Application.Features.Identity.Commands.DeleteMyAccount;
 using ExpenseTracker.Application.Features.Identity.Commands.RequestChangeEmail;
 using ExpenseTracker.Application.Features.Identity.Commands.Update;
+using ExpenseTracker.Application.Features.Identity.Commands.UpdateProfileImage;
 using ExpenseTracker.Application.Features.Users.Queries.GetById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +51,40 @@ public class ProfileController : ControllerBase
         await _mediator.Send(command, cancellationToken);
         return Ok(new {Success = true, Message = "Updated successfully" });
     }
+
+
+    // //POST: api/profile/my/image
+    // [HttpPost("my/image")]
+    // public async Task<IActionResult> UploadProfileImage(
+    //     IFormFile image,
+    //     CancellationToken cancellationToken)
+    // {
+
+    //     var command = new UploadProfileImageCommand(
+    //         image.OpenReadStream(),
+    //         image.FileName);
+
+    //     await _mediator.Send(command, cancellationToken);
+    //     return Ok(new { Success = true, Message = "Profile image uploaded successfully." });
+    // }
+
+
+
+    //PUT: api/profile/my/image/update
+    [HttpPut("my/image/update")]
+    public async Task<IActionResult> UpdateProfileImage(
+        IFormFile image,
+        CancellationToken cancellationToken)
+    {
+
+        var command = new UpdateProfileImageCommand(
+            image.OpenReadStream(),
+            image.FileName);
+
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Profile image updated successfully." });
+    }
+
     
     // DELETE: api/profile/my
     [HttpDelete("my")]
