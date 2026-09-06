@@ -21,15 +21,12 @@ public class UpdateProfileImageCommandHandler: IRequestHandler<UpdateProfileImag
         UpdateProfileImageCommand request,
         CancellationToken cancellationToken)
     {
-         if (request.Image is null || request.Image.Length == 0)
-            throw new BadRequestException("An image is required.");
-
         var userId = _userAccessor.UserId;
         
         await _identityService.UpdateProfileImageAsync(
             userId,
-            request.Image,
-            request.FileName,
+            request.ImageUpdate.Content,
+            request.ImageUpdate.FileName,
             cancellationToken);
 
         return Unit.Value;

@@ -1,4 +1,5 @@
 using ExpenseTracker.Application.Common.Authorization.Permissions;
+using ExpenseTracker.Application.Common.ProfileImage;
 using ExpenseTracker.Application.DTOs.Auth;
 using ExpenseTracker.Application.Features.Identity.Commands.ConfirmChangeEmail;
 using ExpenseTracker.Application.Features.Identity.Commands.DeleteMyAccount;
@@ -72,14 +73,21 @@ public class ProfileController : ControllerBase
 
     //PUT: api/profile/my/image/update
     [HttpPut("my/image/update")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(6 * 1024 * 1024)]
     public async Task<IActionResult> UpdateProfileImage(
-        IFormFile image,
+        [FromForm] IFormFile image,
         CancellationToken cancellationToken)
     {
+        await using var stream = image.OpenReadStream();
 
         var command = new UpdateProfileImageCommand(
-            image.OpenReadStream(),
-            image.FileName);
+            new ProfileImageUpdate(
+                stream,
+                image.FileName,
+                image.Length,
+                image.ContentType)
+        );
 
         await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Profile image updated successfully." });

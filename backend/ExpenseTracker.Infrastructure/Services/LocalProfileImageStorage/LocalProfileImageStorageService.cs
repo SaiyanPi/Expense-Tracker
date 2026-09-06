@@ -17,8 +17,37 @@ public class LocalProfileImageStorageService : IProfileImageStorageService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<string> SaveAsync(Stream image, string fileName, CancellationToken cancellationToken = default)
+    public async Task<string> SaveAsync(Stream image, string fileName,
+        CancellationToken cancellationToken = default)
     {
+        const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+
+        var extension = Path.GetExtension(fileName).ToLowerInvariant();
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+
+        if (!allowedExtensions.Contains(extension))
+        {
+            throw new InvalidOperationException(
+                "Only JPG, JPEG, and PNG images are allowed.");
+        }
+
+        if (image.CanSeek && image.Length > maxFileSize)
+        {
+            throw new InvalidOperationException(
+                "Profile image cannot exceed 5 MB.");
+        }
+
+        // Validate the actual file content.
+        if (!await IsValidImageSignatureAsync(
+                image,
+                extension,
+                cancellationToken))
+        {
+            throw new InvalidOperationException(
+                "The uploaded file is not a valid image.");
+        }
+
         var uploadsFolder = Path.Combine(
             _environment.WebRootPath,
             "uploads",
@@ -26,10 +55,11 @@ public class LocalProfileImageStorageService : IProfileImageStorageService
 
         Directory.CreateDirectory(uploadsFolder);
 
-        var extension = Path.GetExtension(fileName);
         var storedFileName = $"{Guid.NewGuid()}{extension}";
 
-        var filePath = Path.Combine(uploadsFolder, storedFileName);
+        var filePath = Path.Combine(
+            uploadsFolder,
+            storedFileName);
 
         await using var fileStream = new FileStream(
             filePath,
@@ -37,11 +67,12 @@ public class LocalProfileImageStorageService : IProfileImageStorageService
             FileAccess.Write,
             FileShare.None);
 
-        await image.CopyToAsync(fileStream, cancellationToken);
+        await image.CopyToAsync(
+            fileStream,
+            cancellationToken);
 
         var request = _httpContextAccessor.HttpContext?.Request;
 
-        // This will save the imageUrl as: http://localhost:5167/uploads/profile-images/76b3e34e-906b-48b7-9e82-2cc881a236d9.png
         return $"{request?.Scheme}://{request?.Host}/uploads/profile-images/{storedFileName}";
     }
 
@@ -60,5 +91,39 @@ public class LocalProfileImageStorageService : IProfileImageStorageService
             File.Delete(filePath);
 
         return Task.CompletedTask;
+    }
+
+    private static async Task<bool> IsValidImageSignatureAsync(Stream image, string extension,
+        CancellationToken cancellationToken)
+    {
+        if (!image.CanSeek)
+            return false;
+
+        image.Position = 0;
+
+        byte[] signature = extension switch
+        {
+            ".jpg" or ".jpeg" =>
+                [0xFF, 0xD8, 0xFF],
+
+            ".png" =>
+                [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A],
+
+            _ => []
+        };
+
+        if (signature.Length == 0)
+            return false;
+
+        var buffer = new byte[signature.Length];
+
+        var bytesRead = await image.ReadAsync(
+            buffer,
+            cancellationToken);
+
+        image.Position = 0;
+
+        return bytesRead == signature.Length &&
+            buffer.SequenceEqual(signature);
     }
 }
