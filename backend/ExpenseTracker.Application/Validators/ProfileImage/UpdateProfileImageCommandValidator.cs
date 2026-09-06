@@ -18,10 +18,12 @@ public sealed class UpdateProfileImageCommandValidator
         {
             RuleFor(x => x.ImageUpdate.Length)
                 .LessThanOrEqualTo(MaxFileSize)
+                .OverridePropertyName("Size")
                 .WithMessage("Profile image cannot exceed 5 MB.");
 
             RuleFor(x => x.ImageUpdate.FileName)
                 .Must(HaveAllowedExtension)
+                .OverridePropertyName("Format")
                 .WithMessage("Only JPG, JPEG, and PNG images are allowed.");
         });
     }
