@@ -27,7 +27,8 @@ public class ApplicationUser : IdentityUser
         FullName = this.FullName,
         Email = this.Email ?? string.Empty,
         PhoneNumber = this.PhoneNumber ?? string.Empty,
-        ProfileImageUrl = this.ProfileImageUrl
+        ProfileImageUrl = this.ProfileImageUrl,
+        EmailConfirmed = this.EmailConfirmed
     };
 }
 

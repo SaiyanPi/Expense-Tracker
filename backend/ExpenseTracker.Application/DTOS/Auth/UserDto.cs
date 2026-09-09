@@ -7,6 +7,7 @@ public class UserDto
     public string Email { get; set; } = default!;
     public string PhoneNumber { get; set; } = default!;
     public string? ProfileImageUrl { get; set; }
+    public bool EmailConfirmed { get; set; }
 
 
 }
