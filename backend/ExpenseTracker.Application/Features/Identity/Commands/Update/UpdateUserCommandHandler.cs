@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ExpenseTracker.Application.Features.Identity.Commands.Update;
 
-public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
+public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserDto>
 {
     private readonly IIdentityService _identityService;
     private readonly IUserAccessor _userAccessor;
@@ -28,7 +28,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
         _mapper = mapper;
     }
 
-    public async Task<Unit> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    public async Task<UserDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
         // BUISNESS RULE:
         // regardless of role, redirect to update (userManagement doesn't have update endpoint)
@@ -41,8 +41,8 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Unit>
             PhoneNumber = request.PhoneNumber
         };
 
-        await _identityService.UpdateAsync(userId, dto);
-        return Unit.Value;
+        var updatedUser = await _identityService.UpdateAsync(userId, dto);
+        return updatedUser;
     }
 }
 

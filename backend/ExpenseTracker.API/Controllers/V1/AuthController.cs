@@ -11,6 +11,7 @@ using ExpenseTracker.Application.Features.Identity.Commands.Logout;
 using ExpenseTracker.Application.Features.Identity.Commands.RefreshToken;
 using ExpenseTracker.Application.Features.Identity.Commands.Register;
 using ExpenseTracker.Application.Features.Identity.Commands.RequestChangeEmail;
+using ExpenseTracker.Application.Features.Identity.Commands.RequestEmailConfirmation;
 using ExpenseTracker.Application.Features.Identity.Commands.ResetPassword;
 using ExpenseTracker.Application.Features.Identity.Commands.SendPhoneConfirmationCode;
 using MediatR;
@@ -120,6 +121,17 @@ public class AuthController : ControllerBase
         var command = new ChangePasswordCommand(dto);
         await _mediator.Send(command, cancellationToken);
         return Ok(new { Success = true, Message = "Password changed successfully" });
+    }
+
+    // Request Email confirmation
+    // GET: api/auth/request/confirm-email
+    [AllowAnonymous]
+    [HttpGet("request/confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(CancellationToken cancellationToken = default)
+    {
+        var command = new RequestEmailConfirmationCommand();
+        await _mediator.Send(command, cancellationToken);
+        return Ok(new { Success = true, Message = "Confirmation Email sent successfully" });
     }
 
     // Confirm Email

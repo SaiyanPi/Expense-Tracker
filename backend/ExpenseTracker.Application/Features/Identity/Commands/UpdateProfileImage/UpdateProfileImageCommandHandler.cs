@@ -1,10 +1,11 @@
 using ExpenseTracker.Application.Common.Exceptions;
 using ExpenseTracker.Application.Common.Interfaces.Services;
+using ExpenseTracker.Application.DTOs.Auth;
 using MediatR;
 
 namespace ExpenseTracker.Application.Features.Identity.Commands.UpdateProfileImage;
 
-public class UpdateProfileImageCommandHandler: IRequestHandler<UpdateProfileImageCommand, Unit>
+public class UpdateProfileImageCommandHandler: IRequestHandler<UpdateProfileImageCommand, UserDto>
 {
     private readonly IIdentityService _identityService;
     private readonly IUserAccessor _userAccessor;
@@ -17,19 +18,19 @@ public class UpdateProfileImageCommandHandler: IRequestHandler<UpdateProfileImag
         _userAccessor = userAccessor;
     }
 
-    public async Task<Unit> Handle(
+    public async Task<UserDto> Handle(
         UpdateProfileImageCommand request,
         CancellationToken cancellationToken)
     {
         var userId = _userAccessor.UserId;
         
-        await _identityService.UpdateProfileImageAsync(
+        var updatedUser = await _identityService.UpdateProfileImageAsync(
             userId,
             request.ImageUpdate.Content,
             request.ImageUpdate.FileName,
             cancellationToken);
 
-        return Unit.Value;
+        return updatedUser;
     }
 
 }

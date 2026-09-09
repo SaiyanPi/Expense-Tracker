@@ -55,7 +55,7 @@ public class IdentityService : IIdentityService
             ?? throw new Exception("User not found after registration.");
         try
         {
-            // 1. automatically generate email confirmation token
+            // 1. generate email confirmation token
             var emailConfirmationToken = await _identityRepository.GenerateEmailConfirmationTokenAsync(user.Id);
             if (emailConfirmationToken == null)
                 throw new IdentityOperationException("Failed to generate email confirmation token.");
@@ -134,7 +134,7 @@ public class IdentityService : IIdentityService
         return result;
     }
 
-    public async Task UpdateAsync(string userId, UpdateUserDto dto)
+    public async Task<UserDto> UpdateAsync(string userId, UpdateUserDto dto)
     {
         var user = await _userRepository.GetByIdAsync(userId);
         if(user is null)
@@ -145,6 +145,15 @@ public class IdentityService : IIdentityService
         var updated = await _identityRepository.UpdateAsync(user);
         if(!updated)
             throw new IdentityOperationException("User update failed.");
+
+        return new UserDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            ProfileImageUrl = user.ProfileImageUrl
+        };
     }
 
 
@@ -177,7 +186,7 @@ public class IdentityService : IIdentityService
     // }
 
 
-    public async Task UpdateProfileImageAsync(string userId, Stream image, string fileName, CancellationToken cancellationToken = default)
+    public async Task<UserDto> UpdateProfileImageAsync(string userId, Stream image, string fileName, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId);
 
@@ -210,6 +219,15 @@ public class IdentityService : IIdentityService
         {
             await _profileImageStorageService.DeleteAsync(oldImageUrl, cancellationToken);
         }
+
+        return new UserDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            ProfileImageUrl = user.ProfileImageUrl
+        };
     }
 
 
@@ -301,15 +319,26 @@ public class IdentityService : IIdentityService
 
     // Email Confirmation
     //-----------------------
-    public async Task RequestEmailConfirmationTokenAsync(RequestEmailConfirmationDto dto)
+    public async Task RequestEmailConfirmationTokenAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.GetByIdAsync(dto.UserId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
-            throw new NotFoundException(nameof(User), dto.UserId);
+            throw new NotFoundException(nameof(User), userId);
 
-        var token = await _identityRepository.GenerateEmailConfirmationTokenAsync(dto.UserId);
-        if (token == null)
+         // 1. generate email confirmation token
+        var emailConfirmationToken = await _identityRepository.GenerateEmailConfirmationTokenAsync(user.Id);
+        if (emailConfirmationToken == null)
             throw new IdentityOperationException("Failed to generate email confirmation token.");
+
+        // 2. build confirmation link (to be sent via email)
+        var confirmationLink = $"http://localhost:5167/api/auth/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(emailConfirmationToken)}";
+
+        // 3. send confirmation email
+        await _emailService.SendEmailAsync(
+            to: user.Email,
+            subject: "Email Confirmation",
+            body: $"Please confirm your email by clicking this link: {confirmationLink}", 
+            cancellationToken: cancellationToken);
     }
 
     public async Task ConfirmEmailAsync(VerifyEmailDto dto)

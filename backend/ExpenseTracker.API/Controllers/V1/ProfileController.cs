@@ -49,8 +49,8 @@ public class ProfileController : ControllerBase
             dto.FullName,
             dto.PhoneNumber);
 
-        await _mediator.Send(command, cancellationToken);
-        return Ok(new {Success = true, Message = "Updated successfully" });
+        var updatedUser = await _mediator.Send(command, cancellationToken);
+        return Ok(updatedUser);
     }
 
 
@@ -89,13 +89,13 @@ public class ProfileController : ControllerBase
                 image.ContentType)
         );
 
-        await _mediator.Send(command, cancellationToken);
-        return Ok(new { Success = true, Message = "Profile image updated successfully." });
+        var updatedUser = await _mediator.Send(command, cancellationToken);
+        return Ok(updatedUser);
     }
 
     
-    // DELETE: api/profile/my
-    [HttpDelete("my")]
+    // DELETE: api/profile/my/delete
+    [HttpDelete("my/delete")]
     public async Task<IActionResult> DeleteProfile(
         CancellationToken cancellationToken = default)
     {
