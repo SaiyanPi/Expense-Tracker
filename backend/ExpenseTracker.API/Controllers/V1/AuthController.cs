@@ -125,8 +125,8 @@ public class AuthController : ControllerBase
 
     // Request Email confirmation
     // GET: api/auth/request/confirm-email
-    [AllowAnonymous]
-    [HttpGet("request/confirm-email")]
+    [Authorize]
+    [HttpPost("request/confirm-email")]
     public async Task<IActionResult> ConfirmEmail(CancellationToken cancellationToken = default)
     {
         var command = new RequestEmailConfirmationCommand();

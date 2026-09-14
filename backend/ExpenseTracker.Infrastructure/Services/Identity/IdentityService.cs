@@ -364,8 +364,8 @@ public class IdentityService : IIdentityService
         if (token == null)
             throw new IdentityOperationException("Failed to generate password reset token.");
 
-        // build reset link (to be sent via email)
-        var resetLink = $"http://localhost:5167/api/auth/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
+        // build reset link (must be a frontend address)
+        var resetLink = $"http://localhost:4200/reset-password?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
         // send resetLink via email (implementation omitted)
         await _emailService.SendEmailAsync(
