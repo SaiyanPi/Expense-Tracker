@@ -43,7 +43,7 @@ public class DashBoardRepository : IDashboardRepository
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Expenses
-            .Where(e => e.UserId == userId && e.Date >= startDate && e.Date < endDateExclusive)
+            .Where(e => e.UserId == userId && e.CategoryId != null && e.Date >= startDate && e.Date < endDateExclusive)
             .GroupBy(e => e.Category)
             .Select(g => new DashboardCategoryExpenseSummary
             {
