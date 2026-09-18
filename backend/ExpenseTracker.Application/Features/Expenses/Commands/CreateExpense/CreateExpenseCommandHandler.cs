@@ -79,6 +79,13 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
             if (!ownsCategory)
                 throw new ConflictException($"You don't have a Category with id '{categoryId}'.");
         }
+
+        // These variables hold notification information.
+        // We calculate them now, but send the notification only
+        // after the expense has been successfully created.
+        Budget? notificationBudget = null;
+        decimal notificationPercentage = 0;
+        decimal notificationRemainingAmount = 0;
         
         // budget validation
         if (request.CreateExpenseDto.BudgetId is Guid budgetId)
@@ -95,9 +102,9 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
                 throw new NotFoundException(nameof(Budget), budgetId);
 
             // check the budget isActive 
-            var isActive = await _budgetRepository.GetBudgetStatusByIdAsync(budgetId, cancellationToken);
-            if (!isActive)
-                throw new NotFoundException("You cannot create an expense for an inactive/expired budget.");
+            // var isActive = await _budgetRepository.GetBudgetStatusByIdAsync(budgetId, cancellationToken);
+            if (!budget.IsActive)
+                throw new BadRequestException("You cannot create an expense for an inactive/expired budget.");
             
             if (budget.CategoryId is Guid budgetCategoryId)
             {
@@ -137,46 +144,70 @@ public class CreateExpenseCommandHandler : IRequestHandler<CreateExpenseCommand,
                     $"{budget.StartDate:yyyy-MM-dd} and {budget.EndDate:yyyy-MM-dd}.");
             }
 
+            // Calculate threshold information BEFORE creating the expense.
+            // This is okay because we're only calculating here.
             var totalSpent = await _expenseRepository
-                .GetTotalExpensesUnderABudgetAsync(budget!.Id, userId, cancellationToken);
-            
-            var remainingAmount = budget.Amount-totalSpent;
-            // calculate spent ratio
-            var thresholdPercentage = 50m;
-            var percentageUsed = (totalSpent / budget.Amount) * 100m;
-            var roundedPercentage = Math.Floor(percentageUsed);
-            if(roundedPercentage > thresholdPercentage)
+                .GetTotalExpensesUnderABudgetAsync(
+                    budget.Id,
+                    userId,
+                    cancellationToken);
+
+            var newTotalSpent =
+                totalSpent + request.CreateExpenseDto.Amount;
+
+            var previousPercentage =
+                (totalSpent / budget.Amount) * 100m;
+
+            var newPercentage =
+                (newTotalSpent / budget.Amount) * 100m;
+
+            var remainingAmount =
+                budget.Amount - newTotalSpent;
+
+            const decimal thresholdPercentage = 50m;
+
+            // Only notify when THIS expense causes the budget
+            // to cross the 50% threshold.
+            if (previousPercentage <= thresholdPercentage &&
+                newPercentage > thresholdPercentage)
             {
-                // hook the business metric
                 ExpenseMetrics.BudgetThresholdExceeded();
 
                 _logger.LogWarning(
                     "Budget threshold exceeded for BudgetId {BudgetId}. Used {PercentageUsed}%, Remaining {RemainingAmount}",
                     budget.Id,
-                    roundedPercentage,
+                    newPercentage,
                     remainingAmount
                 );
 
-                // ⚠️⚠️
-                // Also, one issue worth flagging: budget-threshold calculation happens before the new expense is 
-                // added, so percentageUsed represents spending before this expense. If the intention is "notify when this new 
-                // expense causes the budget to cross 50%", your calculation needs to include dto.Amount. That's separate from 
-                // today's category bug, but it's a genuine logic issue.
-                await _notificationService.BudgetExceededAsync(
-                    budget.Id,
-                    budget.Name,
-                    percentageUsed,
-                    remainingAmount,
-                    userId,
-                    cancellationToken);
+                // Don't notify yet.
+                // Store the information and notify after AddAsync().
+                notificationBudget = budget;
+                notificationPercentage = newPercentage;
+                notificationRemainingAmount = remainingAmount;
             }
         }
-      
+
+        // Create expense
         var expense = _mapper.Map<Expense>(request.CreateExpenseDto);
         expense.UserId = userId;
         expense.Date = expenseDate;
         
         await _expenseRepository.AddAsync(expense, cancellationToken);
+
+
+        // Expense has now been successfully persisted.
+        // It is safe to perform the notification side effect.
+        if (notificationBudget is not null)
+        {
+            await _notificationService.BudgetExceededAsync(
+                notificationBudget.Id,
+                notificationBudget.Name,
+                notificationPercentage,
+                notificationRemainingAmount,
+                userId,
+                cancellationToken);
+        }
 
         // Invalidate the cache once a new expense is created for the user, so that the next
         // query will fetch fresh data
