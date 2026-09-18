@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ExpenseTracker.Infrastructure.Services.Notification;
 
-public class SignalRService : INotificationService
+public class NotificationService : INotificationService
 {
     private readonly IHubContext<NotificationHub> _hubContext;
+    // private readonly INotificationRepository _notificationRepository;
 
-    public SignalRService(IHubContext<NotificationHub> hubContext)
+    public NotificationService(
+        IHubContext<NotificationHub> hubContext
+       )
     {
         _hubContext = hubContext;
     }

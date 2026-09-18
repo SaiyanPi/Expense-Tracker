@@ -74,7 +74,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IUserAccessor, UserAccessor>();
 
         // register SignalR notification service
-        services.AddScoped<INotificationService, SignalRService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         // register audit logger for security events
         services.AddScoped<ISecurityEventLoggerService, SecurityEventLoggerService>();
